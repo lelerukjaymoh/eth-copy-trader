@@ -1,0 +1,153 @@
+[
+    {
+        "type": "event",
+        "anonymous": false,
+        "name": "OwnershipTransferred",
+        "inputs": [
+            {
+                "type": "address",
+                "name": "previousOwner",
+                "indexed": true
+            },
+            {
+                "type": "address",
+                "name": "newOwner",
+                "indexed": true
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "approve",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "weth"
+            },
+            {
+                "type": "address",
+                "name": "uniswapRouterAddress"
+            }
+        ],
+        "outputs": [
+            {
+                "type": "bool"
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "buy",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "uint256",
+                "name": "amountIn"
+            },
+            {
+                "type": "uint256",
+                "name": "amountOutMin"
+            },
+            {
+                "type": "address[]",
+                "name": "path"
+            },
+            {
+                "type": "uint256",
+                "name": "deadline"
+            },
+            {
+                "type": "address",
+                "name": "uniswapRouterAddress"
+            }
+        ],
+        "outputs": [
+            {
+                "type": "bool"
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "destroySmartContract",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "_to"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "constant": true,
+        "stateMutability": "view",
+        "payable": false,
+        "inputs": [],
+        "outputs": [
+            {
+                "type": "address"
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "sell",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "uint256",
+                "name": "amountIn"
+            },
+            {
+                "type": "uint256",
+                "name": "amountOutMin"
+            },
+            {
+                "type": "address[]",
+                "name": "path"
+            },
+            {
+                "type": "uint256",
+                "name": "deadline"
+            },
+            {
+                "type": "address",
+                "name": "uniswapRouterAddress"
+            }
+        ],
+        "outputs": [
+            {
+                "type": "bool"
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "withdrawToken",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "tokenContractAddress"
+            },
+            {
+                "type": "uint256",
+                "name": "amount"
+            }
+        ],
+        "outputs": [
+            {
+                "type": "bool"
+            }
+        ]
+    }
+]

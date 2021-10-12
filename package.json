@@ -4,7 +4,8 @@
   "description": "A sniper bot on Ethereum blockchain tha buys tokens once liquidity is addded to it. It makes multiple buys using a smart contract",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node-dev -r dotenv/config src/index.ts"
+    "start": "ts-node-dev -r dotenv/config src/index.ts",
+    "test": "ts-node-dev -r dotenv/config src/test.ts"
   },
   "keywords": [],
   "author": "jay@coredevs.co",
@@ -19,7 +20,8 @@
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.3.5",
     "web3": "^1.4.0",
-    "ws": "^7.5.2"
+    "ws": "^7.5.2",
+    "wscat": "^5.0.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",

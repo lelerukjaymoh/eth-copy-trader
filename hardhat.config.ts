@@ -3,19 +3,25 @@ import { config as dotEnvConfig } from "dotenv";
 
 dotEnvConfig({ path: `${__dirname}/.env` });
 
-if (!process.env.PRIVATE_KEY || !process.env.RINKBEY_JSON_RPC) {
+if (!process.env.PRIVATE_KEY) {
   throw new Error(
-    `Please provide your BSC PRIVATE_KEY or JSON_RPC in .env file`
+    `Please provide your BSC PRIVATE_KEY in .env in the project root`
   );
+}
+if (!process.env.JSON_RPC) {
+  throw new Error(
+    `Please provide your  INFURA_HTTP in .env in the project root`
+  );
+
 }
 
 module.exports = {
   networks: {
     hardhat: {},
     mainnet: {
-      url: process.env.RINKBEY_JSON_RPC,
-      chainId: 4,
-      gasPrice: 5 * 10 ** 9,
+      url: process.env.JSON_RPC,
+      chainId: 56,
+      gasPrice: 20000000000,
       accounts: [
         process.env.PRIVATE_KEY.startsWith("0x")
           ? process.env.PRIVATE_KEY
@@ -23,7 +29,7 @@ module.exports = {
       ],
     },
     rinkeby: {
-      url: process.env.RINKEBY_RPC,
+      url: process.env.RINKBEY_JSON_RPC,
       chainId: 4,
       gasPrice: 5 * 10 ** 9,
       accounts: [
@@ -36,7 +42,7 @@ module.exports = {
   solidity: {
     compilers: [
       {
-        version: "0.7.0",
+        version: "0.8.9",
         settings: {
           optimizer: {
             enabled: true,
@@ -45,5 +51,6 @@ module.exports = {
         }
       }
     ],
+    // version: "0.8.0",
   },
 };

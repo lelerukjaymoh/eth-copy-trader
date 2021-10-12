@@ -8,7 +8,8 @@ const MAX_INT = "115792089237316195423570985008687907853269984665640564039457584
 if (!process.env.JSON_RPC) {
     throw new Error("JSON_RPC was on provided in the .env file")
 }
-const web3 = new Web3(process.env.JSON_RPC!)
+
+const web3 = new Web3(process.env.RINKBEY_JSON_RPC!)
 
 const approveToken = async (token: string, gasPrice: number, gasLimit: number, walletAddress: string, nonce: number) => {
 
@@ -26,7 +27,7 @@ const approveToken = async (token: string, gasPrice: number, gasLimit: number, w
             from: process.env.WALLET_ADDRESS,
             gasPrice: web3.utils.toWei(gasPrice.toString(), "gwei"),
             gas: gasLimit,
-            to: botParams.smartContractAddress,
+            to: botParams.swapperAddress,
             value: 0,
             data: approve,
             nonce: nonce
@@ -63,7 +64,7 @@ const buy = async (amountIn: number, amountOutMin: number, path: string[], maxFe
         toHex(amountOutMin),
         path,
         deadline,
-        botParams.wethAddrress
+        botParams.uniswapv2Router
     ).encodeABI({
         from: process.env.WALLET_ADDRESS
     }
@@ -74,7 +75,7 @@ const buy = async (amountIn: number, amountOutMin: number, path: string[], maxFe
         maxFeePerGas: toHex(maxFeePerGas - 1),
         gasPrice: toHex(maxPriorityFeePerGas - 1),
         gas: toHex(gasLimit),
-        to: botParams.smartContractAddress,
+        to: botParams.swapperAddress,
         value: 0,
         data: buyData,
         nonce: nonce

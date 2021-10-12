@@ -1,0 +1,46 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Swapper.sol": {
+      "lastModificationDate": 1633510581008,
+      "contentHash": "42387ffe4a19fe4a3d688e1027a89aee",
+      "sourceName": "contracts/Swapper.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.9"
+      ],
+      "artifacts": [
+        "Address",
+        "Context",
+        "IERC20",
+        "IUniswapV2Router01",
+        "IUniswapV2Router02",
+        "Ownable",
+        "SafeERC20",
+        "Swapper"
+      ]
+    }
+  }
+}
