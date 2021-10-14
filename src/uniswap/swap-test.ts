@@ -1,5 +1,5 @@
 import Web3 from "web3";
-import { APPROVE_GAS_PRICE, botParams } from "../config/setup";
+import { botParams } from "../config/setup";
 import { overLoads } from "../types";
 import { smartContract, toHex, tokenAllowance } from "../utils/common";
 
@@ -8,61 +8,10 @@ const MAX_INT =
 
 // Ensure all enviroment varibales are provided in .env
 if (!process.env.RINKEBY_JSON_RPC) {
-  throw new Error("JSON_RPC was on provided in the .env file");
+  throw new Error("RINKEBY_JSON_RPC was on provided in the .env file");
 }
 
 const web3 = new Web3(process.env.RINKEBY_JSON_RPC!);
-
-const allowToken = async (token: string) => {
-  const lastNonce = await web3.eth.getTransactionCount(
-    process.env.RINKEBY_WALLET_ADDRESS!,
-    "pending"
-  );
-
-  console.log(lastNonce);
-
-  console.log("Token to approve ", token);
-
-  const approve = smartContract.methods
-    .approve(token, botParams.uniswapv2Router)
-    .encodeABI({
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
-    });
-
-  const approveParams = {
-    from: process.env.RINKEBY_WALLET_ADDRESS,
-    gasPrice: web3.utils.toWei("1", "gwei"),
-    gas: 70000,
-    to: botParams.swapperAddress,
-    value: 0,
-    data: approve,
-    nonce: lastNonce,
-  };
-
-  console.log(
-    "Total Transaction charges ",
-    (approveParams.gas * APPROVE_GAS_PRICE) / 10 ** 18
-  );
-
-  const signedApprove = await web3.eth.accounts.signTransaction(
-    approveParams,
-    process.env.RINKEBY_PRIVATE_KEY!
-  );
-
-  await web3.eth
-    .sendSignedTransaction(signedApprove.rawTransaction!)
-    .on("transactionHash", async (hash) => {
-      try {
-        console.log(
-          "\n\n\n ----------- SUCCESSFULLY BROADCAST AN APPROVE ---------"
-        );
-        console.log("Transaction Hash ", hash);
-      } catch (error) {
-        console.log("\n\n\n Encoutered an error broadcasting buy txn");
-        console.log("Error :  ", error);
-      }
-    });
-};
 
 const approveToken = async (
   token: string,
@@ -77,11 +26,11 @@ const approveToken = async (
     const approve = smartContract.methods
       .approve(token, botParams.uniswapv2Router)
       .encodeABI({
-        from: process.env.RINKEBY_WALLET_ADDRESS!,
+        from: process.env.WALLET_ADDRESS!,
       });
 
     const approveParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS,
+      from: process.env.WALLET_ADDRESS,
       gasPrice: web3.utils.toWei(gasPrice.toString(), "gwei"),
       gas: gasLimit,
       to: botParams.swapperAddress,
@@ -135,12 +84,12 @@ const buy = async (
       botParams.uniswapv2Router
     )
     .encodeABI({
-      from: process.env.RINKEBY_WALLET_ADDRESS,
+      from: process.env.WALLET_ADDRESS,
     });
 
   if (overLoads.gasPrice) {
     buyParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      from: process.env.WALLET_ADDRESS!,
       gasPrice: toHex(overLoads.gasPrice),
       gas: toHex(overLoads.gasLimit),
       to: botParams.swapperAddress,
@@ -150,7 +99,7 @@ const buy = async (
     };
   } else {
     buyParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      from: process.env.WALLET_ADDRESS!,
       gasPrice: toHex(
         overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
       ),
@@ -189,4 +138,4 @@ const buy = async (
   return txnHash;
 };
 
-export { allowToken, approveToken, buy };
+export { approveToken, buy };

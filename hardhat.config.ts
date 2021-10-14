@@ -3,9 +3,9 @@ import { config as dotEnvConfig } from "dotenv";
 
 dotEnvConfig({ path: `${__dirname}/.env` });
 
-if (!process.env.PRIVATE_KEY || !process.env.RINKBEY_PRIVATE_KEY) {
+if (!process.env.PRIVATE_KEY || !process.env.RINKEBY_PRIVATE_KEY) {
   throw new Error(
-    `Please provide your PRIVATE_KEY or RINKBEY_PRIVATE_KEY in .env in the project root`
+    `Please provide your PRIVATE_KEY or RINKEBY_PRIVATE_KEY in .env in the project root`
   );
 }
 if (!process.env.JSON_RPC) {
@@ -28,13 +28,13 @@ module.exports = {
       ],
     },
     rinkeby: {
-      url: process.env.RINKBEY_JSON_RPC,
+      url: process.env.RINKEBY_JSON_RPC,
       chainId: 4,
       gasPrice: 5 * 10 ** 9,
       accounts: [
-        process.env.RINKBEY_PRIVATE_KEY!.startsWith("0x")
-          ? process.env.RINKBEY_PRIVATE_KEY
-          : `0x${process.env.RINKBEY_PRIVATE_KEY}`,
+        process.env.RINKEBY_PRIVATE_KEY!.startsWith("0x")
+          ? process.env.RINKEBY_PRIVATE_KEY
+          : `0x${process.env.RINKEBY_PRIVATE_KEY}`,
       ],
     },
   },

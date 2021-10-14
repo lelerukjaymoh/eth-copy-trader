@@ -10,9 +10,10 @@ export interface txContents {
 }
 
 export interface overLoads {
-  gasLimit: Number;
-  nonce: Number;
-  gasPrice?: Number;
-  maxPriorityFeePerGas?: Number;
-  maxFeePerGas?: Number;
+  gasLimit: number;
+  nonce?: number;
+  gasPrice?: number;
+  maxPriorityFeePerGas?: number;
+  maxFeePerGas?: number;
+  value?: string;
 }

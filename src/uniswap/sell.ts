@@ -6,9 +6,9 @@ import { toHex } from "../utils/common";
 // Perepare enviroment and setup variables
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
 let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS!);
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 
-const signer = new ethers.Wallet(PRIVATE_KEY!);
+const signer = new ethers.Wallet(RINKEBY_PRIVATE_KEY!);
 const provider = ethers.getDefaultProvider(process.env.JSON_RPC, {
   name: "binance",
   chainId: 56,

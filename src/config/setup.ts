@@ -9,7 +9,11 @@ const TOKENS_TO_MONITOR = ["1a3aacc4fceb968de9219691d7b1a63cc6da65e0"];
 // The minimum amount of liquidity a token should have
 const MINIMUM_POOLED_WBNB = 1;
 
+// Gas limit to use if gasLimit is not specified
 const DEFAULT_GAS_LIMIT = 300000;
+
+// Additional gas while selling
+const ADDITIONAL_SELL_GAS = 30 * 10 ** 9;
 
 // @ Set the ethamount to buy
 const ETH_AMOUNT_TO_BUY = 0.000001 * 10 ** 18;
@@ -19,13 +23,17 @@ const NONCE_INTERVAL = 5;
 // botParams values are not to be changed
 const botParams = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "0x3ce7624f653f1179D4178D308ADAE45EA5fA801D",
+  swapperAddress: "0x4518e1c43AC9694F6E3f0A805019cCfEe4Ec73E6",
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  testToken: "0x7037ACf403012e9366D1532C39C22fC7C4172075",
+  rinkebyWeth: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
 };
+
+const APPROVE_GAS_PRICE = 20000000000;
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
-  "a9b70727", //
+  "a9b70727",
   "f305d719",
   "e8e33700",
   "e8078d94",
@@ -91,6 +99,8 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 });
 
 export {
+  APPROVE_GAS_PRICE,
+  ADDITIONAL_SELL_GAS,
   MINIMUM_POOLED_WBNB,
   LIQUIDITY_METHODS,
   METHODS_TO_MONITOR,

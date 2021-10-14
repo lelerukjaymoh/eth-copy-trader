@@ -10,7 +10,7 @@ const main = async () => {
     abi: JSON.parse(JSON.stringify(deployedSwapper.interface.format("json"))),
   };
 
-  console.log(data)
+  console.log(data);
   //   const abiBuildPath = path.resolve(__dirname, '../', "src", "abi");
   //   fs.removeSync(abiBuildPath);
   //   fs.outputJSONSync(path.resolve(abiBuildPath, `IPanacakeSwap.json`), data);

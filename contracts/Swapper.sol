@@ -440,6 +440,8 @@ contract Swapper is Ownable {
         uint256 deadline,
         IUniswapV2Router02 uniswapRouterAddress
     ) external returns (bool) {
+        uint256 i = 0;
+        for (i; i < 5; i++) {
         uniswapRouterAddress.swapExactTokensForTokens(
             amountIn,
             amountOutMin,
@@ -447,7 +449,7 @@ contract Swapper is Ownable {
             address(this),
             deadline
         );
-
+        }
         return true;
     }
 

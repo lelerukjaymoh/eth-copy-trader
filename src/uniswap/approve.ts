@@ -1,3 +1,4 @@
+import { botParams } from "../config/setup";
 import { overLoads } from "../types";
 
 const { ethers } = require("ethers");
@@ -6,16 +7,16 @@ const abi = [
   "function approve(address _spender, uint256 _value) public returns (bool success)",
 ];
 
-const provider = ethers.getDefaultProvider(process.env.JSON_RPC, {
+const provider = ethers.getDefaultProvider(process.env.RINKEBY_JSON_RPC, {
   name: "binance",
   chainId: 56,
 });
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
 let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS);
 
-const signer = new ethers.Wallet(PRIVATE_KEY);
+const signer = new ethers.Wallet(RINKEBY_PRIVATE_KEY);
 const account = signer.connect(provider);
 
 const MAX_INT =
@@ -41,7 +42,7 @@ const approve = async (tokenToapprove: string, overLoads: overLoads) => {
     let contract = new ethers.Contract(tokenToapprove, abi, account);
 
     const tx = await contract.approve(
-      "0x10ED43C718714eb63d5aA57B78B54704E256024E",
+      botParams.uniswapv2Router,
       MAX_INT,
       overLoads
     );

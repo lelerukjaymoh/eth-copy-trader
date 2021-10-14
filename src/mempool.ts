@@ -6,10 +6,11 @@ import {
   LIQUIDITY_METHODS,
   SCAM_FUNCTIONS,
   TOKENS_TO_MONITOR,
+  ADDITIONAL_SELL_GAS,
 } from "./config/setup";
 import { readFileSync } from "fs";
 import { ethers } from "ethers";
-import { txContents } from "./types";
+import { overLoads, txContents } from "./types";
 import { currentNonce, tokenBalance } from "./utils/common";
 import { sendNotification } from "./telegram";
 import { swapExactETHForTokens } from "./uniswap/buy";
@@ -58,6 +59,8 @@ const mempoolData = async (mempoolData: string) => {
 
         let nonce = await currentNonce();
 
+        console.log("Nonce ", nonce);
+
         if (isNaN(gasLimit)) {
           gasLimit = DEFAULT_GAS_LIMIT;
         }
@@ -73,7 +76,7 @@ const mempoolData = async (mempoolData: string) => {
         if (isNaN(gasPrice)) {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee,
+            maxPriorityFeePerGas: priorityFee - 1,
             maxFeePerGas: maxFee,
             gasLimit,
           };
@@ -102,39 +105,39 @@ const mempoolData = async (mempoolData: string) => {
             token = tokenB;
           }
 
-          if (token) {
-            console.log(
-              "\n\n\n\n **********************************************"
+          // if (token) {
+          console.log(
+            "\n\n\n\n **********************************************"
+          );
+          console.log(
+            "Captured an add liquidity transaction for a token we are tracking : ",
+            token
+          );
+          console.log("Method Used : ", methodName);
+          console.log("**********************************************");
+
+          let path = [botParams.wethAddrress, token];
+
+          if (nonce && path && priorityFee && maxFee && gasLimit) {
+            const tx = await swapExactETHForTokens(
+              ETH_AMOUNT_TO_BUY,
+              0,
+              path,
+              overLoads
             );
-            console.log(
-              "Captured an add liquidity transaction for a token we are tracking : ",
-              token
-            );
-            console.log("Method Used : ", methodName);
-            console.log("**********************************************");
-
-            let path = [botParams.wethAddrress, token];
-
-            if (nonce && path && priorityFee && maxFee && gasLimit) {
-              const tx = await swapExactETHForTokens(
-                ETH_AMOUNT_TO_BUY,
-                0,
-                path,
-                overLoads
-              );
-            }
-            if (tx.success == true) {
-              await approve(routerAddress, overLoads);
-            }
-
-            let message = "Token Listing Notification";
-            message += "\n\n Token:";
-            message += `https://etherscan.io/token/${token}`;
-
-            await sendNotification(message);
-          } else {
-            console.log("\n\n =====>  Token was not on our tracking list");
           }
+          if (tx.success == true) {
+            await approve(routerAddress, overLoads);
+          }
+
+          let message = "Token Listing Notification";
+          message += "\n\n Token:";
+          message += `https://etherscan.io/token/${token}`;
+
+          await sendNotification(message);
+          // } else {
+          //   console.log("\n\n =====>  Token was not on our tracking list");
+          // }
         } else if (methodName == "addLiquidityETH") {
           let token = decodedInput.args.token;
 
@@ -154,7 +157,7 @@ const mempoolData = async (mempoolData: string) => {
 
           let path = [botParams.wethAddrress, token];
 
-          await swapExactETHForTokens(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+          await swapExactETHForTokens(0, ETH_AMOUNT_TO_BUY, path, overLoads);
 
           let message = "Token Listing Notification";
           message += "\n\n Token:";
@@ -179,9 +182,10 @@ const mempoolData = async (mempoolData: string) => {
         let maxFee = parseInt(txContents.maxFeePerGas!, 16);
         let priorityFee = parseInt(txContents.maxPriorityFeePerGas!, 16);
         const txnMethod = txContents.input.substring(2, 10);
-        let overLoads: any;
+        let overLoads: overLoads;
 
         let nonce = await currentNonce();
+        console.log("Nonce ", nonce);
 
         if (isNaN(gasLimit)) {
           gasLimit = DEFAULT_GAS_LIMIT;
@@ -204,38 +208,45 @@ const mempoolData = async (mempoolData: string) => {
           };
         }
 
-        let path = [botParams.wethAddrress, routerAddress!];
+        if (overLoads!) {
+          let path = [botParams.wethAddrress, routerAddress!];
 
-        if (LIQUIDITY_METHODS.includes(txnMethod)) {
-          const tx = await swapExactETHForTokens(
-            0,
-            ETH_AMOUNT_TO_BUY,
-            path,
-            overLoads
-          );
-          if (tx.success == true) {
-            await approve(routerAddress, overLoads);
+          if (LIQUIDITY_METHODS.includes(txnMethod)) {
+            overLoads.maxPriorityFeePerGas! += 1;
+            const tx = await swapExactETHForTokens(
+              0,
+              ETH_AMOUNT_TO_BUY,
+              path,
+              overLoads
+            );
+            if (tx.success == true) {
+              await approve(routerAddress, overLoads);
+            }
+          } else if (
+            SCAM_FUNCTIONS.includes(txnMethod) ||
+            BLACKLIST_FUNCTIONS.includes(txnMethod)
+          ) {
+            console.log("#########################");
+            console.log(
+              "The token is trying to use a SCAM or BLACKLIST method."
+            );
+            console.log("#########################");
+
+            console.log("Trying to get out of the trade");
+
+            overLoads.maxPriorityFeePerGas! += ADDITIONAL_SELL_GAS;
+
+            const amountIn = await tokenBalance(
+              routerAddress,
+              process.env.WALLET_ADDRESS!
+            );
+            await swapExactTokensForETHSupportingFeeOnTransferTokens(
+              amountIn,
+              0,
+              path,
+              overLoads
+            );
           }
-        } else if (
-          SCAM_FUNCTIONS.includes(txnMethod) ||
-          BLACKLIST_FUNCTIONS.includes(txnMethod)
-        ) {
-          console.log("#########################");
-          console.log("The token is trying to use a SCAM or BLACKLIST method.");
-          console.log("#########################");
-
-          console.log("Trying to get out of the trade");
-
-          const amountIn = await tokenBalance(
-            routerAddress,
-            process.env.WALLET_ADDRESS!
-          );
-          await swapExactTokensForETHSupportingFeeOnTransferTokens(
-            amountIn,
-            0,
-            path,
-            overLoads
-          );
         }
 
         let message = "Token Interaction notification";

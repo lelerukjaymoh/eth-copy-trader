@@ -1,9 +1,52 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
+    "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Floki.sol": {
+      "lastModificationDate": 1634108369313,
+      "contentHash": "2b4a283b0d0817bd533a9d1afab36fdc",
+      "sourceName": "contracts/Floki.sol",
+      "solcConfig": {
+        "version": "0.8.9",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "Address",
+        "Context",
+        "FLOKI",
+        "IERC20",
+        "IUniswapV2Factory",
+        "IUniswapV2Pair",
+        "IUniswapV2Router01",
+        "IUniswapV2Router02",
+        "Ownable",
+        "SafeMath"
+      ]
+    },
     "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Swapper.sol": {
-      "lastModificationDate": 1633510581008,
-      "contentHash": "42387ffe4a19fe4a3d688e1027a89aee",
+      "lastModificationDate": 1634043629920,
+      "contentHash": "ed7dacb2bc1a998af121ab8d38ea7856",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.8.9",
