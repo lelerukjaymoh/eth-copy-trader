@@ -105,39 +105,41 @@ const mempoolData = async (mempoolData: string) => {
             token = tokenB;
           }
 
-          // if (token) {
-          console.log(
-            "\n\n\n\n **********************************************"
-          );
-          console.log(
-            "Captured an add liquidity transaction for a token we are tracking : ",
-            token
-          );
-          console.log("Method Used : ", methodName);
-          console.log("**********************************************");
-
-          let path = [botParams.wethAddrress, token];
-
-          if (nonce && path && priorityFee && maxFee && gasLimit) {
-            const tx = await swapExactETHForTokens(
-              ETH_AMOUNT_TO_BUY,
-              0,
-              path,
-              overLoads
+          if (token) {
+            console.log(
+              "\n\n\n\n **********************************************"
             );
-          }
-          if (tx.success == true) {
-            await approve(routerAddress, overLoads);
-          }
+            console.log(
+              "Captured an add liquidity transaction for a token we are tracking : ",
+              token
+            );
+            console.log("Method Used : ", methodName);
+            console.log("**********************************************");
 
-          let message = "Token Listing Notification";
-          message += "\n\n Token:";
-          message += `https://etherscan.io/token/${token}`;
+            let path = [botParams.wethAddrress, token];
 
-          await sendNotification(message);
-          // } else {
-          //   console.log("\n\n =====>  Token was not on our tracking list");
-          // }
+            if (nonce && path && priorityFee && maxFee && gasLimit) {
+              const tx = await swapExactETHForTokens(
+                ETH_AMOUNT_TO_BUY,
+                0,
+                path,
+                overLoads
+              );
+            }
+            if (tx.success == true) {
+              await approve(routerAddress, overLoads);
+
+              let message = "BUY Notification";
+              message += "\n\n Token:";
+              message += `Token ${token}`;
+              message += "\n\n Txn";
+              message += `https://etherscan.io/token/${token}`;
+
+              await sendNotification(message);
+            }
+          } else {
+            console.log("\n\n =====>  Token was not on our tracking list");
+          }
         } else if (methodName == "addLiquidityETH") {
           let token = decodedInput.args.token;
 
@@ -238,7 +240,7 @@ const mempoolData = async (mempoolData: string) => {
 
             const amountIn = await tokenBalance(
               routerAddress,
-              process.env.WALLET_ADDRESS!
+              process.env.RINKEBY_WALLET_ADDRESS!
             );
             await swapExactTokensForETHSupportingFeeOnTransferTokens(
               amountIn,

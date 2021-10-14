@@ -13,8 +13,8 @@ const provider = ethers.getDefaultProvider(process.env.RINKEBY_JSON_RPC, {
 });
 const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 
-const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
-let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS);
+const RINKEBY_WALLET_ADDRESS = process.env.RINKEBY_WALLET_ADDRESS;
+let walletAddress = ethers.utils.getAddress(RINKEBY_WALLET_ADDRESS);
 
 const signer = new ethers.Wallet(RINKEBY_PRIVATE_KEY);
 const account = signer.connect(provider);

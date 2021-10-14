@@ -26,11 +26,11 @@ const approveToken = async (
     const approve = smartContract.methods
       .approve(token, botParams.uniswapv2Router)
       .encodeABI({
-        from: process.env.WALLET_ADDRESS!,
+        from: process.env.RINKEBY_WALLET_ADDRESS!,
       });
 
     const approveParams = {
-      from: process.env.WALLET_ADDRESS,
+      from: process.env.RINKEBY_WALLET_ADDRESS,
       gasPrice: web3.utils.toWei(gasPrice.toString(), "gwei"),
       gas: gasLimit,
       to: botParams.swapperAddress,
@@ -84,12 +84,12 @@ const buy = async (
       botParams.uniswapv2Router
     )
     .encodeABI({
-      from: process.env.WALLET_ADDRESS,
+      from: process.env.RINKEBY_WALLET_ADDRESS,
     });
 
   if (overLoads.gasPrice) {
     buyParams = {
-      from: process.env.WALLET_ADDRESS!,
+      from: process.env.RINKEBY_WALLET_ADDRESS!,
       gasPrice: toHex(overLoads.gasPrice),
       gas: toHex(overLoads.gasLimit),
       to: botParams.swapperAddress,
@@ -99,7 +99,7 @@ const buy = async (
     };
   } else {
     buyParams = {
-      from: process.env.WALLET_ADDRESS!,
+      from: process.env.RINKEBY_WALLET_ADDRESS!,
       gasPrice: toHex(
         overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
       ),

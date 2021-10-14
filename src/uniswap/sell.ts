@@ -4,8 +4,8 @@ import { overLoads } from "../types";
 import { toHex } from "../utils/common";
 
 // Perepare enviroment and setup variables
-const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
-let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS!);
+const RINKEBY_WALLET_ADDRESS = process.env.RINKEBY_WALLET_ADDRESS;
+let walletAddress = ethers.utils.getAddress(RINKEBY_WALLET_ADDRESS!);
 const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
 
 const signer = new ethers.Wallet(RINKEBY_PRIVATE_KEY!);
@@ -37,7 +37,7 @@ const swapTokensForExactETH = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountIn: ${amountInMax}, \n amountOutMin: ${amountOut}, \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
+      `\n\n amountIn: ${amountInMax}, \n amountOutMin: ${amountOut}, \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
     );
 
     const tx = await uniswap.swapTokensForExactETH(
@@ -83,7 +83,7 @@ const swapExactTokensForETHSupportingFeeOnTransferTokens = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountIn: ${amountIn}, \n amountOutMin: ${amountOutMin}, \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
+      `\n\n amountIn: ${amountIn}, \n amountOutMin: ${amountOutMin}, \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
     );
 
     const tx = await uniswap.swapExactTokensForETHSupportingFeeOnTransferTokens(
@@ -132,7 +132,7 @@ const swapExactTokensForETH = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountIn: ${amountIn}, \n amountOutMin: ${amountOutMin}, \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
+      `\n\n amountIn: ${amountIn}, \n amountOutMin: ${amountOutMin}, \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline}`
     );
 
     const tx = await uniswap.swapExactTokensForETH(
