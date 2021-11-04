@@ -13,9 +13,7 @@ import {
   Trade,
   TradeType,
 } from "@uniswap/sdk";
-const provider = new ethers.providers.JsonRpcProvider(
-  process.env.RINKEBY_JSON_RPC!
-);
+const provider = new ethers.providers.JsonRpcProvider(process.env.JSON_RPC!);
 
 const main = async () => {
   try {
