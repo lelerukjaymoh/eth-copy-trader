@@ -7,10 +7,10 @@ dotEnvConfig({ path: `./.env` });
 if (
   !process.env.PRIVATE_KEY ||
   !process.env.RINKEBY_PRIVATE_KEY ||
-  !process.env.CUSTOM_NODE_JSON_RPC
+  !process.env.JSON_RPC
 ) {
   throw new Error(
-    `Please provide your PRIVATE_KEY or RINKEBY_PRIVATE_KEY in .env in the project root`
+    `Please provide your PRIVATE_KEY or PRIVATE_KEY in .env in the project root`
   );
 }
 if (!process.env.JSON_RPC) {
@@ -23,13 +23,13 @@ module.exports = {
   networks: {
     hardhat: {},
     mainnet: {
-      url: process.env.CUSTOM_NODE_JSON_RPC,
+      url: process.env.JSON_RPC,
       chainId: 1,
       gasPrice: DEFAULT_GAS_PRICE,
       accounts: [
-        process.env.RINKEBY_PRIVATE_KEY.startsWith("0x")
-          ? process.env.RINKEBY_PRIVATE_KEY
-          : process.env.RINKEBY_PRIVATE_KEY,
+        process.env.PRIVATE_KEY.startsWith("0x")
+          ? process.env.PRIVATE_KEY
+          : process.env.PRIVATE_KEY,
       ],
     },
     rinkeby: {

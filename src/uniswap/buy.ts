@@ -4,12 +4,12 @@ import { overLoads } from "../types";
 import { toHex } from "../utils/common";
 
 // Perepare enviroment and setup variables
-const RINKEBY_WALLET_ADDRESS = process.env.RINKEBY_WALLET_ADDRESS;
-const walletAddress = ethers.utils.getAddress(RINKEBY_WALLET_ADDRESS);
-const RINKEBY_PRIVATE_KEY = process.env.RINKEBY_PRIVATE_KEY;
+const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
+const walletAddress = ethers.utils.getAddress(WALLET_ADDRESS);
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
-const signer = new ethers.Wallet(RINKEBY_PRIVATE_KEY);
-const provider = ethers.getDefaultProvider(process.env.RINKEBY_JSON_RPC);
+const signer = new ethers.Wallet(PRIVATE_KEY);
+const provider = ethers.getDefaultProvider(process.env.JSON_RPC);
 const account = signer.connect(provider);
 
 const swapExactETHForTokens = async (
@@ -40,7 +40,7 @@ const swapExactETHForTokens = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountOutMin: ${amountOutMin}, \n\nValue : ${value} \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
+      `\n\n amountOutMin: ${amountOutMin}, \n\nValue : ${value} \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
     );
 
     const tx = await uniswap.swapExactETHForTokens(
@@ -87,7 +87,7 @@ const swapExactETHForTokensSupportingFeeOnTransferTokens = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n \n amountOutMin: ${amountOutMin}, \nValue: ${value} \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
+      `\n \n amountOutMin: ${amountOutMin}, \nValue: ${value} \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
     );
 
     const tx = await uniswap.swapExactETHForTokensSupportingFeeOnTransferTokens(
@@ -138,7 +138,7 @@ const swapETHForExactTokens = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountOut: ${amountOut}, \n Value: ${value} \nto: ${RINKEBY_WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
+      `\n\n amountOut: ${amountOut}, \n Value: ${value} \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
     );
 
     const tx = await uniswap.swapETHForExactTokens(

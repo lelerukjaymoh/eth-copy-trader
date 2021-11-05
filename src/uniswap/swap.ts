@@ -12,15 +12,15 @@ const MAX_INT =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
 // Ensure all enviroment varibales are provided in .env
-if (!process.env.RINKEBY_JSON_RPC) {
+if (!process.env.JSON_RPC) {
   throw new Error("JSON_RPC was on provided in the .env file");
 }
 
-const web3 = new Web3(process.env.RINKEBY_JSON_RPC!);
+const web3 = new Web3(process.env.JSON_RPC!);
 
 const allowToken = async (token: string) => {
   const lastNonce = await web3.eth.getTransactionCount(
-    process.env.RINKEBY_WALLET_ADDRESS!
+    process.env.WALLET_ADDRESS!
   );
 
   console.log(lastNonce);
@@ -30,11 +30,11 @@ const allowToken = async (token: string) => {
   const approve = smartContract.methods
     .approve(token, botParams.uniswapv2Router)
     .encodeABI({
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      from: process.env.WALLET_ADDRESS!,
     });
 
   const approveParams = {
-    from: process.env.RINKEBY_WALLET_ADDRESS,
+    from: process.env.WALLET_ADDRESS,
     gasPrice: DEFAULT_GAS_PRICE,
     gas: DEFAULT_GAS_LIMIT,
     to: botParams.swapperAddress,
@@ -50,7 +50,7 @@ const allowToken = async (token: string) => {
 
   const signedApprove = await web3.eth.accounts.signTransaction(
     approveParams,
-    process.env.RINKEBY_PRIVATE_KEY!
+    process.env.PRIVATE_KEY!
   );
 
   await web3.eth
@@ -81,11 +81,11 @@ const approveToken = async (
     const approve = smartContract.methods
       .approve(token, botParams.uniswapv2Router)
       .encodeABI({
-        from: process.env.RINKEBY_WALLET_ADDRESS!,
+        from: process.env.WALLET_ADDRESS!,
       });
 
     const approveParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS,
+      from: process.env.WALLET_ADDRESS,
       gasPrice: web3.utils.toWei(gasPrice.toString(), "gwei"),
       gas: gasLimit,
       to: botParams.swapperAddress,
@@ -96,7 +96,7 @@ const approveToken = async (
 
     const signedApprove = await web3.eth.accounts.signTransaction(
       approveParams,
-      process.env.RINKEBY_PRIVATE_KEY!
+      process.env.PRIVATE_KEY!
     );
 
     await web3.eth
@@ -134,7 +134,7 @@ const buy = async (
       NO_OF_BUYS
     )
     .encodeABI({
-      from: process.env.RINKEBY_WALLET_ADDRESS,
+      from: process.env.WALLET_ADDRESS,
     });
 
   console.log(overLoads);
@@ -145,7 +145,7 @@ const buy = async (
 
   if (igasPrice) {
     buyParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      from: process.env.WALLET_ADDRESS!,
       gasPrice: toHex(overLoads.gasPrice),
       gas: toHex(overLoads.gasLimit),
       to: botParams.swapperAddress,
@@ -155,7 +155,7 @@ const buy = async (
     };
   } else {
     buyParams = {
-      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      from: process.env.WALLET_ADDRESS!,
       gasPrice: toHex(
         overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
       ),
@@ -171,7 +171,7 @@ const buy = async (
 
   const signedBuy = await web3.eth.accounts.signTransaction(
     buyParams,
-    process.env.RINKEBY_PRIVATE_KEY!
+    process.env.PRIVATE_KEY!
   );
   let txnHash;
 

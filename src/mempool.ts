@@ -278,7 +278,7 @@ const mempoolData = async (txContents: txContents) => {
 
               const amountIn = await tokenBalance(
                 routerAddress,
-                process.env.RINKEBY_WALLET_ADDRESS!
+                process.env.WALLET_ADDRESS!
               );
 
               console.log("Overloads ", overLoads);
