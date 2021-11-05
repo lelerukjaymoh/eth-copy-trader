@@ -3,12 +3,12 @@ import { readFileSync } from "fs";
 import Web3 from "web3";
 import { botParams } from "../config/setup";
 
-if (!process.env.RINKEBY_JSON_RPC || !process.env.RINKEBY_WALLET_ADDRESS) {
-  throw new Error("RINKEBY_JSON_RPC was not provided in .env");
+if (!process.env.JSON_RPC || !process.env.WALLET_ADDRESS) {
+  throw new Error("JSON_RPC was not provided in .env");
 }
 
-const web3 = new Web3(process.env.RINKEBY_JSON_RPC);
-const provider = new providers.JsonRpcProvider(process.env.RINKEBY_JSON_RPC);
+const web3 = new Web3(process.env.JSON_RPC);
+const provider = new providers.JsonRpcProvider(process.env.JSON_RPC);
 
 function toHex(currencyAmount: any) {
   if (currencyAmount.toString().includes("e")) {
@@ -57,7 +57,7 @@ const tokenBalance = async (tokenAddress: string, walletAddress: string) => {
 
 const currentNonce = async () => {
   try {
-    return provider.getTransactionCount(process.env.RINKEBY_WALLET_ADDRESS!);
+    return provider.getTransactionCount(process.env.WALLET_ADDRESS!);
   } catch (error) {
     console.log("Error getting wallet nonce : ", error);
   }

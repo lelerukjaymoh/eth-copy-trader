@@ -6,9 +6,9 @@ import { txContents } from "./types";
 
 console.log(METHODS_TO_MONITOR);
 
-if (!process.env.CUSTOM_NODE_WS_RPC || !process.env.INFURA_JSON_RPC) {
+if (!process.env.CUSTOM_NODE_WS_RPC || !process.env.JSON_RPC) {
   throw new Error(
-    "CUSTOM_NODE_WS_RPC or INFURA_JSON_RPC was not provided in the .env"
+    "CUSTOM_NODE_WS_RPC or JSON_RPC was not provided in the .env"
   );
 }
 
