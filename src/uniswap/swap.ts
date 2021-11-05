@@ -1,5 +1,10 @@
 import Web3 from "web3";
-import { APPROVE_GAS_PRICE, botParams } from "../config/setup";
+import {
+  DEFAULT_GAS_PRICE,
+  botParams,
+  DEFAULT_GAS_LIMIT,
+  NO_OF_BUYS,
+} from "../config/setup";
 import { overLoads } from "../types";
 import { smartContract, toHex, tokenAllowance } from "../utils/common";
 
@@ -15,8 +20,7 @@ const web3 = new Web3(process.env.RINKEBY_JSON_RPC!);
 
 const allowToken = async (token: string) => {
   const lastNonce = await web3.eth.getTransactionCount(
-    process.env.RINKEBY_WALLET_ADDRESS!,
-    "pending"
+    process.env.RINKEBY_WALLET_ADDRESS!
   );
 
   console.log(lastNonce);
@@ -31,8 +35,8 @@ const allowToken = async (token: string) => {
 
   const approveParams = {
     from: process.env.RINKEBY_WALLET_ADDRESS,
-    gasPrice: web3.utils.toWei("1", "gwei"),
-    gas: 70000,
+    gasPrice: DEFAULT_GAS_PRICE,
+    gas: DEFAULT_GAS_LIMIT,
     to: botParams.swapperAddress,
     value: 0,
     data: approve,
@@ -41,7 +45,7 @@ const allowToken = async (token: string) => {
 
   console.log(
     "Total Transaction charges ",
-    (approveParams.gas * APPROVE_GAS_PRICE) / 10 ** 18
+    (approveParams.gas * DEFAULT_GAS_PRICE) / 10 ** 18
   );
 
   const signedApprove = await web3.eth.accounts.signTransaction(
@@ -111,12 +115,6 @@ const approveToken = async (
   }
 };
 
-// uint256 amountIn,
-// uint256 amountOutMin,
-// address[] memory path,
-// uint256 deadline,
-// IUniswapV2Router02 uniswapRouterAddress
-
 const buy = async (
   amountIn: number,
   amountOutMin: number,
@@ -132,13 +130,20 @@ const buy = async (
       toHex(amountOutMin),
       path,
       deadline,
-      botParams.uniswapv2Router
+      botParams.uniswapv2Router,
+      NO_OF_BUYS
     )
     .encodeABI({
       from: process.env.RINKEBY_WALLET_ADDRESS,
     });
 
-  if (overLoads.gasPrice) {
+  console.log(overLoads);
+
+  // TODO: To remove the check to be greater than a given amount
+
+  const igasPrice = overLoads["gasPrice"];
+
+  if (igasPrice) {
     buyParams = {
       from: process.env.RINKEBY_WALLET_ADDRESS!,
       gasPrice: toHex(overLoads.gasPrice),

@@ -4,7 +4,10 @@
 // Setting up the Bot parameters
 
 // @ Enter the tokens to monitor in the array TOKENS_TO_MONITOR
-const TOKENS_TO_MONITOR = ["1a3aacc4fceb968de9219691d7b1a63cc6da65e0"];
+const TOKENS_TO_MONITOR = [
+  { token: "1a3aacc4fceb968de9219691d7b1a63cc6da65e0", buyType: "C" },
+  { token: "1a3aacc4fceb968de9219691tyyewtewd7b1a63cc6da65e0", buyType: "r" },
+];
 
 // The minimum amount of liquidity a token should have
 const MINIMUM_POOLED_WBNB = 1;
@@ -23,13 +26,21 @@ const NONCE_INTERVAL = 5;
 // botParams values are not to be changed
 const botParams = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "0x4518e1c43AC9694F6E3f0A805019cCfEe4Ec73E6",
+  swapperAddress: "0x4d2ed594d302f5d4018ca2fa618da0536d0c9a80",
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-  testToken: "0x7037ACf403012e9366D1532C39C22fC7C4172075",
-  rinkebyWeth: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
 };
 
-const APPROVE_GAS_PRICE = 20000000000;
+// TEST PARAMS
+
+// const botParams = {
+//   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+//   swapperAddress: "0x4518e1c43AC9694F6E3f0A805019cCfEe4Ec73E6",
+//   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+//   testToken: "0x7037ACf403012e9366D1532C39C22fC7C4172075",
+//   rinkebyWeth: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
+// };
+
+const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -98,8 +109,10 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
   METHODS_TO_MONITOR.push(functionId);
 });
 
+const NO_OF_BUYS = 2;
+
 export {
-  APPROVE_GAS_PRICE,
+  DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
   MINIMUM_POOLED_WBNB,
   LIQUIDITY_METHODS,
@@ -111,4 +124,5 @@ export {
   NONCE_INTERVAL,
   DEFAULT_GAS_LIMIT,
   botParams,
+  NO_OF_BUYS,
 };

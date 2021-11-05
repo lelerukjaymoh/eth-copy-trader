@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev -r dotenv/config src/index.ts",
-    "test": "ts-node-dev -r dotenv/config src/test.ts"
+    "test": "ts-node-dev -r dotenv/config src/rinkeby.ts",
+    "dev": "ts-node-dev -r dotenv/config src/test1.ts",
+    "postdeploy": "ts-node-dev -r dotenv/config src/postDeploy"
   },
   "keywords": [],
   "author": "jay@coredevs.co",

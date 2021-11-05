@@ -68,7 +68,18 @@ const wait = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+const buyMessage = (token: string, buyTxHash: string) => {
+  let message = "*** Successfully Broadcast a BUY ***";
+  message += "\n\n Token";
+  message += `\nhttps://etherscan.io/token/${token}`;
+  message += "\n\n Tx";
+  message += `\nhttps://etherscan.io/tx/${buyTxHash}`;
+
+  return message;
+};
+
 export {
+  buyMessage,
   tokenBalance,
   wait,
   toHex,

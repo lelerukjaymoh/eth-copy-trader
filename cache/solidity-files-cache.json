@@ -45,8 +45,8 @@
       ]
     },
     "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Swapper.sol": {
-      "lastModificationDate": 1634043629920,
-      "contentHash": "ed7dacb2bc1a998af121ab8d38ea7856",
+      "lastModificationDate": 1636042287228,
+      "contentHash": "06452da1db002b4d8cd39475f224eae8",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.8.9",

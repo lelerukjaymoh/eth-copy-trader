@@ -31,9 +31,11 @@ const swapExactETHForTokens = async (
       "\n\n==================== swapExactETHForTokens ====================="
     );
 
+    console.log("OverLoads", overLoads);
+
     // Convert amount to toHex
     let value = toHex(ethAmount);
-    overLoads.value = value;
+    overLoads["value"] = value;
 
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
