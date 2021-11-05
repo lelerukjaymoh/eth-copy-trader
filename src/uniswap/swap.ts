@@ -143,66 +143,55 @@ const buy = async (
 
   const igasPrice = overLoads["gasPrice"];
 
-  if (
-    (overLoads.gasPrice && overLoads.gasPrice > 70 * 10 ** 9) ||
-    (overLoads.maxFeePerGas && overLoads.maxFeePerGas > 70 * 10 ** 9)
-  ) {
-    if (igasPrice) {
-      buyParams = {
-        from: process.env.RINKEBY_WALLET_ADDRESS!,
-        gasPrice: toHex(overLoads.gasPrice),
-        gas: toHex(overLoads.gasLimit),
-        to: botParams.swapperAddress,
-        value: 0,
-        data: buyData,
-        nonce: overLoads.nonce,
-      };
-    } else {
-      buyParams = {
-        from: process.env.RINKEBY_WALLET_ADDRESS!,
-        gasPrice: toHex(
-          overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
-        ),
-        gas: toHex(overLoads.gasLimit),
-        to: botParams.swapperAddress,
-        value: 0,
-        data: buyData,
-        nonce: overLoads.nonce,
-      };
-    }
-
-    console.log(buyParams);
-
-    const signedBuy = await web3.eth.accounts.signTransaction(
-      buyParams,
-      process.env.RINKEBY_PRIVATE_KEY!
-    );
-    let txnHash;
-
-    await web3.eth
-      .sendSignedTransaction(signedBuy.rawTransaction!)
-      .on("transactionHash", async (hash) => {
-        try {
-          console.log(
-            "\n\n\n ----------- SUCCESSFULLY BROADCAST A BUY ---------"
-          );
-          console.log("Transaction Hash ", hash);
-
-          txnHash = hash;
-        } catch (error) {
-          console.log("\n\n\n Encoutered an error broadcasting buy txn");
-          console.log("Error :  ", error);
-        }
-      });
-
-    return txnHash;
+  if (igasPrice) {
+    buyParams = {
+      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      gasPrice: toHex(overLoads.gasPrice),
+      gas: toHex(overLoads.gasLimit),
+      to: botParams.swapperAddress,
+      value: 0,
+      data: buyData,
+      nonce: overLoads.nonce,
+    };
   } else {
-    console.log(
-      "\n\n\n   Victims gasPrice was so low ..... ",
-      overLoads.gasPrice! / 10 ** 9,
-      overLoads.maxFeePerGas! / 10 ** 9
-    );
+    buyParams = {
+      from: process.env.RINKEBY_WALLET_ADDRESS!,
+      gasPrice: toHex(
+        overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
+      ),
+      gas: toHex(overLoads.gasLimit),
+      to: botParams.swapperAddress,
+      value: 0,
+      data: buyData,
+      nonce: overLoads.nonce,
+    };
   }
+
+  console.log(buyParams);
+
+  const signedBuy = await web3.eth.accounts.signTransaction(
+    buyParams,
+    process.env.RINKEBY_PRIVATE_KEY!
+  );
+  let txnHash;
+
+  await web3.eth
+    .sendSignedTransaction(signedBuy.rawTransaction!)
+    .on("transactionHash", async (hash) => {
+      try {
+        console.log(
+          "\n\n\n ----------- SUCCESSFULLY BROADCAST A BUY ---------"
+        );
+        console.log("Transaction Hash ", hash);
+
+        txnHash = hash;
+      } catch (error) {
+        console.log("\n\n\n Encoutered an error broadcasting buy txn");
+        console.log("Error :  ", error);
+      }
+    });
+
+  return txnHash;
 };
 
 export { allowToken, approveToken, buy };

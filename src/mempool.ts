@@ -104,8 +104,6 @@ const mempoolData = async (txContents: txContents) => {
           console.log("Gas Limit ", gasLimit);
           console.log("txData ", txContents);
 
-          // TODO: To uncomment the addLiquidity part
-
           if (methodName == "addLiquidity") {
             count++;
             let tokenA = decodedInput.args.tokenA;
@@ -155,56 +153,54 @@ const mempoolData = async (txContents: txContents) => {
 
             console.log("Token : ", token);
 
-            // if (tokensToMonitor.has(token.toLowerCase())) {
+            if (tokensToMonitor.has(token.toLowerCase())) {
+              console.log(
+                "\n\n\n\n\n\n\n **********************************************"
+              );
+              console.log(
+                "\nCaptured an add liquidity transaction for a token we are tracking : ",
+                token
+              );
+              console.log("Method used : ", methodName);
+              console.log("\n**********************************************");
 
-            console.log(
-              "\n\n\n\n\n\n\n **********************************************"
-            );
-            console.log(
-              "\nCaptured an add liquidity transaction for a token we are tracking : ",
-              token
-            );
-            console.log("Method used : ", methodName);
-            console.log("\n**********************************************");
+              let path = [botParams.wethAddrress, token];
 
-            let path = [botParams.wethAddrress, token];
+              console.log("Overloads ", overLoads);
 
-            console.log("Overloads ", overLoads);
+              if (overLoads) {
+                count++;
 
-            if (overLoads) {
-              count++;
+                let buyTxHash;
 
-              let buyTxHash;
+                if (tokensToMonitor.get(token).buyType == "c") {
+                  buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                } else {
+                  buyTxHash = await swapExactETHForTokens(
+                    0,
+                    ETH_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                }
 
-              if (tokensToMonitor.get(token).buyType == "c") {
-                buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                if (buyTxHash) {
+                  sendNotification(buyMessage(token, buyTxHash.data));
+                }
               } else {
-                buyTxHash = await swapExactETHForTokens(
-                  0,
-                  ETH_AMOUNT_TO_BUY,
-                  path,
-                  overLoads
-                );
+                ("\n\n\n Could not populate the overLoads");
               }
 
-              if (buyTxHash) {
-                sendNotification(buyMessage(token, buyTxHash.data));
-              }
+              // REVIEW: This token listing notification to be removed
+
+              // let message = "Token Listing Notification";
+              // message += "\n\n Token:";
+              // m4essage += `https://etherscan.io/token/${token}`;
+
+              // await sendNotification(message);
             } else {
-              ("\n\n\n Could not populate the overLoads");
+              console.log("\n\n =====>  Token was not on our tracking list");
             }
-
-            // REVIEW: This token listing notification to be removed
-
-            // let message = "Token Listing Notification";
-            // message += "\n\n Token:";
-            // message += `https://etherscan.io/token/${token}`;
-
-            // await sendNotification(message);
-
-            // } else {
-            //     console.log("\n\n =====>  Token was not on our tracking list");
-            // }
           }
         } else if (tokensToMonitor.has(routerAddress)) {
           console.log(
