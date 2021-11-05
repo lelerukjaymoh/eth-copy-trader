@@ -1,11 +1,13 @@
+import { BigNumber } from "ethers";
+
 export interface txContents {
+  hash: string;
   from: string;
   to: string;
-  value: string;
-  maxPriorityFeePerGas?: string;
-  maxFeePerGas?: string;
-  gasPrice?: string;
-  gas: string;
+  maxPriorityFeePerGas?: BigNumber;
+  maxFeePerGas?: BigNumber;
+  gasPrice?: BigNumber;
+  gas: BigNumber;
   input: string;
 }
 

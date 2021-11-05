@@ -1,9 +1,14 @@
 import "@nomiclabs/hardhat-waffle";
 import { config as dotEnvConfig } from "dotenv";
+import { DEFAULT_GAS_PRICE } from "./src/config/setup";
 
-dotEnvConfig({ path: `${__dirname}/.env` });
+dotEnvConfig({ path: `./.env` });
 
-if (!process.env.PRIVATE_KEY || !process.env.RINKEBY_PRIVATE_KEY) {
+if (
+  !process.env.PRIVATE_KEY ||
+  !process.env.RINKEBY_PRIVATE_KEY ||
+  !process.env.CUSTOM_NODE_JSON_RPC
+) {
   throw new Error(
     `Please provide your PRIVATE_KEY or RINKEBY_PRIVATE_KEY in .env in the project root`
   );
@@ -18,13 +23,13 @@ module.exports = {
   networks: {
     hardhat: {},
     mainnet: {
-      url: process.env.JSON_RPC,
+      url: process.env.CUSTOM_NODE_JSON_RPC,
       chainId: 1,
-      gasPrice: 130 * 10 ** 9,
+      gasPrice: DEFAULT_GAS_PRICE,
       accounts: [
-        process.env.PRIVATE_KEY.startsWith("0x")
-          ? process.env.PRIVATE_KEY
-          : `0x${process.env.PRIVATE_KEY}`,
+        process.env.RINKEBY_PRIVATE_KEY.startsWith("0x")
+          ? process.env.RINKEBY_PRIVATE_KEY
+          : process.env.RINKEBY_PRIVATE_KEY,
       ],
     },
     rinkeby: {

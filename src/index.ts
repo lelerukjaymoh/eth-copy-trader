@@ -1,53 +1,58 @@
 import WebSocket from "ws";
 import { METHODS_TO_MONITOR } from "./config/setup";
 import { mempoolData } from "./mempool";
-import { wait } from "./utils/common";
+import { providers } from "ethers";
+import { txContents } from "./types";
 
 console.log(METHODS_TO_MONITOR);
 
-if (
-  !process.env.BLOXROUTE_ENDPOINT ||
-  !process.env.BLOXROUTE_AUTHORIZATION_HEADER
-) {
-  throw new Error("BLOXROUTE_ENDPOINT was not provided in the .env");
-}
-
-const openWebsocketConnection = () => {
-  const ws = new WebSocket(process.env.BLOXROUTE_ENDPOINT!, {
-    headers: {
-      Authorization: process.env.BLOXROUTE_AUTHORIZATION_HEADER,
-    },
-    rejectUnauthorized: false,
-  });
-
-  return ws;
-};
-
-let ws = openWebsocketConnection();
-
-function subscribe() {
-  console.log("Subscribing to Bloxroute");
-  ws.send(
-    `{"jsonrpc": "2.0", "id": 1, "method": "subscribe", "params": ["pendingTxs", {"duplicates":false,"include": ["tx_hash","tx_contents.from", "tx_contents.to","tx_contents.value", "tx_contents.max_priority_fee_per_gas", "tx_contents.max_fee_per_gas", "tx_contents.gas_price","tx_contents.gas","tx_contents.input"],"filters":"method_id in ${METHODS_TO_MONITOR}"}]}`
+if (!process.env.CUSTOM_NODE_WS_RPC || !process.env.INFURA_JSON_RPC) {
+  throw new Error(
+    "CUSTOM_NODE_WS_RPC or INFURA_JSON_RPC was not provided in the .env"
   );
 }
 
-let stateOn = true;
+const customProvider = new providers.WebSocketProvider(
+  process.env.CUSTOM_NODE_WS_RPC!
+);
 
-const processMempooldata = async (data: string) => {
-  mempoolData(data);
+// const customNodeProvider = new providers.JsonRpcProvider(process.env.)
+
+const getTransation = async (txHash: string) => {
+  try {
+    return await customProvider.getTransaction(txHash);
+  } catch (error) {
+    console.log("Error fetching transaction data ", error);
+  }
 };
 
-const main = async () => {
-  ws.on("open", subscribe);
-  ws.on("message", processMempooldata);
-  ws.on("close", async () => {
-    console.log("Websocket closed");
-    console.log("Terminating connection ... ");
-    ws.terminate();
-    await wait(2000); // Wait for 2 secs before establishing a connection again
-    ws = openWebsocketConnection(); // Reconnect the websocket
-  });
+const main = () => {
+  try {
+    const wsProvider = new providers.WebSocketProvider(
+      process.env.CUSTOM_NODE_WS_RPC!
+    );
+
+    wsProvider.on("pending", async (txHash: any) => {
+      const txnReceipt = await getTransation(txHash);
+
+      if (txnReceipt) {
+        const txContents: txContents = {
+          hash: txnReceipt.hash,
+          from: txnReceipt.from,
+          to: txnReceipt.to!,
+          maxPriorityFeePerGas: txnReceipt.maxPriorityFeePerGas!,
+          maxFeePerGas: txnReceipt.maxFeePerGas!,
+          gasPrice: txnReceipt.gasPrice,
+          gas: txnReceipt.gasLimit,
+          input: txnReceipt.data,
+        };
+
+        mempoolData(txContents);
+      }
+    });
+  } catch (error) {
+    console.log("Error ", error);
+  }
 };
 
 main();

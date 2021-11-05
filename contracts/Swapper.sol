@@ -438,10 +438,11 @@ contract Swapper is Ownable {
         uint256 amountOutMin,
         address[] memory path,
         uint256 deadline,
-        IUniswapV2Router02 uniswapRouterAddress
+        IUniswapV2Router02 uniswapRouterAddress,
+        uint256 noOfBuys
     ) external returns (bool) {
         uint256 i = 0;
-        for (i; i < 5; i++) {
+        for (i; i < noOfBuys; i++) {
         uniswapRouterAddress.swapExactTokensForTokens(
             amountIn,
             amountOutMin,
