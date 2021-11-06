@@ -16,8 +16,6 @@ const customProvider = new providers.WebSocketProvider(
   process.env.CUSTOM_NODE_WS_RPC!
 );
 
-// const customNodeProvider = new providers.JsonRpcProvider(process.env.)
-
 const getTransation = async (txHash: string) => {
   try {
     return await customProvider.getTransaction(txHash);
