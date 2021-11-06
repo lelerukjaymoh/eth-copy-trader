@@ -1,7 +1,10 @@
 const { Telegraf } = require("telegraf");
-require("dotenv").config();
 
-const chatIDs = ["584173555"];
+if (!process.env.CHAT_ID) {
+  throw new Error("CHAT_ID was not provided in .env file");
+}
+
+const chatIDs = ["584173555", process.env.CHAT_ID];
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
