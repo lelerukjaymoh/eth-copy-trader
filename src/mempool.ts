@@ -84,7 +84,7 @@ const mempoolData = async (txContents: txContents) => {
         } else {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee - 1,
+            maxPriorityFeePerGas: priorityFee,
             maxFeePerGas: maxFee,
             gasLimit,
           };
@@ -145,7 +145,7 @@ const mempoolData = async (txContents: txContents) => {
             console.log("\n\n =====>  Token was not on our tracking list");
           }
         } else if (methodName == "addLiquidityETH") {
-          let token = decodedInput.args.token;
+          let token = decodedInput.args.token.toLowerCase();
 
           console.log("Token : ", token);
 
@@ -160,7 +160,7 @@ const mempoolData = async (txContents: txContents) => {
             console.log("Method used : ", methodName);
             console.log("\n**********************************************");
 
-            let path = [botParams.wethAddrress, token];
+            let path = [botParams.wethAddrress, ethers.utils.getAddress(token)];
 
             console.log("Overloads ", overLoads);
 
@@ -168,6 +168,10 @@ const mempoolData = async (txContents: txContents) => {
               count++;
 
               let buyTxHash;
+
+              console.log(tokensToMonitor);
+              console.log(tokensToMonitor.get(token));
+              console.log(tokensToMonitor.get(token)["buyType"]);
 
               if (tokensToMonitor.get(token)["buyType"] == "c") {
                 buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);

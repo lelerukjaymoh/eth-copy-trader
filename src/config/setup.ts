@@ -5,8 +5,7 @@
 // r ==> buy udirectly to the uniswapv2 router
 
 const TOKENS_TO_MONITOR = [
-  { token: "1a3aacc4fceb968de9219691d7b1a63cc6da65e0", buyType: "C" },
-  { token: "1a3aacc4fceb968de9219691tyyewtewd7b1a63cc6da65e0", buyType: "r" },
+  { token: "0x3301ee63fb29f863f2333bd4466acb46cd8323e6", buyType: "r" },
 ];
 
 // Gas limit to use if gasLimit is not specified

@@ -6,10 +6,8 @@ import { txContents } from "./types";
 
 console.log(METHODS_TO_MONITOR);
 
-if (!process.env.CUSTOM_NODE_WS_RPC || !process.env.JSON_RPC) {
-  throw new Error(
-    "CUSTOM_NODE_WS_RPC or JSON_RPC was not provided in the .env"
-  );
+if (!process.env.CUSTOM_NODE_WS_RPC) {
+  throw new Error("CUSTOM_NODE_WS_RPC was not provided in the .env");
 }
 
 const customProvider = new providers.WebSocketProvider(
