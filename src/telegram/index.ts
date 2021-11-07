@@ -24,7 +24,7 @@ const sendNotification = async (message: any) => {
         disable_web_page_preview: true,
       })
       .catch((error: any) => {
-        console.log("Encouterd an error while sending notification to ", chat);
+        console.log("Encouterd an error while sending notification");
         console.log("==============================");
         console.log(error);
       });
