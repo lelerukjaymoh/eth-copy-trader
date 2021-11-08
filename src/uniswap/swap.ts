@@ -173,7 +173,8 @@ const buy = async (
     buyParams,
     process.env.PRIVATE_KEY!
   );
-  let txnHash;
+
+  let buyResponseData: any;
 
   await web3.eth
     .sendSignedTransaction(signedBuy.rawTransaction!)
@@ -184,14 +185,17 @@ const buy = async (
         );
         console.log("Transaction Hash ", hash);
 
-        txnHash = hash;
+        buyResponseData = {
+          success: true,
+          data: hash,
+        };
       } catch (error) {
         console.log("\n\n\n Encoutered an error broadcasting buy txn");
         console.log("Error :  ", error);
       }
     });
 
-  return txnHash;
+  return buyResponseData;
 };
 
 export { allowToken, approveToken, buy };
