@@ -11,7 +11,12 @@ import {
 import { readFileSync } from "fs";
 import { ethers } from "ethers";
 import { overLoads, txContents } from "./types";
-import { buyMessage, currentNonce, tokenBalance } from "./utils/common";
+import {
+  buyMessage,
+  currentNonce,
+  scamMessage,
+  tokenBalance,
+} from "./utils/common";
 import { sendNotification } from "./telegram";
 import { swapExactETHForTokens } from "./uniswap/buy";
 import { swapExactTokensForETHSupportingFeeOnTransferTokens } from "./uniswap/sell";
@@ -227,13 +232,13 @@ const mempoolData = async (txContents: txContents) => {
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
-            gasPrice,
+            gasPrice: gasPrice + ADDITIONAL_SELL_GAS,
             gasLimit,
           };
         } else {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee,
+            maxPriorityFeePerGas: priorityFee + ADDITIONAL_SELL_GAS,
             maxFeePerGas: maxFee,
             gasLimit,
           };
@@ -267,22 +272,27 @@ const mempoolData = async (txContents: txContents) => {
 
             console.log("Trying to get out of the trade");
 
-            overLoads.maxPriorityFeePerGas! += ADDITIONAL_SELL_GAS;
-
             const amountIn = await tokenBalance(
               routerAddress,
               process.env.WALLET_ADDRESS!
             );
 
+            const path = [routerAddress!, botParams.wethAddrress];
+
             console.log("Overloads ", overLoads);
 
-            if (overLoads) {
-              await swapExactTokensForETHSupportingFeeOnTransferTokens(
-                amountIn,
-                0,
-                path,
-                overLoads
-              );
+            if (overLoads && amountIn && amountIn > 0) {
+              const tx =
+                await swapExactTokensForETHSupportingFeeOnTransferTokens(
+                  amountIn,
+                  0,
+                  path,
+                  overLoads
+                );
+
+              if (tx.success == true) {
+                sendNotification(scamMessage(routerAddress, tx.data));
+              }
             } else {
               ("\n\n\n Could not populate the overLoads");
               sendNotification("Overloads were empty");
