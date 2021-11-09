@@ -232,13 +232,13 @@ const mempoolData = async (txContents: txContents) => {
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
-            gasPrice: gasPrice + ADDITIONAL_SELL_GAS,
+            gasPrice: gasPrice,
             gasLimit,
           };
         } else {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee + ADDITIONAL_SELL_GAS,
+            maxPriorityFeePerGas: priorityFee,
             maxFeePerGas: maxFee,
             gasLimit,
           };
@@ -246,19 +246,24 @@ const mempoolData = async (txContents: txContents) => {
 
         if (overLoads!) {
           let path = [botParams.wethAddrress, routerAddress!];
+          let buyTxHash;
 
           if (LIQUIDITY_METHODS.includes(txnMethod)) {
-            overLoads.maxPriorityFeePerGas!;
-            const tx = await swapExactETHForTokens(
-              0,
-              ETH_AMOUNT_TO_BUY,
-              path,
-              overLoads
-            );
-            if (tx.success == true) {
+            if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+              buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+            } else {
+              buyTxHash = await swapExactETHForTokens(
+                0,
+                ETH_AMOUNT_TO_BUY,
+                path,
+                overLoads
+              );
+            }
+
+            if (buyTxHash.success == true) {
               await approve(routerAddress, overLoads);
 
-              sendNotification(buyMessage(routerAddress, tx.data));
+              sendNotification(buyMessage(routerAddress, buyTxHash.data));
             }
           } else if (
             SCAM_FUNCTIONS.includes(txnMethod) ||
@@ -271,6 +276,12 @@ const mempoolData = async (txContents: txContents) => {
             console.log("#########################");
 
             console.log("Trying to get out of the trade");
+
+            if (overLoads && overLoads.gasPrice) {
+              overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
+            } else {
+              overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
+            }
 
             const amountIn = await tokenBalance(
               routerAddress,
