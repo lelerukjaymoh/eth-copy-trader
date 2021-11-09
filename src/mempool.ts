@@ -230,9 +230,7 @@ const mempoolData = async (txContents: txContents) => {
             gasPrice,
             gasLimit,
           };
-        }
-
-        if (isNaN(gasPrice)) {
+        } else {
           overLoads = {
             nonce,
             maxPriorityFeePerGas: priorityFee,
