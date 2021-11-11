@@ -65,7 +65,6 @@ const mempoolData = async (txContents: txContents) => {
 
         console.log("Decoded Data", decodedInput);
 
-        let gasLimit = parseInt(txContents.gas._hex, 16);
         let gasPrice = parseInt(txContents.gasPrice?._hex!, 16);
         let maxFee = parseInt(txContents.maxFeePerGas?._hex!, 16);
         let priorityFee = parseInt(txContents.maxPriorityFeePerGas?._hex!, 16);
@@ -75,22 +74,18 @@ const mempoolData = async (txContents: txContents) => {
 
         console.log("Nonce ", nonce);
 
-        if (isNaN(gasLimit)) {
-          gasLimit = DEFAULT_GAS_LIMIT;
-        }
-
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
             gasPrice,
-            gasLimit,
+            gasLimit: DEFAULT_GAS_LIMIT,
           };
         } else {
           overLoads = {
             nonce,
             maxPriorityFeePerGas: priorityFee,
             maxFeePerGas: maxFee,
-            gasLimit,
+            gasLimit: DEFAULT_GAS_LIMIT,
           };
         }
 
@@ -101,7 +96,7 @@ const mempoolData = async (txContents: txContents) => {
 
         console.log("\n Method Name : ", methodName);
         console.log("Gas price : ", gasPrice! / 1000000000);
-        console.log("Gas Limit ", gasLimit);
+        console.log("Gas Limit ", DEFAULT_GAS_LIMIT);
         console.log("txData ", txContents);
 
         if (methodName == "addLiquidity") {
@@ -132,7 +127,7 @@ const mempoolData = async (txContents: txContents) => {
 
             let path = [botParams.wethAddrress, token];
 
-            if (nonce && path && priorityFee && maxFee && gasLimit) {
+            if (nonce && path && priorityFee && maxFee && DEFAULT_GAS_LIMIT) {
               const tx = await swapExactETHForTokens(
                 ETH_AMOUNT_TO_BUY,
                 0,
@@ -179,7 +174,6 @@ const mempoolData = async (txContents: txContents) => {
               console.log(tokensToMonitor.get(token)["buyType"]);
 
               if (tokensToMonitor.get(token)["buyType"] == "c") {
-                overLoads.gasLimit = DEFAULT_GAS_LIMIT;
                 buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
               } else {
                 buyTxHash = await swapExactETHForTokens(
@@ -215,7 +209,6 @@ const mempoolData = async (txContents: txContents) => {
         );
         console.log("**********************************************");
 
-        let gasLimit = parseInt(txContents.gas._hex, 16);
         let gasPrice = parseInt(txContents.gasPrice?._hex!, 16);
         let maxFee = parseInt(txContents.maxFeePerGas?._hex!, 16);
         let priorityFee = parseInt(txContents.maxPriorityFeePerGas?._hex!, 16);
@@ -225,22 +218,18 @@ const mempoolData = async (txContents: txContents) => {
         let nonce = await currentNonce();
         console.log("Nonce ", nonce);
 
-        if (isNaN(gasLimit)) {
-          gasLimit = DEFAULT_GAS_LIMIT;
-        }
-
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
             gasPrice: gasPrice,
-            gasLimit,
+            gasLimit: DEFAULT_GAS_LIMIT,
           };
         } else {
           overLoads = {
             nonce,
             maxPriorityFeePerGas: priorityFee,
             maxFeePerGas: maxFee,
-            gasLimit,
+            gasLimit: DEFAULT_GAS_LIMIT,
           };
         }
 
@@ -250,7 +239,6 @@ const mempoolData = async (txContents: txContents) => {
 
           if (LIQUIDITY_METHODS.includes(txnMethod)) {
             if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
-              overLoads.gasLimit = DEFAULT_GAS_LIMIT;
               buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
             } else {
               buyTxHash = await swapExactETHForTokens(
@@ -281,7 +269,6 @@ const mempoolData = async (txContents: txContents) => {
 
             if (overLoads && overLoads.gasPrice) {
               overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
-              overLoads.gasLimit = DEFAULT_GAS_LIMIT;
             } else {
               overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
             }
