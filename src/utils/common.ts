@@ -78,7 +78,7 @@ const buyMessage = (token: string, buyTxHash: string) => {
   return message;
 };
 
-const scamMessage = (token: string, buyTxHash: string) => {
+const scamTxMessage = (token: string, buyTxHash: string) => {
   let message = "*** Successfully SOLD tokens before a scam function ***";
   message += "\n\n Token";
   message += `\nhttps://etherscan.io/token/${token}`;
@@ -89,7 +89,7 @@ const scamMessage = (token: string, buyTxHash: string) => {
 };
 
 export {
-  scamMessage,
+  scamTxMessage,
   buyMessage,
   tokenBalance,
   wait,

@@ -14,7 +14,7 @@ import { overLoads, txContents } from "./types";
 import {
   buyMessage,
   currentNonce,
-  scamMessage,
+  scamTxMessage,
   tokenBalance,
 } from "./utils/common";
 import { sendNotification } from "./telegram";
@@ -69,8 +69,7 @@ const mempoolData = async (txContents: txContents) => {
         let gasPrice = parseInt(txContents.gasPrice?._hex!, 16);
         let maxFee = parseInt(txContents.maxFeePerGas?._hex!, 16);
         let priorityFee = parseInt(txContents.maxPriorityFeePerGas?._hex!, 16);
-        const txnMethod = txContents.input.substring(2, 10);
-        let overLoads: any;
+        let overLoads: overLoads;
 
         let nonce = await currentNonce();
 
@@ -141,6 +140,7 @@ const mempoolData = async (txContents: txContents) => {
                 overLoads
               );
               if (tx.success == true) {
+                overLoads.nonce! += 1;
                 await approve(token, overLoads);
 
                 sendNotification(buyMessage(token, tx.data));
@@ -179,6 +179,7 @@ const mempoolData = async (txContents: txContents) => {
               console.log(tokensToMonitor.get(token)["buyType"]);
 
               if (tokensToMonitor.get(token)["buyType"] == "c") {
+                overLoads.gasLimit = DEFAULT_GAS_LIMIT;
                 buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
               } else {
                 buyTxHash = await swapExactETHForTokens(
@@ -189,23 +190,22 @@ const mempoolData = async (txContents: txContents) => {
                 );
               }
 
-              if (buyTxHash) {
+              if (buyTxHash && buyTxHash.success == true) {
+                overLoads.nonce! += 1;
+                await approve(token, overLoads);
+
                 sendNotification(buyMessage(token, buyTxHash.data));
               }
             } else {
-              ("\n\n\n Could not populate the overLoads");
+              let message =
+                "We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
+
+              console.log(message);
+              sendNotification(message);
             }
-
-            // REVIEW: This token listing notification to be removed
-
-            // let message = "Token Listing Notification";
-            // message += "\n\n Token:";
-            // m4essage += `https://etherscan.io/token/${token}`;
-
-            // await sendNotification(message);
-          } else {
-            console.log("\n\n =====>  Token was not on our tracking list");
           }
+        } else {
+          console.log("\n\n =====>  Token was not on our tracking list");
         }
       } else if (tokensToMonitor.has(routerAddress)) {
         console.log("\n\n\n\n **********************************************");
@@ -250,6 +250,7 @@ const mempoolData = async (txContents: txContents) => {
 
           if (LIQUIDITY_METHODS.includes(txnMethod)) {
             if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+              overLoads.gasLimit = DEFAULT_GAS_LIMIT;
               buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
             } else {
               buyTxHash = await swapExactETHForTokens(
@@ -261,6 +262,7 @@ const mempoolData = async (txContents: txContents) => {
             }
 
             if (buyTxHash.success == true) {
+              overLoads.nonce! += 1;
               await approve(routerAddress, overLoads);
 
               sendNotification(buyMessage(routerAddress, buyTxHash.data));
@@ -279,6 +281,7 @@ const mempoolData = async (txContents: txContents) => {
 
             if (overLoads && overLoads.gasPrice) {
               overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
+              overLoads.gasLimit = DEFAULT_GAS_LIMIT;
             } else {
               overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
             }
@@ -292,7 +295,7 @@ const mempoolData = async (txContents: txContents) => {
 
             console.log("Overloads ", overLoads);
 
-            if (overLoads && amountIn && amountIn > 0) {
+            if (overLoads && path && amountIn && amountIn > 0) {
               const tx =
                 await swapExactTokensForETHSupportingFeeOnTransferTokens(
                   amountIn,
@@ -302,22 +305,21 @@ const mempoolData = async (txContents: txContents) => {
                 );
 
               if (tx.success == true) {
-                sendNotification(scamMessage(routerAddress, tx.data));
+                sendNotification(scamTxMessage(routerAddress, tx.data));
               }
             } else {
-              ("\n\n\n Could not populate the overLoads");
-              sendNotification("Overloads were empty");
+              let message = "One of the errors below occurred";
+              message +=
+                "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
+              message += "\n\n - We dont hold any of this tokens: ";
+              message += `\n  Token: https://etherscan.io/token/${routerAddress}`;
+              message += `\n  Our Token Balance: ${amountIn}`;
+
+              console.log(message);
+              sendNotification(message);
             }
           }
         }
-
-        // REVIEW: This notification of if a the token contract has been interacted with to be removed
-
-        // let message = "Token Interaction notification";
-        // message += "\n\n Token:";
-        // message += `https://etherscan.io/token/${routerAddress}`;
-
-        // await sendNotification(message);
       }
     }
   } catch (error) {
