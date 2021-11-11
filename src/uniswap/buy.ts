@@ -138,8 +138,12 @@ const swapETHForExactTokens = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     console.log(
-      `\n\n amountOut: ${amountOut}, \n Value: ${value} \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
+      `\n\n amountOut: ${toHex(
+        amountOut
+      )}, \n Value: ${value} \nto: ${WALLET_ADDRESS}, \npath: ${path}, \n OverLoads: ${overLoads}, \n deadline: ${deadline},`
     );
+
+    overLoads.value = value;
 
     const tx = await uniswap.swapETHForExactTokens(
       toHex(amountOut),

@@ -1,22 +1,31 @@
 // TOKENS_TO_MONITOR
 // To add token that the bot will monitor, and also provide the buytype which can either be "C" or "r"
 
+import { ethers } from "ethers";
+
 // c ==> buy using a smart contract
 // r ==> buy udirectly to the uniswapv2 router
 
 const TOKENS_TO_MONITOR = [
-  { token: "0x3301ee63fb29f863f2333bd4466acb46cd8323e6", buyType: "r" },
+  {
+    token: "0xc4f6d012125d71a7a2b12685ab291ba4692ee43c",
+    buyType: "c",
+    buyToken: "t",
+  },
 ];
 
+// Amount of exact tokens to buy
+const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
+
 // Gas limit to use if gasLimit is not specified
-const DEFAULT_GAS_LIMIT = 300000;
+const DEFAULT_GAS_LIMIT = 600000;
 const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
 
 // Additional gas while selling
 const ADDITIONAL_SELL_GAS = 30 * 10 ** 9;
 
 // Set the ethamount to buy
-const ETH_AMOUNT_TO_BUY = 0.000001 * 10 ** 18;
+const ETH_AMOUNT_TO_BUY = 0.05 * 10 ** 18;
 
 // Fixed params used by the bot
 // botParams values are not to be changed
@@ -96,6 +105,7 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 const NO_OF_BUYS = 2;
 
 export {
+  EXACT_TOKEN_AMOUNT_TO_BUY,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
   LIQUIDITY_METHODS,

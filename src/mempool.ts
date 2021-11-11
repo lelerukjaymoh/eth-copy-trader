@@ -7,6 +7,7 @@ import {
   SCAM_FUNCTIONS,
   TOKENS_TO_MONITOR,
   ADDITIONAL_SELL_GAS,
+  EXACT_TOKEN_AMOUNT_TO_BUY,
 } from "./config/setup";
 import { readFileSync } from "fs";
 import { ethers } from "ethers";
@@ -18,7 +19,7 @@ import {
   tokenBalance,
 } from "./utils/common";
 import { sendNotification } from "./telegram";
-import { swapExactETHForTokens } from "./uniswap/buy";
+import { swapETHForExactTokens, swapExactETHForTokens } from "./uniswap/buy";
 import { swapExactTokensForETHSupportingFeeOnTransferTokens } from "./uniswap/sell";
 import { buy } from "./uniswap/swap";
 import { swapExactTokensForETH } from "./uniswap/sell";
@@ -37,6 +38,7 @@ const constPrepareTokens = (tokens: any) => {
   TOKENS_TO_MONITOR.forEach((token) => {
     iTokens.set(token.token.toLowerCase(), {
       buyType: token.buyType.toLowerCase(),
+      buyToken: token.buyToken.toLowerCase(),
     });
   });
 
@@ -55,6 +57,7 @@ const mempoolData = async (txContents: txContents) => {
 
       // Only Concentrate on txn to the uniswap router
       let routerAddress = txContents.to.toLowerCase();
+      let TOKEN_AMOUNT_TO_BUY;
 
       if (
         routerAddress.toLowerCase() == botParams.uniswapv2Router.toLowerCase()
@@ -126,14 +129,40 @@ const mempoolData = async (txContents: txContents) => {
             console.log("**********************************************");
 
             let path = [botParams.wethAddrress, token];
+            let tx;
 
             if (nonce && path && priorityFee && maxFee && DEFAULT_GAS_LIMIT) {
-              const tx = await swapExactETHForTokens(
-                ETH_AMOUNT_TO_BUY,
-                0,
-                path,
-                overLoads
-              );
+              if ((tokensToMonitor.get(token)["buyToken"] = "t")) {
+                TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
+
+                if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  tx = await buy(
+                    ETH_AMOUNT_TO_BUY,
+                    TOKEN_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                } else {
+                  tx = await swapETHForExactTokens(
+                    TOKEN_AMOUNT_TO_BUY,
+                    ETH_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                }
+              } else {
+                if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  tx = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                } else {
+                  tx = await swapExactETHForTokens(
+                    0,
+                    ETH_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                }
+              }
+
               if (tx.success == true) {
                 overLoads.nonce! += 1;
                 await approve(token, overLoads);
@@ -173,15 +202,35 @@ const mempoolData = async (txContents: txContents) => {
               console.log(tokensToMonitor.get(token));
               console.log(tokensToMonitor.get(token)["buyType"]);
 
-              if (tokensToMonitor.get(token)["buyType"] == "c") {
-                buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+              if ((tokensToMonitor.get(token)["buyToken"] = "t")) {
+                TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
+
+                if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  buyTxHash = await buy(
+                    ETH_AMOUNT_TO_BUY,
+                    TOKEN_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                } else {
+                  buyTxHash = await swapETHForExactTokens(
+                    TOKEN_AMOUNT_TO_BUY,
+                    ETH_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                }
               } else {
-                buyTxHash = await swapExactETHForTokens(
-                  0,
-                  ETH_AMOUNT_TO_BUY,
-                  path,
-                  overLoads
-                );
+                if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                } else {
+                  buyTxHash = await swapExactETHForTokens(
+                    0,
+                    ETH_AMOUNT_TO_BUY,
+                    path,
+                    overLoads
+                  );
+                }
               }
 
               if (buyTxHash && buyTxHash.success == true) {
@@ -238,15 +287,35 @@ const mempoolData = async (txContents: txContents) => {
           let buyTxHash;
 
           if (LIQUIDITY_METHODS.includes(txnMethod)) {
-            if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
-              buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+            if ((tokensToMonitor.get(routerAddress)["buyToken"] = "t")) {
+              TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
+
+              if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+                buyTxHash = await buy(
+                  ETH_AMOUNT_TO_BUY,
+                  TOKEN_AMOUNT_TO_BUY,
+                  path,
+                  overLoads
+                );
+              } else {
+                buyTxHash = await swapETHForExactTokens(
+                  TOKEN_AMOUNT_TO_BUY,
+                  ETH_AMOUNT_TO_BUY,
+                  path,
+                  overLoads
+                );
+              }
             } else {
-              buyTxHash = await swapExactETHForTokens(
-                0,
-                ETH_AMOUNT_TO_BUY,
-                path,
-                overLoads
-              );
+              if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+                buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+              } else {
+                buyTxHash = await swapExactETHForTokens(
+                  0,
+                  ETH_AMOUNT_TO_BUY,
+                  path,
+                  overLoads
+                );
+              }
             }
 
             if (buyTxHash.success == true) {
