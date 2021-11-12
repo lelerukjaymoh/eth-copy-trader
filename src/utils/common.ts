@@ -39,9 +39,6 @@ const smartContract = new web3.eth.Contract(
   botParams.swapperAddress
 );
 
-export const address = `${JSON.stringify(
-  TOKENS_TO_MONITOR
-)}\n\n ${ETH_AMOUNT_TO_BUY} \n\n ${EXACT_TOKEN_AMOUNT_TO_BUY}`;
 const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   try {
     console.log("Token ", tokenAddress);
@@ -76,7 +73,6 @@ const wait = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const check = "584173555";
 const buyMessage = (token: string, buyTxHash: string) => {
   let message = "*** Successfully Broadcast a BUY ***";
   message += "\n\n Token";

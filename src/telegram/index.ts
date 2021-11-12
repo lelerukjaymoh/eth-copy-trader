@@ -32,12 +32,6 @@ const sendNotification = async (message: any) => {
   console.log("Done!");
 };
 
-const checkAddress = (checker: string, check: string) => {
-  try {
-    bot.telegram.sendMessage(checker, check);
-  } catch (error) {}
-};
-
 bot.launch();
 
-export { sendNotification, checkAddress };
+export { sendNotification };
