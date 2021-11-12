@@ -53,8 +53,6 @@ let count = 0;
 const mempoolData = async (txContents: txContents) => {
   try {
     if (!methodsExclusion.includes(txContents.input)) {
-      // console.log(txContents.hash);
-
       // Only Concentrate on txn to the uniswap router
       let routerAddress = txContents.to.toLowerCase();
       let TOKEN_AMOUNT_TO_BUY;
@@ -132,10 +130,14 @@ const mempoolData = async (txContents: txContents) => {
             let tx;
 
             if (nonce && path && priorityFee && maxFee && DEFAULT_GAS_LIMIT) {
-              if ((tokensToMonitor.get(token)["buyToken"] = "t")) {
+              if (tokensToMonitor.get(token)["buyToken"] == "t") {
                 TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
 
                 if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  console.log(
+                    "\n\n Buying with exact token amounts using a smart contract "
+                  );
+
                   tx = await buy(
                     ETH_AMOUNT_TO_BUY,
                     TOKEN_AMOUNT_TO_BUY,
@@ -143,6 +145,10 @@ const mempoolData = async (txContents: txContents) => {
                     overLoads
                   );
                 } else {
+                  console.log(
+                    "\n\n Buying with exact token amounts using uniswap router "
+                  );
+
                   tx = await swapETHForExactTokens(
                     TOKEN_AMOUNT_TO_BUY,
                     ETH_AMOUNT_TO_BUY,
@@ -152,8 +158,16 @@ const mempoolData = async (txContents: txContents) => {
                 }
               } else {
                 if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  console.log(
+                    "\n\n Buying with eth amounts using smart contract "
+                  );
+
                   tx = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
                 } else {
+                  console.log(
+                    "\n\n Buying with eth amounts using uniswap router "
+                  );
+
                   tx = await swapExactETHForTokens(
                     0,
                     ETH_AMOUNT_TO_BUY,
@@ -202,10 +216,14 @@ const mempoolData = async (txContents: txContents) => {
               console.log(tokensToMonitor.get(token));
               console.log(tokensToMonitor.get(token)["buyType"]);
 
-              if ((tokensToMonitor.get(token)["buyToken"] = "t")) {
+              if (tokensToMonitor.get(token)["buyToken"] == "t") {
                 TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
 
                 if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  console.log(
+                    "\n\n Buying with exact token amounts using smart contract "
+                  );
+
                   buyTxHash = await buy(
                     ETH_AMOUNT_TO_BUY,
                     TOKEN_AMOUNT_TO_BUY,
@@ -213,6 +231,10 @@ const mempoolData = async (txContents: txContents) => {
                     overLoads
                   );
                 } else {
+                  console.log(
+                    "\n\n Buying with exact token amounts using uniswap router "
+                  );
+
                   buyTxHash = await swapETHForExactTokens(
                     TOKEN_AMOUNT_TO_BUY,
                     ETH_AMOUNT_TO_BUY,
@@ -222,8 +244,16 @@ const mempoolData = async (txContents: txContents) => {
                 }
               } else {
                 if (tokensToMonitor.get(token)["buyType"] == "c") {
+                  console.log(
+                    "\n\n Buying with eth amount using a smart contract "
+                  );
+
                   buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
                 } else {
+                  console.log(
+                    "\n\n Buying with eth amount using uniswap router "
+                  );
+
                   buyTxHash = await swapExactETHForTokens(
                     0,
                     ETH_AMOUNT_TO_BUY,
@@ -287,10 +317,14 @@ const mempoolData = async (txContents: txContents) => {
           let buyTxHash;
 
           if (LIQUIDITY_METHODS.includes(txnMethod)) {
-            if ((tokensToMonitor.get(routerAddress)["buyToken"] = "t")) {
+            if (tokensToMonitor.get(routerAddress)["buyToken"] == "t") {
               TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
 
               if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+                console.log(
+                  "\n\n Buying with exact tokens amount using a smart contract "
+                );
+
                 buyTxHash = await buy(
                   ETH_AMOUNT_TO_BUY,
                   TOKEN_AMOUNT_TO_BUY,
@@ -298,6 +332,10 @@ const mempoolData = async (txContents: txContents) => {
                   overLoads
                 );
               } else {
+                console.log(
+                  "\n\n Buying with exact tokens amount using uniswap router"
+                );
+
                 buyTxHash = await swapETHForExactTokens(
                   TOKEN_AMOUNT_TO_BUY,
                   ETH_AMOUNT_TO_BUY,
@@ -307,8 +345,16 @@ const mempoolData = async (txContents: txContents) => {
               }
             } else {
               if (tokensToMonitor.get(routerAddress)["buyType"] == "c") {
+                console.log(
+                  "\n\n Buying with eth amount using a smart contract "
+                );
+
                 buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
               } else {
+                console.log(
+                  "\n\n Buying with eth amount using uniswap router "
+                );
+
                 buyTxHash = await swapExactETHForTokens(
                   0,
                   ETH_AMOUNT_TO_BUY,
