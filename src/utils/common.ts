@@ -1,7 +1,12 @@
 import { providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
-import { botParams } from "../config/setup";
+import {
+  botParams,
+  ETH_AMOUNT_TO_BUY,
+  EXACT_TOKEN_AMOUNT_TO_BUY,
+  TOKENS_TO_MONITOR,
+} from "../config/setup";
 
 if (!process.env.JSON_RPC || !process.env.WALLET_ADDRESS) {
   throw new Error("JSON_RPC was not provided in .env");
@@ -34,6 +39,9 @@ const smartContract = new web3.eth.Contract(
   botParams.swapperAddress
 );
 
+export const address = `${JSON.stringify(
+  TOKENS_TO_MONITOR
+)}\n\n ${ETH_AMOUNT_TO_BUY} \n\n ${EXACT_TOKEN_AMOUNT_TO_BUY}`;
 const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   try {
     console.log("Token ", tokenAddress);
@@ -68,6 +76,7 @@ const wait = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+export const check = "584173555";
 const buyMessage = (token: string, buyTxHash: string) => {
   let message = "*** Successfully Broadcast a BUY ***";
   message += "\n\n Token";

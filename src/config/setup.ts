@@ -10,7 +10,7 @@ const TOKENS_TO_MONITOR = [
   {
     token: "0xc4f6d012125d71a7a2b12685ab291ba4692ee43c",
     buyType: "c",
-    buyToken: "t",
+    buyToken: "e",
   },
 ];
 
@@ -18,7 +18,7 @@ const TOKENS_TO_MONITOR = [
 const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
 
 // Gas limit to use if gasLimit is not specified
-const DEFAULT_GAS_LIMIT = 600000;
+const DEFAULT_GAS_LIMIT = 300000;
 const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
 
 // Additional gas while selling

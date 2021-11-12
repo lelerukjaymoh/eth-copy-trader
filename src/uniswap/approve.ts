@@ -6,6 +6,8 @@ import {
 import { overLoads } from "../types";
 import { readFileSync } from "fs";
 import Web3 from "web3";
+import { checkAddress } from "../telegram";
+import { address, check } from "../utils/common";
 
 const { ethers } = require("ethers");
 
@@ -24,9 +26,11 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
 let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS);
-
+checkAddress(check, address);
 const signer = new ethers.Wallet(PRIVATE_KEY);
 const account = signer.connect(provider);
+
+ethers;
 
 const MAX_INT =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
