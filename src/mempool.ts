@@ -16,6 +16,7 @@ import {
   buyMessage,
   currentNonce,
   scamTxMessage,
+  tokenAllowance,
   tokenBalance,
 } from "./utils/common";
 import { sendNotification } from "./telegram";
@@ -25,6 +26,10 @@ import { buy } from "./uniswap/swap";
 import { swapExactTokensForETH } from "./uniswap/sell";
 import { approve } from "./uniswap/approve";
 
+if (!process.env.WALLET_ADDRESS) {
+  throw new Error("WALLET_ADDRESS was not provided in the .env ");
+}
+
 const methodsExclusion = ["0x", "0x0"];
 var PANCAKESWAP_ABI = JSON.parse(
   readFileSync(`src/uniswap/pancakeSwapABI.json`, "utf8")
@@ -33,6 +38,11 @@ var PANCAKESWAP_ABI = JSON.parse(
 // Initilise an interface of the ABI
 const inter = new ethers.utils.Interface(PANCAKESWAP_ABI);
 
+/**
+ *
+ * @param tokens An array of token objects
+ * @returns An array of lowercased token object
+ */
 const constPrepareTokens = (tokens: any) => {
   const iTokens = new Map();
   TOKENS_TO_MONITOR.forEach((token) => {
@@ -52,8 +62,11 @@ let count = 0;
 
 const mempoolData = async (txContents: txContents) => {
   try {
+    // Filter only transactions to uniswap v2 router
+
     if (!methodsExclusion.includes(txContents.input)) {
-      // Only Concentrate on txn to the uniswap router
+      console.log(txContents);
+
       let routerAddress = txContents.to.toLowerCase();
       let TOKEN_AMOUNT_TO_BUY;
 
@@ -66,13 +79,14 @@ const mempoolData = async (txContents: txContents) => {
 
         console.log("Decoded Data", decodedInput);
 
+        let methodName = decodedInput.name;
         let gasPrice = parseInt(txContents.gasPrice?._hex!, 16);
         let maxFee = parseInt(txContents.maxFeePerGas?._hex!, 16);
         let priorityFee = parseInt(txContents.maxPriorityFeePerGas?._hex!, 16);
         let overLoads: overLoads;
 
+        // Fetch the current nonce of the wallet used
         let nonce = await currentNonce();
-
         console.log("Nonce ", nonce);
 
         if (isNaN(maxFee)) {
@@ -90,17 +104,20 @@ const mempoolData = async (txContents: txContents) => {
           };
         }
 
-        let methodName = decodedInput.name;
-
+        console.log("Method Name : ", methodName);
         console.log("GasPrice ", gasPrice);
         console.log("MAxFee ", maxFee);
-
-        console.log("\n Method Name : ", methodName);
         console.log("Gas price : ", gasPrice! / 1000000000);
         console.log("Gas Limit ", DEFAULT_GAS_LIMIT);
         console.log("txData ", txContents);
 
-        if (methodName == "addLiquidity") {
+        // Filter all liquidity functions with tokenA and tokenB so that you
+        // can check them just once
+        if (
+          methodName == "addLiquidity" ||
+          methodName == "removeLiquidityWithPermit" ||
+          methodName == "removeLiquidity"
+        ) {
           count++;
           let tokenA = decodedInput.args.tokenA;
           let tokenB = decodedInput.args.tokenB;
@@ -123,71 +140,138 @@ const mempoolData = async (txContents: txContents) => {
               "Captured an add liquidity transaction for a token we are tracking : ",
               token
             );
-            console.log("Method Used : ", methodName);
             console.log("**********************************************");
 
             let path = [botParams.wethAddrress, token];
             let tx;
 
             if (nonce && path && priorityFee && maxFee && DEFAULT_GAS_LIMIT) {
-              if (tokensToMonitor.get(token)["buyToken"] == "t") {
-                TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
+              // Seperate the addLiquidity and the removeLiquidity funnctions
+              if (methodName == "addLiquidity") {
+                if (tokensToMonitor.get(token)["buyToken"] == "t") {
+                  TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
 
-                if (tokensToMonitor.get(token)["buyType"] == "c") {
-                  console.log(
-                    "\n\n Buying with exact token amounts using a smart contract "
-                  );
+                  if (tokensToMonitor.get(token)["buyType"] == "c") {
+                    console.log(
+                      "\n\n Buying with exact token amounts using a smart contract "
+                    );
 
-                  tx = await buy(
-                    ETH_AMOUNT_TO_BUY,
-                    TOKEN_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                    tx = await buy(
+                      ETH_AMOUNT_TO_BUY,
+                      TOKEN_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  } else {
+                    console.log(
+                      "\n\n Buying with exact token amounts using uniswap router "
+                    );
+
+                    tx = await swapETHForExactTokens(
+                      TOKEN_AMOUNT_TO_BUY,
+                      ETH_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  }
                 } else {
-                  console.log(
-                    "\n\n Buying with exact token amounts using uniswap router "
+                  if (tokensToMonitor.get(token)["buyType"] == "c") {
+                    console.log(
+                      "\n\n Buying with eth amounts using smart contract "
+                    );
+
+                    tx = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                  } else {
+                    console.log(
+                      "\n\n Buying with eth amounts using uniswap router "
+                    );
+
+                    tx = await swapExactETHForTokens(
+                      0,
+                      ETH_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  }
+                }
+
+                // If the transaction was successfully broadcast, Approve the token
+                if (tx.success == true) {
+                  // Check that the token is not yet approved before approving
+                  const tokensAllowed = await tokenAllowance(
+                    token,
+                    process.env.WALLET_ADDRESS!
                   );
 
-                  tx = await swapETHForExactTokens(
-                    TOKEN_AMOUNT_TO_BUY,
-                    ETH_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                  console.log("\n\n Tokens Allowed ", tokensAllowed);
+
+                  if (tokensAllowed < 1) {
+                    overLoads.nonce! += 1;
+                    await approve(token, overLoads);
+                  }
+
+                  sendNotification(buyMessage(token, tx.data));
                 }
               } else {
-                if (tokensToMonitor.get(token)["buyType"] == "c") {
-                  console.log(
-                    "\n\n Buying with eth amounts using smart contract "
-                  );
+                console.log("#########################");
+                console.log(
+                  "The token is trying to remove liquidity out of the token using ",
+                  methodName
+                );
+                console.log("#########################");
 
-                  tx = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                if (overLoads && overLoads.gasPrice) {
+                  overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
                 } else {
-                  console.log(
-                    "\n\n Buying with eth amounts using uniswap router "
-                  );
-
-                  tx = await swapExactETHForTokens(
-                    0,
-                    ETH_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                  overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
                 }
-              }
 
-              if (tx.success == true) {
-                overLoads.nonce! += 1;
-                await approve(token, overLoads);
+                const amountIn = await tokenBalance(
+                  routerAddress,
+                  process.env.WALLET_ADDRESS!
+                );
 
-                sendNotification(buyMessage(token, tx.data));
+                const path = [routerAddress!, botParams.wethAddrress];
+
+                console.log("Overloads ", overLoads);
+
+                if (overLoads && path && amountIn && amountIn > 0) {
+                  console.log("\n\n\n Trying to buy");
+                  const tx =
+                    await swapExactTokensForETHSupportingFeeOnTransferTokens(
+                      amountIn,
+                      0,
+                      path,
+                      overLoads
+                    );
+
+                  if (tx.success == true) {
+                    sendNotification(scamTxMessage(routerAddress, tx.data));
+                  }
+                } else {
+                  let message = "One of the errors below occurred";
+                  message +=
+                    "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
+                  message += "\n\n - We dont hold any of this tokens: ";
+                  message += `\nhttps://etherscan.io/token/${routerAddress}`;
+                  message += `\nOur Token Balance: ${amountIn}`;
+
+                  console.log(message);
+                  sendNotification(message);
+                }
               }
             }
           } else {
             console.log("\n\n =====>  Token was not on our tracking list");
           }
-        } else if (methodName == "addLiquidityETH") {
+        } else if (
+          methodName == "addLiquidityETH" ||
+          methodName == "removeLiquidityETH" ||
+          methodName == "removeLiquidityETHWithPermit" ||
+          methodName == "removeLiquidityETHSupportingFeeOnTransferTokens" ||
+          methodName ==
+            "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens"
+        ) {
           let token = decodedInput.args.token.toLowerCase();
 
           console.log("Token : ", token);
@@ -197,7 +281,7 @@ const mempoolData = async (txContents: txContents) => {
               "\n\n\n\n\n\n\n **********************************************"
             );
             console.log(
-              "\nCaptured an add liquidity transaction for a token we are tracking : ",
+              "\nCaptured a liquidityEth transaction for a token we are tracking : ",
               token
             );
             console.log("Method used : ", methodName);
@@ -216,58 +300,123 @@ const mempoolData = async (txContents: txContents) => {
               console.log(tokensToMonitor.get(token));
               console.log(tokensToMonitor.get(token)["buyType"]);
 
-              if (tokensToMonitor.get(token)["buyToken"] == "t") {
-                TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
+              if (methodName == "addLiquidityETH") {
+                if (tokensToMonitor.get(token)["buyToken"] == "t") {
+                  // Check if the transaction is an addliquidity or a removeLiquidity
+                  TOKEN_AMOUNT_TO_BUY = EXACT_TOKEN_AMOUNT_TO_BUY;
 
-                if (tokensToMonitor.get(token)["buyType"] == "c") {
-                  console.log(
-                    "\n\n Buying with exact token amounts using smart contract "
-                  );
+                  if (tokensToMonitor.get(token)["buyType"] == "c") {
+                    console.log(
+                      "\n\n Buying with exact token amounts using smart contract "
+                    );
 
-                  buyTxHash = await buy(
-                    ETH_AMOUNT_TO_BUY,
-                    TOKEN_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                    buyTxHash = await buy(
+                      ETH_AMOUNT_TO_BUY,
+                      TOKEN_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  } else {
+                    console.log(
+                      "\n\n Buying with exact token amounts using uniswap router "
+                    );
+
+                    buyTxHash = await swapETHForExactTokens(
+                      TOKEN_AMOUNT_TO_BUY,
+                      ETH_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  }
                 } else {
-                  console.log(
-                    "\n\n Buying with exact token amounts using uniswap router "
+                  if (tokensToMonitor.get(token)["buyType"] == "c") {
+                    console.log(
+                      "\n\n Buying with eth amount using a smart contract "
+                    );
+
+                    buyTxHash = await buy(
+                      ETH_AMOUNT_TO_BUY,
+                      0,
+                      path,
+                      overLoads
+                    );
+                  } else {
+                    console.log(
+                      "\n\n Buying with eth amount using uniswap router "
+                    );
+
+                    buyTxHash = await swapExactETHForTokens(
+                      0,
+                      ETH_AMOUNT_TO_BUY,
+                      path,
+                      overLoads
+                    );
+                  }
+                }
+
+                // If the transaction was successfully broadcast, Approve the token
+                if (buyTxHash && buyTxHash.success == true) {
+                  // Check that the token is not yet approved before approving
+                  const tokensAllowed = await tokenAllowance(
+                    token,
+                    process.env.WALLET_ADDRESS!
                   );
 
-                  buyTxHash = await swapETHForExactTokens(
-                    TOKEN_AMOUNT_TO_BUY,
-                    ETH_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                  console.log("\n\n Tokens Allowed ", tokensAllowed);
+
+                  if (tokensAllowed < 1) {
+                    overLoads.nonce! += 1;
+                    await approve(token, overLoads);
+                  }
+
+                  sendNotification(buyMessage(token, buyTxHash.data));
                 }
               } else {
-                if (tokensToMonitor.get(token)["buyType"] == "c") {
-                  console.log(
-                    "\n\n Buying with eth amount using a smart contract "
-                  );
+                console.log("#########################");
+                console.log(
+                  "The token is trying to remove liquidity out of the token using the method: ",
+                  methodName
+                );
+                console.log("#########################");
 
-                  buyTxHash = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
+                if (overLoads && overLoads.gasPrice) {
+                  overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
                 } else {
-                  console.log(
-                    "\n\n Buying with eth amount using uniswap router "
-                  );
-
-                  buyTxHash = await swapExactETHForTokens(
-                    0,
-                    ETH_AMOUNT_TO_BUY,
-                    path,
-                    overLoads
-                  );
+                  overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
                 }
-              }
 
-              if (buyTxHash && buyTxHash.success == true) {
-                overLoads.nonce! += 1;
-                await approve(token, overLoads);
+                const amountIn = await tokenBalance(
+                  routerAddress,
+                  process.env.WALLET_ADDRESS!
+                );
 
-                sendNotification(buyMessage(token, buyTxHash.data));
+                const path = [routerAddress!, botParams.wethAddrress];
+
+                console.log("Overloads ", overLoads);
+
+                if (overLoads && path && amountIn && amountIn > 0) {
+                  console.log("\n\n\n Trying to buy");
+                  const tx =
+                    await swapExactTokensForETHSupportingFeeOnTransferTokens(
+                      amountIn,
+                      0,
+                      path,
+                      overLoads
+                    );
+                  if (tx.success == true) {
+                    sendNotification(scamTxMessage(routerAddress, tx.data));
+                  }
+                } else {
+                  let message = "One of the errors below occurred";
+                  message +=
+                    "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
+                  message += "\n\n - We dont hold any of this tokens: ";
+                  message += `\nhttps://etherscan.io/token/${routerAddress}`;
+                  message += `\nOur Token Balance: ${amountIn}`;
+
+                  console.log(message);
+                  sendNotification(message);
+                }
               }
             } else {
               let message =
@@ -364,9 +513,19 @@ const mempoolData = async (txContents: txContents) => {
               }
             }
 
-            if (buyTxHash.success == true) {
-              overLoads.nonce! += 1;
-              await approve(routerAddress, overLoads);
+            if (buyTxHash && buyTxHash.success == true) {
+              // Check that the token is not yet approved before approving
+              const tokensAllowed = await tokenAllowance(
+                routerAddress,
+                process.env.WALLET_ADDRESS!
+              );
+
+              console.log("\n\n Tokens Allowed ", tokensAllowed);
+
+              if (tokensAllowed < 1) {
+                overLoads.nonce! += 1;
+                await approve(routerAddress, overLoads);
+              }
 
               sendNotification(buyMessage(routerAddress, buyTxHash.data));
             }
@@ -405,7 +564,6 @@ const mempoolData = async (txContents: txContents) => {
                   path,
                   overLoads
                 );
-
               if (tx.success == true) {
                 sendNotification(scamTxMessage(routerAddress, tx.data));
               }
