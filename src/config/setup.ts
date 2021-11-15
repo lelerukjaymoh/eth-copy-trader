@@ -8,24 +8,30 @@ import { ethers } from "ethers";
 
 const TOKENS_TO_MONITOR = [
   {
-    token: "0xc4f6d012125d71a7a2b12685ab291ba4692ee43c",
-    buyType: "c",
+    token: "0x64b96aa00485a04fb536326f3cb1829b9da69b34",
+    buyType: "r",
     buyToken: "e",
   },
 ];
+
+// PERCENTAGE_SELL_ALLOWANCE on sells when using swapExactTokensForETHSupportingFeeOnTransferTokens
+const PERCENTAGE_SELL_ALLOWANCE = 0.88;
 
 // Amount of exact tokens to buy
 const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
 
 // Gas limit to use if gasLimit is not specified
-const DEFAULT_GAS_LIMIT = 300000;
-const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
+const DEFAULT_GAS_LIMIT = 500000;
+const DEFAULT_GAS_PRICE = 150 * 10 ** 9;
 
 // Additional gas while selling
-const ADDITIONAL_SELL_GAS = 30 * 10 ** 9;
+const ADDITIONAL_SELL_GAS = 120 * 10 ** 9;
 
 // Set the ethamount to buy
-const ETH_AMOUNT_TO_BUY = 0.05 * 10 ** 18;
+const ETH_AMOUNT_TO_BUY = 0.0000001 * 10 ** 18;
+
+// No of buys to make with the smart contract
+const NO_OF_BUYS = 1;
 
 // Fixed params used by the bot
 // botParams values are not to be changed
@@ -102,9 +108,8 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
   METHODS_TO_MONITOR.push(functionId);
 });
 
-const NO_OF_BUYS = 2;
-
 export {
+  PERCENTAGE_SELL_ALLOWANCE,
   EXACT_TOKEN_AMOUNT_TO_BUY,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,

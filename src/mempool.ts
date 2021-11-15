@@ -8,6 +8,7 @@ import {
   TOKENS_TO_MONITOR,
   ADDITIONAL_SELL_GAS,
   EXACT_TOKEN_AMOUNT_TO_BUY,
+  PERCENTAGE_SELL_ALLOWANCE,
 } from "./config/setup";
 import { readFileSync } from "fs";
 import { ethers } from "ethers";
@@ -197,18 +198,9 @@ const mempoolData = async (txContents: txContents) => {
 
                 // If the transaction was successfully broadcast, Approve the token
                 if (tx.success == true) {
-                  // Check that the token is not yet approved before approving
-                  const tokensAllowed = await tokenAllowance(
-                    token,
-                    process.env.WALLET_ADDRESS!
-                  );
-
-                  console.log("\n\n Tokens Allowed ", tokensAllowed);
-
-                  if (tokensAllowed < 1) {
-                    overLoads.nonce! += 1;
-                    await approve(token, overLoads);
-                  }
+                  overLoads.nonce! += 1;
+                  delete overLoads["value"];
+                  await approve(token, overLoads);
 
                   sendNotification(buyMessage(token, tx.data));
                 }
@@ -221,17 +213,17 @@ const mempoolData = async (txContents: txContents) => {
                 console.log("#########################");
 
                 if (overLoads && overLoads.gasPrice) {
-                  overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
+                  overLoads.gasPrice! += ADDITIONAL_SELL_GAS;
                 } else {
-                  overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
+                  overLoads.maxPriorityFeePerGas! += ADDITIONAL_SELL_GAS;
                 }
 
                 const amountIn = await tokenBalance(
-                  routerAddress,
+                  token,
                   process.env.WALLET_ADDRESS!
                 );
 
-                const path = [routerAddress!, botParams.wethAddrress];
+                const path = [token, botParams.wethAddrress];
 
                 console.log("Overloads ", overLoads);
 
@@ -239,7 +231,7 @@ const mempoolData = async (txContents: txContents) => {
                   console.log("\n\n\n Trying to buy");
                   const tx =
                     await swapExactTokensForETHSupportingFeeOnTransferTokens(
-                      amountIn,
+                      amountIn * PERCENTAGE_SELL_ALLOWANCE,
                       0,
                       path,
                       overLoads
@@ -356,18 +348,10 @@ const mempoolData = async (txContents: txContents) => {
 
                 // If the transaction was successfully broadcast, Approve the token
                 if (buyTxHash && buyTxHash.success == true) {
-                  // Check that the token is not yet approved before approving
-                  const tokensAllowed = await tokenAllowance(
-                    token,
-                    process.env.WALLET_ADDRESS!
-                  );
+                  overLoads.nonce! += 1;
+                  delete overLoads["value"];
 
-                  console.log("\n\n Tokens Allowed ", tokensAllowed);
-
-                  if (tokensAllowed < 1) {
-                    overLoads.nonce! += 1;
-                    await approve(token, overLoads);
-                  }
+                  await approve(token, overLoads);
 
                   sendNotification(buyMessage(token, buyTxHash.data));
                 }
@@ -380,17 +364,17 @@ const mempoolData = async (txContents: txContents) => {
                 console.log("#########################");
 
                 if (overLoads && overLoads.gasPrice) {
-                  overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
+                  overLoads.gasPrice! += ADDITIONAL_SELL_GAS;
                 } else {
-                  overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
+                  overLoads.maxPriorityFeePerGas! += ADDITIONAL_SELL_GAS;
                 }
 
                 const amountIn = await tokenBalance(
-                  routerAddress,
+                  token,
                   process.env.WALLET_ADDRESS!
                 );
 
-                const path = [routerAddress!, botParams.wethAddrress];
+                const path = [token, botParams.wethAddrress];
 
                 console.log("Overloads ", overLoads);
 
@@ -398,7 +382,7 @@ const mempoolData = async (txContents: txContents) => {
                   console.log("\n\n\n Trying to buy");
                   const tx =
                     await swapExactTokensForETHSupportingFeeOnTransferTokens(
-                      amountIn,
+                      amountIn * PERCENTAGE_SELL_ALLOWANCE,
                       0,
                       path,
                       overLoads
@@ -514,18 +498,10 @@ const mempoolData = async (txContents: txContents) => {
             }
 
             if (buyTxHash && buyTxHash.success == true) {
-              // Check that the token is not yet approved before approving
-              const tokensAllowed = await tokenAllowance(
-                routerAddress,
-                process.env.WALLET_ADDRESS!
-              );
+              overLoads.nonce! += 1;
+              delete overLoads["value"];
 
-              console.log("\n\n Tokens Allowed ", tokensAllowed);
-
-              if (tokensAllowed < 1) {
-                overLoads.nonce! += 1;
-                await approve(routerAddress, overLoads);
-              }
+              await approve(routerAddress, overLoads);
 
               sendNotification(buyMessage(routerAddress, buyTxHash.data));
             }
@@ -542,9 +518,9 @@ const mempoolData = async (txContents: txContents) => {
             console.log("Trying to get out of the trade");
 
             if (overLoads && overLoads.gasPrice) {
-              overLoads.gasPrice! + ADDITIONAL_SELL_GAS;
+              overLoads.gasPrice! += ADDITIONAL_SELL_GAS;
             } else {
-              overLoads.maxPriorityFeePerGas! + ADDITIONAL_SELL_GAS;
+              overLoads.maxPriorityFeePerGas! += ADDITIONAL_SELL_GAS;
             }
 
             const amountIn = await tokenBalance(
@@ -559,7 +535,7 @@ const mempoolData = async (txContents: txContents) => {
             if (overLoads && path && amountIn && amountIn > 0) {
               const tx =
                 await swapExactTokensForETHSupportingFeeOnTransferTokens(
-                  amountIn,
+                  amountIn * PERCENTAGE_SELL_ALLOWANCE,
                   0,
                   path,
                   overLoads

@@ -56,7 +56,7 @@ const tokenBalance = async (tokenAddress: string, walletAddress: string) => {
     const tokenContract = new web3.eth.Contract(uniswapABI, tokenAddress);
     return await tokenContract.methods.balanceOf(walletAddress).call();
   } catch (error) {
-    console.log("Error getting token balance");
+    console.log("Error getting token balance", error);
   }
 };
 
