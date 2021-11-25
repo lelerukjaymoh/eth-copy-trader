@@ -24,7 +24,7 @@ module.exports = {
       ],
     },
     rinkeby: {
-      url: process.env.RINKEBY_JSON_RPC,
+      url: process.env.JSON_RPC,
       chainId: 4,
       gasPrice: 5 * 10 ** 9,
       accounts: [
