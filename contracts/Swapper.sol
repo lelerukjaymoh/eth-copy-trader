@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 
+/**
+ * @dev Built at ngeni.io by jay@ngeni.io
+ */
+
 pragma solidity ^0.8.9;
 
 library SafeMath {
@@ -8,7 +12,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryAdd(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             uint256 c = a + b;
             if (c < a) return (false, 0);
@@ -21,7 +29,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function trySub(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b > a) return (false, 0);
             return (true, a - b);
@@ -33,7 +45,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMul(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
             // benefit is lost if 'b' is also tested.
@@ -50,7 +66,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryDiv(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a / b);
@@ -62,7 +82,11 @@ library SafeMath {
      *
      * _Available since v3.4._
      */
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
+    function tryMod(uint256 a, uint256 b)
+        internal
+        pure
+        returns (bool, uint256)
+    {
         unchecked {
             if (b == 0) return (false, 0);
             return (true, a % b);
@@ -647,7 +671,7 @@ abstract contract Ownable is Context {
 // Contract to make buys and sells
 contract Swapper is Ownable {
     using SafeMath for uint256;
-    
+
     function buy(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -657,22 +681,48 @@ contract Swapper is Ownable {
         IUniswapV2Router02 uniswapRouterAddress,
         uint256 noOfBuys
     ) external returns (bool) {
-        for (uint i=0; i < noOfBuys; i++) {
-        uniswapRouterAddress.swapExactTokensForTokens(
-            amountIn,
-            amountOutMin,
-            path,
-            address(this),
-            deadline
+        for (uint256 i = 0; i < noOfBuys; i++) {
+            uniswapRouterAddress.swapExactTokensForTokens(
+                amountIn,
+                amountOutMin,
+                path,
+                address(this),
+                deadline
+            );
+        }
+
+        uint256 balance = IERC20(path[path.length - 1]).balanceOf(
+            address(this)
         );
+
+        for (uint256 i = 0; i < recipients.length; i++) {
+            IERC20(path[path.length - 1]).transfer(
+                recipients[i],
+                balance.div(recipients.length)
+            );
         }
-        
-        uint balance = IERC20(path[path.length - 1]).balanceOf(address(this));
-        
-        for (uint i = 0; i < recipients.length; i++) {
-            IERC20(path[path.length - 1]).transfer(recipients[i], balance.div(recipients.length));
+
+        return true;
+    }
+
+    function buySingle(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] memory path,
+        uint256 deadline,
+        IUniswapV2Router02 uniswapRouterAddress,
+        uint256 noOfBuys
+    ) external returns (bool) {
+        for (uint256 i = 0; i < noOfBuys; i++) {
+            uniswapRouterAddress.swapExactTokensForTokens(
+                amountIn,
+                amountOutMin,
+                path,
+                address(this),
+                deadline
+            );
         }
-        
+
         return true;
     }
 

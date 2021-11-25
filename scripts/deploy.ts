@@ -2,8 +2,8 @@ import { ethers } from "hardhat";
 
 const main = async () => {
   const [deployer] = await ethers.getSigners();
-  const swapper = await ethers.getContractFactory("Swapper");
-  const deployedSwapper = await swapper.deploy();
+  const factory = await ethers.getContractFactory("Swapper");
+  const deployedSwapper = await factory.deploy();
 
   let data = {
     address: deployedSwapper.address,

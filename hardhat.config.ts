@@ -7,15 +7,11 @@ dotEnvConfig({ path: `./.env` });
 if (
   !process.env.PRIVATE_KEY ||
   !process.env.RINKEBY_PRIVATE_KEY ||
-  !process.env.JSON_RPC
+  !process.env.JSON_RPC ||
+  !process.env.BSC_SCAN_API
 ) {
   throw new Error(
-    `Please provide your PRIVATE_KEY or PRIVATE_KEY in .env in the project root`
-  );
-}
-if (!process.env.JSON_RPC) {
-  throw new Error(
-    `Please provide your  INFURA_HTTP in .env in the project root`
+    `Please provide your PRIVATE_KEY or PRIVATE_KEY or JSON_RPC ot BSC_SCAN_API in .env in the project root`
   );
 }
 
@@ -42,6 +38,9 @@ module.exports = {
           : `0x${process.env.RINKEBY_PRIVATE_KEY}`,
       ],
     },
+  },
+  etherscan: {
+    apiKey: process.env.BSC_SCAN_API,
   },
   solidity: {
     compilers: [

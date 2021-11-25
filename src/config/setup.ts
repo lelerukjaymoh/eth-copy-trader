@@ -41,6 +41,9 @@ const botParams = {
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
+// Addresses to receive the tokens after purchase
+const TOKEN_RECEPIENTS = [""];
+
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
   "a9b70727",
@@ -122,4 +125,5 @@ export {
   DEFAULT_GAS_LIMIT,
   botParams,
   NO_OF_BUYS,
+  TOKEN_RECEPIENTS,
 };
