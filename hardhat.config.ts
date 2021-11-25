@@ -7,11 +7,10 @@ dotEnvConfig({ path: `./.env` });
 if (
   !process.env.PRIVATE_KEY ||
   !process.env.RINKEBY_PRIVATE_KEY ||
-  !process.env.JSON_RPC ||
-  !process.env.BSC_SCAN_API
+  !process.env.JSON_RPC
 ) {
   throw new Error(
-    `Please provide your PRIVATE_KEY or PRIVATE_KEY or JSON_RPC ot BSC_SCAN_API in .env in the project root`
+    `Please provide your PRIVATE_KEY or JSON_RPC in .env in the project root`
   );
 }
 

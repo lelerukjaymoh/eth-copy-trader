@@ -8,8 +8,8 @@ import { ethers } from "ethers";
 
 const TOKENS_TO_MONITOR = [
   {
-    token: "0x64b96aa00485a04fb536326f3cb1829b9da69b34",
-    buyType: "r",
+    token: "0xf29E8B8f384E4f3Db0269e5d24F57910C40FEFFf",
+    buyType: "c",
     buyToken: "e",
   },
 ];

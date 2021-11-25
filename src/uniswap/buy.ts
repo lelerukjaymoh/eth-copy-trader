@@ -57,8 +57,7 @@ const swapExactETHForTokens = async (
 
     return { success: true, data: `${tx.hash}` };
   } catch (error) {
-    console.log("swapExactETHForTokens:  ====> ", error);
-
+    console.log("\n\n swapExactETHForTokens:  ====> ", error);
     return { success: false, data: `${error}` };
   }
 };
