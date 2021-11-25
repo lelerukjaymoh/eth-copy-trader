@@ -28,9 +28,9 @@ module.exports = {
       chainId: 4,
       gasPrice: 5 * 10 ** 9,
       accounts: [
-        process.env.RINKEBY_PRIVATE_KEY!.startsWith("0x")
-          ? process.env.RINKEBY_PRIVATE_KEY
-          : `0x${process.env.RINKEBY_PRIVATE_KEY}`,
+        process.env.PRIVATE_KEY!.startsWith("0x")
+          ? process.env.PRIVATE_KEY
+          : `0x${process.env.PRIVATE_KEY}`,
       ],
     },
   },
