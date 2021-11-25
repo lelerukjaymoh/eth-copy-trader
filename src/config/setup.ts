@@ -21,7 +21,7 @@ const PERCENTAGE_SELL_ALLOWANCE = 0.88;
 const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
 
 // Gas limit to use if gasLimit is not specified
-const DEFAULT_GAS_LIMIT = 500000;
+const DEFAULT_GAS_LIMIT = 700000;
 const DEFAULT_GAS_PRICE = 150 * 10 ** 9;
 
 // Additional gas while selling
@@ -37,12 +37,15 @@ const NO_OF_BUYS = 1;
 // botParams values are not to be changed
 const botParams = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "0x4d2ed594d302f5d4018ca2fa618da0536d0c9a80",
+  swapperAddress: "0x9DD4c87097Cc9b367e6941F4FC849fcC5cEdc99d",
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
 // Addresses to receive the tokens after buying
-const TOKEN_RECEPIENTS = [""];
+const TOKEN_RECEPIENTS = [
+  "0x5b9062aCFFEd96734904f5c69aFbC17B040BF8f0",
+  "0x77c31187474A9e09f8dD281a94888F5591Af4e5C",
+];
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
