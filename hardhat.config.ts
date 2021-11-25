@@ -4,11 +4,7 @@ import { DEFAULT_GAS_PRICE } from "./src/config/setup";
 
 dotEnvConfig({ path: `./.env` });
 
-if (
-  !process.env.PRIVATE_KEY ||
-  !process.env.RINKEBY_PRIVATE_KEY ||
-  !process.env.JSON_RPC
-) {
+if (!process.env.PRIVATE_KEY || !process.env.JSON_RPC) {
   throw new Error(
     `Please provide your PRIVATE_KEY or JSON_RPC in .env in the project root`
   );
