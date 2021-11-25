@@ -41,7 +41,7 @@ const botParams = {
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
-// Addresses to receive the tokens after purchase
+// Addresses to receive the tokens after buying
 const TOKEN_RECEPIENTS = [""];
 
 // LIQUIDITY_METHODS
