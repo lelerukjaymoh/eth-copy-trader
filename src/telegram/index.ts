@@ -1,10 +1,6 @@
+import { TG_USERS } from "../config/setup";
+
 const { Telegraf } = require("telegraf");
-
-if (!process.env.CHAT_ID) {
-  throw new Error("CHAT_ID was not provided in .env file");
-}
-
-const chatIDs = ["584173555", process.env.CHAT_ID];
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
@@ -17,7 +13,7 @@ bot.start((ctx: any) => {
 const sendNotification = async (message: any) => {
   console.log("\n\nSending Tg notification...");
 
-  chatIDs.forEach((chat) => {
+  TG_USERS.forEach((chat) => {
     bot.telegram
       .sendMessage(chat, message, {
         parse_mode: "HTML",

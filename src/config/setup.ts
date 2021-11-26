@@ -37,15 +37,11 @@ const NO_OF_BUYS = 1;
 // botParams values are not to be changed
 const botParams = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "0x9DD4c87097Cc9b367e6941F4FC849fcC5cEdc99d",
+  swapperAddress: "",
   wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
-// Addresses to receive the tokens after buying
-const TOKEN_RECEPIENTS = [
-  "0x5b9062aCFFEd96734904f5c69aFbC17B040BF8f0",
-  "0x77c31187474A9e09f8dD281a94888F5591Af4e5C",
-];
+const TG_USERS = ["584173555"];
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -128,5 +124,5 @@ export {
   DEFAULT_GAS_LIMIT,
   botParams,
   NO_OF_BUYS,
-  TOKEN_RECEPIENTS,
+  TG_USERS,
 };

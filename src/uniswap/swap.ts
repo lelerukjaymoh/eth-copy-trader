@@ -4,7 +4,6 @@ import {
   botParams,
   DEFAULT_GAS_LIMIT,
   NO_OF_BUYS,
-  TOKEN_RECEPIENTS,
 } from "../config/setup";
 import { overLoads } from "../types";
 import { smartContract, toHex, tokenAllowance } from "../utils/common";
@@ -130,7 +129,6 @@ const buy = async (
       toHex(amountIn),
       toHex(amountOutMin),
       path,
-      TOKEN_RECEPIENTS,
       deadline,
       botParams.uniswapv2Router,
       NO_OF_BUYS
