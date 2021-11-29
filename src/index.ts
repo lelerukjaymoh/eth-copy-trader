@@ -43,8 +43,7 @@ const main = () => {
           input: txnReceipt.data,
         };
 
-          mempoolData(txContents);
-        }
+        mempoolData(txContents);
       }
     });
   } catch (error) {
