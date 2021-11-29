@@ -1,15 +1,17 @@
-import { providers } from "ethers";
+import { ethers, providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
-import {
-  botParams,
-  ETH_AMOUNT_TO_BUY,
-  EXACT_TOKEN_AMOUNT_TO_BUY,
-  TOKENS_TO_MONITOR,
-} from "../config/setup";
+import { botParams } from "../config/setup";
+import UNISWAP_ABI from "../uniswap/pancakeSwapABI.json";
 
-if (!process.env.JSON_RPC || !process.env.WALLET_ADDRESS) {
-  throw new Error("JSON_RPC was not provided in .env");
+if (
+  !process.env.JSON_RPC ||
+  !process.env.WALLET_ADDRESS ||
+  !process.env.PRIVATE_KEY
+) {
+  throw new Error(
+    "JSON_RPC or WALLET_ADDRESS || PRIVATE_KEY was not provided in .env"
+  );
 }
 
 const web3 = new Web3(process.env.JSON_RPC);
@@ -26,23 +28,31 @@ function toHex(currencyAmount: any) {
   }
 }
 
-const uniswapABI = JSON.parse(
-  readFileSync(`src/uniswap/pancakeSwapABI.json`, "utf8")
-);
-
 const smartContractABI = JSON.parse(
   readFileSync("src/uniswap/swapperABI.json", "utf8")
 );
 
-const smartContract = new web3.eth.Contract(
-  smartContractABI,
-  botParams.swapperAddress
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!);
+const account = signer.connect(provider);
+
+const smartContractInterface = new ethers.utils.Interface(smartContractABI);
+
+const smartContract = new ethers.Contract(
+  botParams.swapperAddress,
+  smartContractInterface,
+  account
 );
+
+// Initilise an interface of the ABI
+const uniswapInterface = new ethers.utils.Interface(UNISWAP_ABI);
 
 const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   try {
     console.log("Token ", tokenAddress);
-    const tokenContract = new web3.eth.Contract(uniswapABI, tokenAddress);
+    const tokenContract = new web3.eth.Contract(
+      JSON.parse(JSON.stringify(UNISWAP_ABI)),
+      tokenAddress
+    );
     return await tokenContract.methods
       .allowance(botParams.swapperAddress, botParams.uniswapv2Router)
       .call();
@@ -51,9 +61,12 @@ const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   }
 };
 
-const tokenBalance = async (tokenAddress: string, walletAddress: string) => {
+const getTokenBalance = async (tokenAddress: string, walletAddress: string) => {
   try {
-    const tokenContract = new web3.eth.Contract(uniswapABI, tokenAddress);
+    const tokenContract = new web3.eth.Contract(
+      JSON.parse(JSON.stringify(UNISWAP_ABI)),
+      tokenAddress
+    );
     return await tokenContract.methods.balanceOf(walletAddress).call();
   } catch (error) {
     console.log("Error getting token balance", error);
@@ -83,6 +96,16 @@ const buyMessage = (token: string, buyTxHash: string) => {
   return message;
 };
 
+const sellMessage = (token: string, sellTxHash: string) => {
+  let message = "*** Successfully Broadcast a SELL ***";
+  message += "\n\n Token";
+  message += `\nhttps://etherscan.io/token/${token}`;
+  message += "\n\n Tx";
+  message += `\nhttps://etherscan.io/tx/${sellTxHash}`;
+
+  return message;
+};
+
 const scamTxMessage = (token: string, buyTxHash: string) => {
   let message = "*** Successfully SOLD tokens before a scam function ***";
   message += "\n\n Token";
@@ -96,11 +119,13 @@ const scamTxMessage = (token: string, buyTxHash: string) => {
 export {
   scamTxMessage,
   buyMessage,
-  tokenBalance,
+  sellMessage,
+  getTokenBalance,
   wait,
   toHex,
   currentNonce,
-  uniswapABI,
-  smartContract,
+  UNISWAP_ABI,
   tokenAllowance,
+  uniswapInterface,
+  smartContract,
 };

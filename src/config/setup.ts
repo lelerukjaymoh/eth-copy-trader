@@ -1,17 +1,7 @@
-// TOKENS_TO_MONITOR
-// To add token that the bot will monitor, and also provide the buytype which can either be "C" or "r"
-
-import { ethers } from "ethers";
-
-// c ==> buy using a smart contract
-// r ==> buy udirectly to the uniswapv2 router
-
-const TOKENS_TO_MONITOR = [
-  {
-    token: "0xf29E8B8f384E4f3Db0269e5d24F57910C40FEFFf",
-    buyType: "c",
-    buyToken: "e",
-  },
+// Wallets we are monitoring
+const WALLETS_TO_MONITOR = [
+  "0x8FE0821e982a426Fa0DbCaFa7B7fa5860507F168",
+  "0x753E6D008D3e23a393E76bF2F9EB1D9BB5271Df3",
 ];
 
 // PERCENTAGE_SELL_ALLOWANCE on sells when using swapExactTokensForETHSupportingFeeOnTransferTokens
@@ -22,10 +12,10 @@ const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
 
 // Gas limit to use if gasLimit is not specified
 const DEFAULT_GAS_LIMIT = 700000;
-const DEFAULT_GAS_PRICE = 150 * 10 ** 9;
+const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
 
 // Additional gas while selling
-const ADDITIONAL_SELL_GAS = 120 * 10 ** 9;
+const ADDITIONAL_SELL_GAS = 100 * 10 ** 9;
 
 // Set the ethamount to buy
 const ETH_AMOUNT_TO_BUY = 0.0000001 * 10 ** 18;
@@ -37,9 +27,14 @@ const NO_OF_BUYS = 1;
 // botParams values are not to be changed
 const botParams = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "",
-  wethAddrress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
+  wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
 };
+
+// RINKEBY VALUES
+// uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+//   swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
+//   wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
 
 const TG_USERS = ["584173555"];
 
@@ -119,7 +114,7 @@ export {
   METHODS_TO_MONITOR,
   SCAM_FUNCTIONS,
   BLACKLIST_FUNCTIONS,
-  TOKENS_TO_MONITOR,
+  WALLETS_TO_MONITOR,
   ETH_AMOUNT_TO_BUY,
   DEFAULT_GAS_LIMIT,
   botParams,

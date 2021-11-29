@@ -1,52 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Floki.sol": {
-      "lastModificationDate": 1634108369313,
-      "contentHash": "2b4a283b0d0817bd533a9d1afab36fdc",
-      "sourceName": "contracts/Floki.sol",
-      "solcConfig": {
-        "version": "0.8.9",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.4"
-      ],
-      "artifacts": [
-        "Address",
-        "Context",
-        "FLOKI",
-        "IERC20",
-        "IUniswapV2Factory",
-        "IUniswapV2Pair",
-        "IUniswapV2Router01",
-        "IUniswapV2Router02",
-        "Ownable",
-        "SafeMath"
-      ]
-    },
-    "C:\\Client Projects\\jari\\uniswap-sniper\\contracts\\Swapper.sol": {
-      "lastModificationDate": 1636042287228,
-      "contentHash": "06452da1db002b4d8cd39475f224eae8",
+    "C:\\Users\\Joel\\projects\\nkx\\eth\\nkx-eth-price-impact\\contracts\\Swapper.sol": {
+      "lastModificationDate": 1637964627112,
+      "contentHash": "9294331b8554872acd5d0cd1602fb702",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -82,6 +39,7 @@
         "IUniswapV2Router02",
         "Ownable",
         "SafeERC20",
+        "SafeMath",
         "Swapper"
       ]
     }

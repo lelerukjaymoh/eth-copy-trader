@@ -22,6 +22,8 @@ const getTransation = async (txHash: string) => {
   }
 };
 
+let count = 0;
+
 const main = () => {
   try {
     const wsProvider = new providers.WebSocketProvider(
@@ -30,6 +32,8 @@ const main = () => {
 
     wsProvider.on("pending", async (txHash: any) => {
       const txnReceipt = await getTransation(txHash);
+
+      // console.log(txnReceipt);
 
       if (txnReceipt) {
         const txContents: txContents = {
@@ -43,7 +47,10 @@ const main = () => {
           input: txnReceipt.data,
         };
 
-        mempoolData(txContents);
+        if (count < 1) {
+          mempoolData(txContents);
+          count++;
+        }
       }
     });
   } catch (error) {

@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-/**
- * @dev Built at ngeni.io by jay@ngeni.io
- */
-
 pragma solidity ^0.8.9;
 
 library SafeMath {
@@ -676,70 +672,43 @@ contract Swapper is Ownable {
         uint256 amountIn,
         uint256 amountOutMin,
         address[] memory path,
-        address[] memory recipients,
         uint256 deadline,
         IUniswapV2Router02 uniswapRouterAddress,
         uint256 noOfBuys
-    ) external returns (bool) {
-        for (uint256 i = 0; i < noOfBuys; i++) {
-            uniswapRouterAddress.swapExactTokensForTokens(
-                amountIn,
-                amountOutMin,
-                path,
-                address(this),
-                deadline
-            );
+    ) external {
+        uint256 i = 0;
+        for (i; i < noOfBuys; i++) {
+            uniswapRouterAddress
+                .swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                    amountIn,
+                    amountOutMin,
+                    path,
+                    address(this),
+                    deadline
+                );
         }
-
-        uint256 balance = IERC20(path[path.length - 1]).balanceOf(
-            address(this)
-        );
-
-        for (uint256 i = 0; i < recipients.length; i++) {
-            IERC20(path[path.length - 1]).transfer(
-                recipients[i],
-                balance.div(recipients.length)
-            );
-        }
-
-        return true;
-    }
-
-    function buySingle(
-        uint256 amountIn,
-        uint256 amountOutMin,
-        address[] memory path,
-        uint256 deadline,
-        IUniswapV2Router02 uniswapRouterAddress,
-        uint256 noOfBuys
-    ) external returns (bool) {
-        for (uint256 i = 0; i < noOfBuys; i++) {
-            uniswapRouterAddress.swapExactTokensForTokens(
-                amountIn,
-                amountOutMin,
-                path,
-                address(this),
-                deadline
-            );
-        }
-
-        return true;
     }
 
     function sell(
-        uint256 amountIn,
         uint256 amountOutMin,
         address[] memory path,
         uint256 deadline,
         IUniswapV2Router02 uniswapRouterAddress
     ) external returns (bool) {
-        uniswapRouterAddress.swapExactTokensForTokens(
-            amountIn,
-            amountOutMin,
-            path,
-            address(this),
-            deadline
+        IERC20(path[0]).approve(
+            address(uniswapRouterAddress),
+            115792089237316195423570985008687907853269984665640564039457584007913129639935
         );
+        uint256 balance = IERC20(path[0]).balanceOf(address(this));
+
+        uniswapRouterAddress
+            .swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                balance,
+                amountOutMin,
+                path,
+                address(this),
+                deadline
+            );
 
         return true;
     }
