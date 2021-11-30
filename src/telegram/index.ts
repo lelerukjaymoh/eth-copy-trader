@@ -36,63 +36,78 @@ bot.on("text", async (ctx: any) => {
 
     if (TG_USERS.includes(user)) {
       const tokenAddress = checkAddress(ctx, details[0].trim());
-      const gasPrice = details[1].trim();
+      let gasPrice = details[1].trim();
 
-      if (tokenAddress) {
+      if (tokenAddress && gasPrice) {
         ctx.reply("Processing ...");
 
-        if (details.length > 2) {
-          const percentageToSell = parseInt(details[1].trim());
+        // if (details.length > 2) {
+        // const percentageToSell = parseInt(details[2].trim());
 
-          if (
-            percentageToSell &&
-            !isNaN(percentageToSell) &&
-            percentageToSell > 0
-          ) {
-            const tokenBalance = await getTokenBalance(
-              tokenAddress!,
-              botParams.swapperAddress
-            );
+        // console.log("Percentage to sell : ", percentageToSell);
 
-            console.log("Token balance ", tokenBalance);
+        //   if (
+        //     percentageToSell &&
+        //     !isNaN(percentageToSell) &&
+        //     percentageToSell > 0
+        //   ) {
+        //     const tokenBalance = await getTokenBalance(
+        //       tokenAddress!,
+        //       botParams.swapperAddress
+        //     );
 
-            if (tokenBalance) {
-              const amountToSell = percentageToSell * tokenBalance;
+        //     console.log("Token balance ", tokenBalance);
 
-              // Manual Buy
-            }
-          }
+        //     if (tokenBalance) {
+        //       const amountToSell = percentageToSell * tokenBalance;
+
+        //       // TODO: implement selling portions of the token
+        //     }
+        //   }
+        // } else{
+
+        gasPrice = parseInt(gasPrice) * 10 ** 9;
+
+        const nonce = await getNonce(process.env.WALLET_ADDRESS!);
+        const overLoads = {
+          gasLimit: DEFAULT_GAS_LIMIT,
+          nonce,
+          gasPrice,
+        };
+        const sellTx = await sell(
+          0,
+          [tokenAddress, botParams.wethAddrress],
+          overLoads
+        );
+
+        console.log("OverLoads  ", overLoads);
+
+        if (sellTx.success) {
+          let message = "Manual Sell Notification";
+          message += "\n\n Txn ";
+          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
+          message += "\n\n Token";
+          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+
+          ctx.reply(message);
         } else {
-          const nonce = await getNonce(process.env.WALLET_ADDRESS!);
-          const overLoads = {
-            gasLimit: DEFAULT_GAS_LIMIT,
-            nonce,
-            gasPrice,
-          };
-          const sellTx = await sell(
-            0,
-            [tokenAddress, botParams.wethAddrress],
-            overLoads
-          );
+          let message = "Manual Sell Error";
+          message += "\n\n Token";
+          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+          message += "\n\n Error";
+          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
 
-          if (sellTx.success) {
-            let message = "Manual Sell Notification";
-            message += "\n\n Txn ";
-            message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
-            message += "\n\n Token";
-            message += `\nhttps://etherscan.io/token/${tokenAddress}`;
-
-            ctx.reply(message);
-          } else {
-            let message = "Manual Sell Error";
-            message += "\n\n Token";
-            message += `\nhttps://etherscan.io/token/${tokenAddress}`;
-            message += "\n\n Error";
-            message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
-
-            ctx.reply(message);
-          }
+          ctx.reply(message);
         }
+        // }
+      } else {
+        let message = "Wrong sell format";
+        message +=
+          "You either did not provide the token address or the gas price value";
+        message += "Example of a correct sell command";
+        message +=
+          "\n\n sell, contractAddress, gasPrice, sell, 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b, 100";
+        ctx.reply();
       }
     } else {
       ctx.reply("Error, You are not authorised to make this request");
