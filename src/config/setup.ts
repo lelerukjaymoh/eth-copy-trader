@@ -1,12 +1,7 @@
 // Wallets we are monitoring
-const WALLETS_TO_MONITOR = [
-  "0x753E6D008D3e23a393E76bF2F9EB1D9BB5271Df3",
-];
-
+const WALLETS_TO_MONITOR = ["0x753E6D008D3e23a393E76bF2F9EB1D9BB5271Df3"];
 
 // Amount of exact tokens to buy
-const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
-
 // Gas limit to use if gasLimit is not specified
 const DEFAULT_GAS_LIMIT = 700000;
 const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
@@ -47,9 +42,8 @@ const TG_USERS = [
   // "420331061",
   // "1247886869",
   "1610178949",
-  "1741013492"
+  "1741013492",
 ];
-
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -119,7 +113,6 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 });
 
 export {
-  EXACT_TOKEN_AMOUNT_TO_BUY,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
   LIQUIDITY_METHODS,
@@ -133,5 +126,5 @@ export {
   NO_OF_BUYS,
   TG_USERS,
   GET_NONCE_TIMEOUT,
-  ADDITIONAL_BUY_GAS
+  ADDITIONAL_BUY_GAS,
 };
