@@ -86,22 +86,26 @@ const wait = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-const buyMessage = (token: string, buyTxHash: string) => {
+const buyMessage = (token: string, buyTxHash: string, target: string) => {
   let message = "*** Successfully Broadcast a BUY ***";
   message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
+  message += `\nhttps://rinkeby.etherscan.io/token/${token}`;
+  message += "\n\n Target";
+  message += `\nhttps://rinkeby.etherscan.io/address/${target}`;
   message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${buyTxHash}`;
+  message += `\nhttps://rinkeby.etherscan.io/tx/${buyTxHash}`;
 
   return message;
 };
 
-const sellMessage = (token: string, sellTxHash: string) => {
+const sellMessage = (token: string, sellTxHash: string, target: string) => {
   let message = "*** Successfully Broadcast a SELL ***";
   message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
+  message += `\nhttps://rinkeby.etherscan.io/token/${token}`;
+  message += "\n\n Target";
+  message += `\nhttps://rinkeby.etherscan.io/address/${target}`;
   message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${sellTxHash}`;
+  message += `\nhttps://rinkeby.etherscan.io/tx/${sellTxHash}`;
 
   return message;
 };
@@ -109,9 +113,9 @@ const sellMessage = (token: string, sellTxHash: string) => {
 const scamTxMessage = (token: string, buyTxHash: string) => {
   let message = "*** Successfully SOLD tokens before a scam function ***";
   message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
+  message += `\nhttps://rinkeby.etherscan.io/token/${token}`;
   message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${buyTxHash}`;
+  message += `\nhttps://rinkeby.etherscan.io/tx/${buyTxHash}`;
 
   return message;
 };

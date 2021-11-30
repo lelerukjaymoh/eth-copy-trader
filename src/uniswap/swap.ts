@@ -6,7 +6,7 @@ import {
   NO_OF_BUYS,
 } from "../config/setup";
 import { overLoads } from "../types";
-import { smartContract } from "../utils/common";
+import { smartContract, toHex } from "../utils/common";
 
 const MAX_INT =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
@@ -158,11 +158,16 @@ const buy = async (
   overLoads: overLoads
 ) => {
   try {
+    console.log(
+      `Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
+    );
+    console.log("Buy OverLoads : ", overLoads);
+
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     const buyTxData = await smartContract.buy(
-      amountIn,
-      amountOutMin,
+      toHex(amountIn),
+      toHex(amountOutMin),
       path,
       deadline,
       botParams.uniswapv2Router,
@@ -184,10 +189,14 @@ const sell = async (
   overLoads: overLoads
 ) => {
   try {
+    console.log(`Amount Out min: ${amountOutMin} \n Path: ${path}`);
+
+    console.log("Sell OverLoads : ", overLoads);
+
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     const sellTxData = await smartContract.sell(
-      amountOutMin,
+      toHex(amountOutMin),
       path,
       deadline,
       botParams.uniswapv2Router,

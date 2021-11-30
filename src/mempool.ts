@@ -41,13 +41,13 @@ const mempoolData = async (txContents: txContents) => {
     // Filter only transactions to uniswap v2 router
 
     if (!methodsExclusion.includes(txContents.input) && txContents.to) {
-      // console.log(txContents);
+      console.log(txContents);
 
       let routerAddress = txContents.to.toLowerCase();
 
       if (
         routerAddress.toLowerCase() ==
-        botParams.uniswapv2Router.toLowerCase() &&
+          botParams.uniswapv2Router.toLowerCase() &&
         walletsToMonitor.includes(txContents.from.toLowerCase())
       ) {
         console.log("\n\n Target is making a transaction to Uniswap router");
@@ -72,14 +72,14 @@ const mempoolData = async (txContents: txContents) => {
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
-            gasPrice: gasPrice += ADDITIONAL_BUY_GAS,
+            gasPrice: (gasPrice += ADDITIONAL_BUY_GAS),
             gasLimit: DEFAULT_GAS_LIMIT,
           };
         } else {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee += ADDITIONAL_BUY_GAS,
-            maxFeePerGas: maxFee += ADDITIONAL_BUY_GAS,
+            maxPriorityFeePerGas: (priorityFee += ADDITIONAL_BUY_GAS),
+            maxFeePerGas: (maxFee += ADDITIONAL_BUY_GAS),
             gasLimit: DEFAULT_GAS_LIMIT,
           };
         }
@@ -100,13 +100,14 @@ const mempoolData = async (txContents: txContents) => {
           methodName == "swapExactETHForTokensSupportingFeeOnTransferTokens"
         ) {
           console.log("Buying ");
-          path = [botParams.wethAddrress, path[0]];
+          let token = path[path.length - 1];
+          path = [botParams.wethAddrress, token];
 
           const buyTx = await buy(ETH_AMOUNT_TO_BUY, 0, path, overLoads);
 
           if (buyTx.success) {
-            sendNotification(buyMessage(path[0], buyTx.data));
-            tokensMonitored.push(path[0])
+            sendNotification(buyMessage(token, buyTx.data, txContents.from));
+            tokensMonitored.push(token);
           }
 
           console.log("Bought  ", buyTx);
@@ -173,7 +174,7 @@ const mempoolData = async (txContents: txContents) => {
             message +=
               "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
             message += "\n\n - We dont hold any of this tokens: ";
-            message += `\nhttps://etherscan.io/token/${routerAddress}`;
+            message += `\nhttps://rinkeby.etherscan.io/token/${routerAddress}`;
             message += `\nOur Token Balance: ${tokenBalance}`;
 
             console.log(message);
@@ -184,7 +185,7 @@ const mempoolData = async (txContents: txContents) => {
           methodName == "removeLiquidityETHWithPermit" ||
           methodName == "removeLiquidityETHSupportingFeeOnTransferTokens" ||
           methodName ==
-          "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens"
+            "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens"
         ) {
           let token = decodedInput.args.token.toLowerCase();
 
@@ -238,7 +239,7 @@ const mempoolData = async (txContents: txContents) => {
             message +=
               "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
             message += "\n\n - We dont hold any of this tokens: ";
-            message += `\nhttps://etherscan.io/token/${routerAddress}`;
+            message += `\nhttps://rinkeby.etherscan.io/token/${routerAddress}`;
             message += `\nOur Token Balance: ${tokenBalance}`;
 
             console.log(message);
@@ -251,12 +252,13 @@ const mempoolData = async (txContents: txContents) => {
         ) {
           console.log("Buying ");
           let path = decodedInput.args.path;
-          path = [path[0], botParams.wethAddrress];
+          let token = path[0];
+          path = [token, botParams.wethAddrress];
 
           const sellTx = await sell(0, path, overLoads);
 
           if (sellTx.success) {
-            sendNotification(sellMessage(path[0], sellTx.data));
+            sendNotification(sellMessage(token, sellTx.data, txContents.from));
           }
 
           console.log("Bought  ", sell);
