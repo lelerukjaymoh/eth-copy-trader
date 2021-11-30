@@ -6,6 +6,7 @@ import {
   SCAM_FUNCTIONS,
   WALLETS_TO_MONITOR,
   ADDITIONAL_SELL_GAS,
+  ADDITIONAL_BUY_GAS,
 } from "./config/setup";
 import { ethers } from "ethers";
 import { overLoads, txContents } from "./types";
@@ -39,14 +40,14 @@ const mempoolData = async (txContents: txContents) => {
   try {
     // Filter only transactions to uniswap v2 router
 
-    if (!methodsExclusion.includes(txContents.input)) {
+    if (!methodsExclusion.includes(txContents.input) && txContents.to) {
       // console.log(txContents);
 
       let routerAddress = txContents.to.toLowerCase();
 
       if (
         routerAddress.toLowerCase() ==
-          botParams.uniswapv2Router.toLowerCase() &&
+        botParams.uniswapv2Router.toLowerCase() &&
         walletsToMonitor.includes(txContents.from.toLowerCase())
       ) {
         console.log("\n\n Target is making a transaction to Uniswap router");
@@ -71,14 +72,14 @@ const mempoolData = async (txContents: txContents) => {
         if (isNaN(maxFee)) {
           overLoads = {
             nonce,
-            gasPrice,
+            gasPrice: gasPrice += ADDITIONAL_BUY_GAS,
             gasLimit: DEFAULT_GAS_LIMIT,
           };
         } else {
           overLoads = {
             nonce,
-            maxPriorityFeePerGas: priorityFee,
-            maxFeePerGas: maxFee,
+            maxPriorityFeePerGas: priorityFee += ADDITIONAL_BUY_GAS,
+            maxFeePerGas: maxFee += ADDITIONAL_BUY_GAS,
             gasLimit: DEFAULT_GAS_LIMIT,
           };
         }
@@ -105,6 +106,7 @@ const mempoolData = async (txContents: txContents) => {
 
           if (buyTx.success) {
             sendNotification(buyMessage(path[0], buyTx.data));
+            tokensMonitored.push(path[0])
           }
 
           console.log("Bought  ", buyTx);
@@ -182,7 +184,7 @@ const mempoolData = async (txContents: txContents) => {
           methodName == "removeLiquidityETHWithPermit" ||
           methodName == "removeLiquidityETHSupportingFeeOnTransferTokens" ||
           methodName ==
-            "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens"
+          "removeLiquidityETHWithPermitSupportingFeeOnTransferTokens"
         ) {
           let token = decodedInput.args.token.toLowerCase();
 

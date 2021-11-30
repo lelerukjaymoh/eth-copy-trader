@@ -2,7 +2,7 @@ import { ethers, providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
 import { botParams, GET_NONCE_TIMEOUT } from "../config/setup";
-import UNISWAP_ABI from "../uniswap/pancakeSwapABI.json";
+import UNISWAP_ABI from "../uniswap/erc20ABI.json";
 
 if (
   !process.env.JSON_RPC ||

@@ -1,11 +1,8 @@
 // Wallets we are monitoring
 const WALLETS_TO_MONITOR = [
-  "0x8FE0821e982a426Fa0DbCaFa7B7fa5860507F168",
   "0x753E6D008D3e23a393E76bF2F9EB1D9BB5271Df3",
 ];
 
-// PERCENTAGE_SELL_ALLOWANCE on sells when using swapExactTokensForETHSupportingFeeOnTransferTokens
-const PERCENTAGE_SELL_ALLOWANCE = 0.88;
 
 // Amount of exact tokens to buy
 const EXACT_TOKEN_AMOUNT_TO_BUY = 1000 * 10 ** 9;
@@ -15,10 +12,13 @@ const DEFAULT_GAS_LIMIT = 700000;
 const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
 
 // Additional gas while selling
-const ADDITIONAL_SELL_GAS = 100 * 10 ** 9;
+const ADDITIONAL_SELL_GAS = 19 * 10 ** 9;
+
+// Additional Buy Gas
+const ADDITIONAL_BUY_GAS = 19 * 10 ** 9;
 
 // Set the ethamount to buy
-const ETH_AMOUNT_TO_BUY = 0.0000001 * 10 ** 18;
+const ETH_AMOUNT_TO_BUY = 0.175 * 10 ** 18;
 
 // No of buys to make with the smart contract
 const NO_OF_BUYS = 1;
@@ -39,7 +39,17 @@ const botParams = {
 //   swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
 //   wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
 
-const TG_USERS = ["584173555"];
+const TG_USERS = [
+  "584173555",
+  // "1295076847",
+  "299108118",
+  // "2060423170",
+  // "420331061",
+  // "1247886869",
+  "1610178949",
+  "1741013492"
+];
+
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -109,7 +119,6 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 });
 
 export {
-  PERCENTAGE_SELL_ALLOWANCE,
   EXACT_TOKEN_AMOUNT_TO_BUY,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
@@ -124,4 +133,5 @@ export {
   NO_OF_BUYS,
   TG_USERS,
   GET_NONCE_TIMEOUT,
+  ADDITIONAL_BUY_GAS
 };

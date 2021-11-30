@@ -48,7 +48,7 @@ const walletNonce = async () => {
 };
 
 const FRONTRUNNER_ABI = JSON.parse(
-  readFileSync("src/uniswap/pancakeSwapABI.json", "utf8")
+  readFileSync("src/uniswap/erc20ABI.json", "utf8")
 );
 
 const frontrunnerContract = new web3.eth.Contract(
