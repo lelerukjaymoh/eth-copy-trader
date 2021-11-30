@@ -174,7 +174,7 @@ const mempoolData = async (txContents: txContents) => {
             message +=
               "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
             message += "\n\n - We dont hold any of this tokens: ";
-            message += `\nhttps://rinkeby.etherscan.io/token/${routerAddress}`;
+            message += `\nhttps://etherscan.io/token/${routerAddress}`;
             message += `\nOur Token Balance: ${tokenBalance}`;
 
             console.log(message);
@@ -239,7 +239,7 @@ const mempoolData = async (txContents: txContents) => {
             message +=
               "\n\n - We could not generate the Overloads or the path for the transaction correctly (This should be a bug)";
             message += "\n\n - We dont hold any of this tokens: ";
-            message += `\nhttps://rinkeby.etherscan.io/token/${routerAddress}`;
+            message += `\nhttps://etherscan.io/token/${routerAddress}`;
             message += `\nOur Token Balance: ${tokenBalance}`;
 
             console.log(message);

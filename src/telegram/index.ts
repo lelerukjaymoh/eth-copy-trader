@@ -85,17 +85,17 @@ bot.on("text", async (ctx: any) => {
         if (sellTx.success) {
           let message = "Manual Sell Notification";
           message += "\n\n Txn ";
-          message += `\nhttps://rinkeby.etherscan.io/tx/${sellTx.data}`;
+          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
           message += "\n\n Token";
-          message += `\nhttps://rinkeby.etherscan.io/token/${tokenAddress}`;
+          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
 
           ctx.reply(message);
         } else {
           let message = "Manual Sell Error";
           message += "\n\n Token";
-          message += `\nhttps://rinkeby.etherscan.io/token/${tokenAddress}`;
+          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
           message += "\n\n Error";
-          message += `\nhttps://rinkeby.etherscan.io/tx/${sellTx.data}`;
+          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
 
           ctx.reply(message);
         }
