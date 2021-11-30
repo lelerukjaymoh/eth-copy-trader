@@ -1,7 +1,7 @@
 import { ethers, providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
-import { botParams } from "../config/setup";
+import { botParams, GET_NONCE_TIMEOUT } from "../config/setup";
 import UNISWAP_ABI from "../uniswap/pancakeSwapABI.json";
 
 if (
@@ -116,6 +116,43 @@ const scamTxMessage = (token: string, buyTxHash: string) => {
   return message;
 };
 
+/**
+ * Returns a checksummed address or send a notification if the address is invalid
+ * @param address Address to checksum
+ * @returns A cheksummed address
+ */
+const checkAddress = (ctx: any, address: string) => {
+  try {
+    const tokenAddress = ethers.utils.getAddress(address);
+    return tokenAddress;
+  } catch (error) {
+    let message = "Error  ";
+    message += "\n\n Invalid token address provided ";
+    message += `\n\n ${error}`;
+    ctx.reply(message);
+  }
+};
+
+const getNonce = async (walletAddress: string) => {
+  let walletNonce;
+
+  const startTime = Date.now();
+  while (true) {
+    let nonce = await provider.getTransactionCount(walletAddress);
+    console.log(nonce);
+
+    if (nonce) {
+      walletNonce = nonce;
+      break;
+    } else if (Date.now() - startTime > GET_NONCE_TIMEOUT * 1000) {
+      break;
+    }
+    await wait(3000);
+  }
+
+  return walletNonce;
+};
+
 export {
   scamTxMessage,
   buyMessage,
@@ -128,4 +165,6 @@ export {
   tokenAllowance,
   uniswapInterface,
   smartContract,
+  checkAddress,
+  getNonce,
 };

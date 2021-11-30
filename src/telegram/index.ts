@@ -1,13 +1,106 @@
-import { TG_USERS } from "../config/setup";
+import {
+  botParams,
+  DEFAULT_GAS_LIMIT,
+  DEFAULT_GAS_PRICE,
+  TG_USERS,
+} from "../config/setup";
+import { checkAddress, getNonce, getTokenBalance } from "../utils/common";
+import { sell } from "../uniswap/swap";
 
 const { Telegraf } = require("telegraf");
+
+if (!process.env.WALLET_ADDRESS || !process.env.BOT_TOKEN) {
+  throw new Error("WALLET_ADDRESS or BOT_TOKEN was not provided in .env");
+}
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start((ctx: any) => {
-  console.log("New User : ", ctx.message.from);
+  ctx.reply(
+    "Welcome, You account is successfully setup to receive notifications  ..."
+  );
+});
 
-  ctx.reply("Welcome ... \n\nBot status: Active");
+/**
+ * Selling Manually using the bot
+ */
+
+bot.on("text", async (ctx: any) => {
+  try {
+    const text: any = ctx.message?.text
+      ? ctx.message?.text
+      : ctx.update.message.text || "";
+    let details = text.split(",");
+
+    let user = ctx.message.from.id.toString();
+
+    if (TG_USERS.includes(user)) {
+      const tokenAddress = checkAddress(ctx, details[0].trim());
+      const gasPrice = details[1].trim();
+
+      if (tokenAddress) {
+        ctx.reply("Processing ...");
+
+        if (details.length > 2) {
+          const percentageToSell = parseInt(details[1].trim());
+
+          if (
+            percentageToSell &&
+            !isNaN(percentageToSell) &&
+            percentageToSell > 0
+          ) {
+            const tokenBalance = await getTokenBalance(
+              tokenAddress!,
+              botParams.swapperAddress
+            );
+
+            console.log("Token balance ", tokenBalance);
+
+            if (tokenBalance) {
+              const amountToSell = percentageToSell * tokenBalance;
+
+              // Manual Buy
+            }
+          }
+        } else {
+          const nonce = await getNonce(process.env.WALLET_ADDRESS!);
+          const overLoads = {
+            gasLimit: DEFAULT_GAS_LIMIT,
+            nonce,
+            gasPrice,
+          };
+          const sellTx = await sell(
+            0,
+            [tokenAddress, botParams.wethAddrress],
+            overLoads
+          );
+
+          if (sellTx.success) {
+            let message = "Manual Sell Notification";
+            message += "\n\n Txn ";
+            message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
+            message += "\n\n Token";
+            message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+
+            ctx.reply(message);
+          } else {
+            let message = "Manual Sell Error";
+            message += "\n\n Token";
+            message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+            message += "\n\n Error";
+            message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
+
+            ctx.reply(message);
+          }
+        }
+      }
+    } else {
+      ctx.reply("Error, You are not authorised to make this request");
+    }
+  } catch (error) {
+    let message = "Encoutered this error while selling";
+    message += `\n\n\ ${error}`;
+  }
 });
 
 const sendNotification = async (message: any) => {
@@ -20,7 +113,10 @@ const sendNotification = async (message: any) => {
         disable_web_page_preview: true,
       })
       .catch((error: any) => {
-        console.log("Encouterd an error while sending notification");
+        console.log(
+          "\n\n Encoutered an error while sending notification to ",
+          chat
+        );
         console.log("==============================");
         console.log(error);
       });

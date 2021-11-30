@@ -40,7 +40,7 @@ const mempoolData = async (txContents: txContents) => {
     // Filter only transactions to uniswap v2 router
 
     if (!methodsExclusion.includes(txContents.input)) {
-      console.log(txContents);
+      // console.log(txContents);
 
       let routerAddress = txContents.to.toLowerCase();
 

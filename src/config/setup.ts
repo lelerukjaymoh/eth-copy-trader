@@ -23,6 +23,9 @@ const ETH_AMOUNT_TO_BUY = 0.0000001 * 10 ** 18;
 // No of buys to make with the smart contract
 const NO_OF_BUYS = 1;
 
+// For how many secs should we keep on querrying for the wallet nonce
+const GET_NONCE_TIMEOUT = 10;
+
 // Fixed params used by the bot
 // botParams values are not to be changed
 const botParams = {
@@ -120,4 +123,5 @@ export {
   botParams,
   NO_OF_BUYS,
   TG_USERS,
+  GET_NONCE_TIMEOUT,
 };
