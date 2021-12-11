@@ -1,15 +1,11 @@
 import Web3 from "web3";
 import {
   DEFAULT_GAS_PRICE,
-  botParams,
   DEFAULT_GAS_LIMIT,
-  NO_OF_BUYS,
+  botParameters,
 } from "../config/setup";
 import { overLoads } from "../types";
-import { smartContract, toHex } from "../utils/common";
-
-const MAX_INT =
-  "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+import { getTokenBalance, smartContract, toHex } from "../utils/common";
 
 // Ensure all enviroment varibales are provided in .env
 if (!process.env.JSON_RPC) {
@@ -18,138 +14,34 @@ if (!process.env.JSON_RPC) {
 
 const web3 = new Web3(process.env.JSON_RPC!);
 
-const allowToken = async (token: string) => {
-  const lastNonce = await web3.eth.getTransactionCount(
-    process.env.WALLET_ADDRESS!
-  );
+const approveToken = async (token: string) => {
+  try {
+    const nonce = await web3.eth.getTransactionCount(
+      process.env.WALLET_ADDRESS!
+    );
 
-  console.log(lastNonce);
+    const overLoads = {
+      gasLimit: DEFAULT_GAS_LIMIT,
+      nonce: 277,
+      gasPrice: DEFAULT_GAS_PRICE,
+    };
 
-  console.log("Token to approve ", token);
+    console.log("Token to approve ", token);
+    console.log(overLoads);
 
-  const approve = smartContract.methods
-    .approve(token, botParams.uniswapv2Router)
-    .encodeABI({
-      from: process.env.WALLET_ADDRESS!,
-    });
+    const approveTxReceipt = await smartContract.kubalia(
+      botParameters.uniswapv2Router,
+      overLoads
+    );
 
-  const approveParams = {
-    from: process.env.WALLET_ADDRESS,
-    gasPrice: DEFAULT_GAS_PRICE,
-    gas: DEFAULT_GAS_LIMIT,
-    to: botParams.swapperAddress,
-    value: 0,
-    data: approve,
-    nonce: lastNonce,
-  };
+    console.log("\n\n\n\n Approve data : ", approveTxReceipt);
 
-  console.log(
-    "Total Transaction charges ",
-    (approveParams.gas * DEFAULT_GAS_PRICE) / 10 ** 18
-  );
-
-  const signedApprove = await web3.eth.accounts.signTransaction(
-    approveParams,
-    process.env.PRIVATE_KEY!
-  );
-
-  await web3.eth
-    .sendSignedTransaction(signedApprove.rawTransaction!)
-    .on("transactionHash", async (hash) => {
-      try {
-        console.log(
-          "\n\n\n ----------- SUCCESSFULLY BROADCAST AN APPROVE ---------"
-        );
-        console.log("Transaction Hash ", hash);
-      } catch (error) {
-        console.log("\n\n\n Encoutered an error broadcasting buy txn");
-        console.log("Error :  ", error);
-      }
-    });
+    return { success: true, data: `${approveTxReceipt.hash}` };
+  } catch (error) {
+    console.log("Error approving ", error);
+    return { success: false, data: `${error}` };
+  }
 };
-
-// const buy = async (
-//   amountIn: number,
-//   amountOutMin: number,
-//   path: string[],
-//   overLoads: overLoads
-// ) => {
-//   const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
-//   let buyParams;
-
-//   const buyData = smartContract.methods
-//     .buy(
-//       toHex(amountIn),
-//       toHex(amountOutMin),
-//       path,
-//       deadline,
-//       botParams.uniswapv2Router,
-//       NO_OF_BUYS
-//     )
-//     .encodeABI({
-//       from: process.env.WALLET_ADDRESS,
-//     });
-
-//   console.log(overLoads);
-
-//   // TODO: To remove the check to be greater than a given amount
-
-//   const igasPrice = overLoads["gasPrice"];
-
-//   if (igasPrice) {
-//     buyParams = {
-//       from: process.env.WALLET_ADDRESS!,
-//       gasPrice: toHex(overLoads.gasPrice),
-//       gas: toHex(overLoads.gasLimit),
-//       to: botParams.swapperAddress,
-//       value: 0,
-//       data: buyData,
-//       nonce: overLoads.nonce,
-//     };
-//   } else {
-//     buyParams = {
-//       from: process.env.WALLET_ADDRESS!,
-//       gasPrice: toHex(
-//         overLoads.maxPriorityFeePerGas! + overLoads.maxFeePerGas!
-//       ),
-//       gas: toHex(overLoads.gasLimit),
-//       to: botParams.swapperAddress,
-//       value: 0,
-//       data: buyData,
-//       nonce: overLoads.nonce,
-//     };
-//   }
-
-//   console.log(buyParams);
-
-//   const signedBuy = await web3.eth.accounts.signTransaction(
-//     buyParams,
-//     process.env.PRIVATE_KEY!
-//   );
-
-//   let buyResponseData: any;
-
-//   await web3.eth
-//     .sendSignedTransaction(signedBuy.rawTransaction!)
-//     .on("transactionHash", async (hash) => {
-//       try {
-//         console.log(
-//           "\n\n\n ----------- SUCCESSFULLY BROADCAST A BUY ---------"
-//         );
-//         console.log("Transaction Hash ", hash);
-
-//         buyResponseData = {
-//           success: true,
-//           data: hash,
-//         };
-//       } catch (error) {
-//         console.log("\n\n\n Encoutered an error broadcasting buy txn");
-//         console.log("Error :  ", error);
-//       }
-//     });
-
-//   return buyResponseData;
-// };
 
 const buy = async (
   amountIn: number,
@@ -161,17 +53,15 @@ const buy = async (
     console.log(
       `Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
     );
+
     console.log("Buy OverLoads : ", overLoads);
 
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
-    const buyTxData = await smartContract.buy(
+    const buyTxData = await smartContract.baisha(
       toHex(amountIn),
       toHex(amountOutMin),
       path,
-      deadline,
-      botParams.uniswapv2Router,
-      NO_OF_BUYS,
       overLoads
     );
 
@@ -179,6 +69,7 @@ const buy = async (
 
     return { success: true, data: `${buyTxData.hash}` };
   } catch (error) {
+    console.log("Error buying ", error);
     return { success: false, data: `${error}` };
   }
 };
@@ -191,24 +82,34 @@ const sell = async (
   try {
     console.log(`Amount Out min: ${amountOutMin} \n Path: ${path}`);
 
-    console.log("Sell OverLoads : ", overLoads);
-
-    const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
-
-    const sellTxData = await smartContract.sell(
-      toHex(amountOutMin),
-      path,
-      deadline,
-      botParams.uniswapv2Router,
-      overLoads
+    const tokenBalance = await getTokenBalance(
+      path[0],
+      botParameters.swapperAddress
     );
 
-    console.log("\n\n\n\n Sell data : ", sellTxData);
+    if (tokenBalance && tokenBalance > 0) {
+      console.log("Sell OverLoads : ", overLoads);
 
-    return { success: true, data: `${sellTxData.hash}` };
+      const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
+
+      const sellTxData = await smartContract.kinda(
+        toHex(amountOutMin),
+        path,
+        overLoads
+      );
+
+      console.log("\n\n\n\n Sell data : ", sellTxData);
+
+      return { success: true, data: `${sellTxData.hash}` };
+    } else {
+      console.log("\n\n We dont hold this token ", tokenBalance);
+    }
   } catch (error) {
+    console.log("Sell error ", error);
     return { success: false, data: `${error}` };
   }
 };
 
-export { allowToken, buy, sell };
+export { approveToken, buy, sell };
+
+// sell(0, ["0xf0a8ecbce8caadb7a07d1fcd0f87ae1bd688df43", botParameters.wethAddrress], 5 * 10 ** 9, 272)

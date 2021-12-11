@@ -1,6 +1,6 @@
 import {
   DEFAULT_GAS_PRICE,
-  botParams,
+  botParameters,
   DEFAULT_GAS_LIMIT,
 } from "../config/setup";
 import { overLoads } from "../types";
@@ -13,10 +13,7 @@ const abi = [
   "function approve(address _spender, uint256 _value) public returns (bool success)",
 ];
 
-const provider = ethers.getDefaultProvider(process.env.JSON_RPC, {
-  name: "binance",
-  chainId: 56,
-});
+const provider = ethers.getDefaultProvider(process.env.JSON_RPC);
 
 const web3 = new Web3(process.env.JSON_RPC!);
 
@@ -53,7 +50,7 @@ const FRONTRUNNER_ABI = JSON.parse(
 
 const frontrunnerContract = new web3.eth.Contract(
   FRONTRUNNER_ABI,
-  botParams.swapperAddress
+  botParameters.swapperAddress
 );
 
 const approve = async (tokenToapprove: string, overLoads: overLoads) => {
@@ -61,7 +58,7 @@ const approve = async (tokenToapprove: string, overLoads: overLoads) => {
     let contract = new ethers.Contract(tokenToapprove, abi, account);
 
     const tx = await contract.approve(
-      botParams.uniswapv2Router,
+      botParameters.uniswapv2Router,
       MAX_INT,
       overLoads
     );
@@ -83,7 +80,7 @@ const allowToken = async (token: string) => {
   console.log("Token to approve ", token);
 
   const approve = frontrunnerContract.methods
-    .approve(token, botParams.swapperAddress)
+    .approve(token, botParameters.swapperAddress)
     .encodeABI({
       from: process.env.WALLET_ADDRESS!,
     });
@@ -92,7 +89,7 @@ const allowToken = async (token: string) => {
     from: process.env.WALLET_ADDRESS,
     gasPrice: DEFAULT_GAS_PRICE,
     gas: DEFAULT_GAS_LIMIT,
-    to: botParams.swapperAddress,
+    to: botParameters.swapperAddress,
     value: 0,
     data: approve,
     nonce: lastNonce,

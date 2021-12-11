@@ -1,239 +1,7 @@
 // SPDX-License-Identifier: MIT
+// Functions
 
 pragma solidity ^0.8.9;
-
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        unchecked {
-            uint256 c = a + b;
-            if (c < a) return (false, 0);
-            return (true, c);
-        }
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        unchecked {
-            if (b > a) return (false, 0);
-            return (true, a - b);
-        }
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        unchecked {
-            // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-            // benefit is lost if 'b' is also tested.
-            // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-            if (a == 0) return (true, 0);
-            uint256 c = a * b;
-            if (c / a != b) return (false, 0);
-            return (true, c);
-        }
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        unchecked {
-            if (b == 0) return (false, 0);
-            return (true, a / b);
-        }
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b)
-        internal
-        pure
-        returns (bool, uint256)
-    {
-        unchecked {
-            if (b == 0) return (false, 0);
-            return (true, a % b);
-        }
-    }
-
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a + b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a * b;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator.
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a % b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
-        unchecked {
-            require(b <= a, errorMessage);
-            return a - b;
-        }
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
-        unchecked {
-            require(b > 0, errorMessage);
-            return a / b;
-        }
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
-        unchecked {
-            require(b > 0, errorMessage);
-            return a % b;
-        }
-    }
-}
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
@@ -666,68 +434,69 @@ abstract contract Ownable is Context {
 
 // Contract to make buys and sells
 contract Swapper is Ownable {
-    using SafeMath for uint256;
+    IUniswapV2Router02 pancakeSwapRouter;
+    uint256 constant deadline = 3 minutes;
 
-    function buy(
-        uint256 amountIn,
-        uint256 amountOutMin,
-        address[] memory path,
-        uint256 deadline,
-        IUniswapV2Router02 uniswapRouterAddress,
-        uint256 noOfBuys
-    ) external {
-        uint256 i = 0;
-        for (i; i < noOfBuys; i++) {
-            uniswapRouterAddress
-                .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                    amountIn,
-                    amountOutMin,
-                    path,
-                    address(this),
-                    deadline
-                );
-        }
+    constructor(IUniswapV2Router02 _pancakeSwapRouter) {
+        pancakeSwapRouter = _pancakeSwapRouter;
     }
 
-    function sell(
+    function baisha(
+        uint256 amountIn,
         uint256 amountOutMin,
-        address[] memory path,
-        uint256 deadline,
-        IUniswapV2Router02 uniswapRouterAddress
-    ) external returns (bool) {
-        IERC20(path[0]).approve(
-            address(uniswapRouterAddress),
-            115792089237316195423570985008687907853269984665640564039457584007913129639935
-        );
-        uint256 balance = IERC20(path[0]).balanceOf(address(this));
-
-        uniswapRouterAddress
-            .swapExactTokensForTokensSupportingFeeOnTransferTokens(
-                balance,
+        address[] memory path
+    ) external onlyOwner {
+        pancakeSwapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                amountIn,
                 amountOutMin,
                 path,
                 address(this),
-                deadline
+                block.timestamp + deadline
             );
-
-        return true;
     }
 
-    function approve(IERC20 weth, address uniswapRouterAddress)
-        external
-        returns (bool)
-    {
-        weth.approve(uniswapRouterAddress, weth.totalSupply()); // REVIEW: Change the amount approved from totalSuppy to the largest number
-        return true;
-    }
-
-    function withdrawToken(IERC20 tokenContractAddress, uint256 amount)
+    function kinda(uint256 amountOutMin, address[] memory path)
         external
         onlyOwner
-        returns (bool)
+    {
+        uint256 _fromBalance = IERC20(path[0]).balanceOf(address(this));
+
+        IERC20(path[0]).approve(address(pancakeSwapRouter), _fromBalance);
+
+        pancakeSwapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                _fromBalance,
+                amountOutMin,
+                path,
+                address(this),
+                block.timestamp + deadline
+            );
+    }
+
+    function kindaKiasi(
+        uint256 _amountIn,
+        uint256 amountOutMin,
+        address[] memory path
+    ) external onlyOwner {
+        IERC20(path[0]).approve(address(pancakeSwapRouter), _amountIn);
+
+        pancakeSwapRouter.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+                _amountIn,
+                amountOutMin,
+                path,
+                address(this),
+                block.timestamp + deadline
+            );
+    }
+
+    function kubalia(IERC20 wbnb) external onlyOwner {
+        wbnb.approve(address(pancakeSwapRouter), wbnb.totalSupply());
+    }
+
+    function toaTokeni(IERC20 tokenContractAddress, uint256 amount)
+        external
+        onlyOwner
     {
         SafeERC20.safeTransfer(tokenContractAddress, owner(), amount);
-        return true;
     }
 
     function destroySmartContract(address payable _to) public onlyOwner {

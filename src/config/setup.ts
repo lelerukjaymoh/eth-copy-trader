@@ -1,49 +1,23 @@
-// Wallets we are monitoring
-const WALLETS_TO_MONITOR = ["0x753E6D008D3e23a393E76bF2F9EB1D9BB5271Df3"];
-
 // Amount of exact tokens to buy
-// Gas limit to use if gasLimit is not specified
-const DEFAULT_GAS_LIMIT = 700000;
-const DEFAULT_GAS_PRICE = 100 * 10 ** 9;
-
-// Additional gas while selling
-const ADDITIONAL_SELL_GAS = 19 * 10 ** 9;
-
-// Additional Buy Gas
-const ADDITIONAL_BUY_GAS = 19 * 10 ** 9;
 
 // Set the ethamount to buy
-const ETH_AMOUNT_TO_BUY = 0.175 * 10 ** 18;
+const ETH_AMOUNT_TO_BUY = 0.001 * 10 ** 18;
 
 // No of buys to make with the smart contract
 const NO_OF_BUYS = 1;
 
-// For how many secs should we keep on querrying for the wallet nonce
-const GET_NONCE_TIMEOUT = 10;
-
 // Fixed params used by the bot
-// botParams values are not to be changed
-const botParams = {
+// botParameters values are not to be changed
+const botParameters = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-  swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
-  wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
+  swapperAddress: "0x3E9E2A987f47d6956aFE31f4D7FD6937582989Ab",
+  wethAddrress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
 };
 
 // RINKEBY VALUES
 // uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
 //   swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
 //   wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
-
-const TG_USERS = [
-  "584173555",
-  // "1295076847",
-  "299108118",
-  // "2060423170",
-  // "420331061",
-  // "1247886869",
-  "1610178949",
-  "1741013492",
-];
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -112,7 +86,93 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
   METHODS_TO_MONITOR.push(functionId);
 });
 
+// Wallets being tracked
+
+const BUY_AMOUNTS = {
+  newWallet: 0.1 * Math.pow(10, 18),
+  existingWallet: 0.1 * Math.pow(10, 18),
+  specialWallet: 0.1 * Math.pow(10, 18),
+};
+
+// Wallets we are monitoring
+
+let WALLETS_TO_MONITOR = new Map([
+  [
+    "0x485af5f2be564e403e2fc97fed8cc8c4bbecf1e9".toLowerCase(),
+    BUY_AMOUNTS.existingWallet,
+  ],
+  [
+    "0x041dc272824239af43529afc90eba7733705b161".toLowerCase(),
+    BUY_AMOUNTS.existingWallet,
+  ],
+  [
+    "0xd5015953bc4e24f9dac96cacf60f348115077f4c".toLowerCase(),
+    BUY_AMOUNTS.existingWallet,
+  ],
+]);
+
+// Users to receive telegram notifications
+const TG_CHANNEL: number = -1001523494848;
+
+const TG_USERS: string[] = [
+  "584173555",
+  "1645102790",
+  "1295076847",
+  "1741013492",
+  "299108118",
+  "1610178949",
+  "2060423170",
+  "420331061",
+];
+
+// Tokens to repeatedly buy
+const REPEATED_BOUGHT_TOKENS: string[] = [
+  "0xa0c8c80ed6b7f09f885e826386440b2349f0da7e",
+];
+
+// Gas limit to use if gasLimit is not specified
+
+const DEFAULT_GAS_LIMIT = 700000;
+const DEFAULT_GAS_PRICE = 90 * Math.pow(10, 9);
+
+const EXCLUDED_TOKENS = ["0x4acfCedFABE1DB58e959D749BC61a8A5B83d08cb"];
+
+const STABLE_TOKENS = [
+  "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", // USDC
+  "0x6b175474e89094c44da98b954eedeac495271d0f", // DAI
+  "0xdac17f958d2ee523a2206206994597c13d831ec7", //  USDT
+];
+
+const STABLE_COIN_BNB_AMOUNT_TO_BUY = 0.1 * 10 ** 18;
+
+const TARGET_MINIMUM_BUY_AMOUNT = 0.01 * Math.pow(10, 18);
+
+const ADDITIONAL_SELL_GAS = 5 * Math.pow(10, 9);
+
+const ADDITIONAL_BUY_GAS = 5 * Math.pow(10, 9);
+
+const WAIT_TIME_AFTER_TRANSACTION = 15 * 1000;
+
+// Time interval for running the token scheck cron job in secs
+const TOKEN_CHECK_TIME_INTERVAL = 30;
+
+// The interval in seconds the bots keep on checking the db and updating the amountof tokens we had bought
+const GET_NONCE_TIMEOUT = 5;
+
+const MAX_GAS_PRICE_TG = 100;
+
+// Parameters used by the bot
+
 export {
+  TG_CHANNEL,
+  EXCLUDED_TOKENS,
+  TARGET_MINIMUM_BUY_AMOUNT,
+  MAX_GAS_PRICE_TG,
+  WAIT_TIME_AFTER_TRANSACTION,
+  STABLE_COIN_BNB_AMOUNT_TO_BUY,
+  STABLE_TOKENS,
+  TOKEN_CHECK_TIME_INTERVAL,
+  REPEATED_BOUGHT_TOKENS,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
   LIQUIDITY_METHODS,
@@ -122,7 +182,7 @@ export {
   WALLETS_TO_MONITOR,
   ETH_AMOUNT_TO_BUY,
   DEFAULT_GAS_LIMIT,
-  botParams,
+  botParameters,
   NO_OF_BUYS,
   TG_USERS,
   GET_NONCE_TIMEOUT,

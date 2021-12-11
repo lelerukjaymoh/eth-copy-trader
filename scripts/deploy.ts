@@ -1,9 +1,10 @@
 import { ethers } from "hardhat";
+import { botParameters } from "../src/config/setup";
 
 const main = async () => {
   const [deployer] = await ethers.getSigners();
   const factory = await ethers.getContractFactory("Swapper");
-  const deployedSwapper = await factory.deploy();
+  const deployedSwapper = await factory.deploy(botParameters.uniswapv2Router);
 
   let data = {
     address: deployedSwapper.address,

@@ -1,8 +1,11 @@
 import { ethers, providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
-import { botParams, GET_NONCE_TIMEOUT } from "../config/setup";
-import UNISWAP_ABI from "../uniswap/erc20ABI.json";
+import { botParameters, GET_NONCE_TIMEOUT } from "../config/setup";
+import ERC20ABI from "./abi/erc20ABI.json";
+import smartContractABI from "./abi/swapperABI.json";
+import { BoughtTokens } from "../db/models";
+import "../db/connect";
 
 if (
   !process.env.JSON_RPC ||
@@ -14,62 +17,23 @@ if (
   );
 }
 
-const web3 = new Web3(process.env.JSON_RPC);
-const provider = new providers.JsonRpcProvider(process.env.JSON_RPC);
-
-function toHex(currencyAmount: any) {
-  if (currencyAmount.toString().includes("e")) {
-    let hexedAmount = currencyAmount.toString(16);
-    return `0x${hexedAmount}`;
-  } else {
-    let parsedAmount = parseInt(currencyAmount);
-    let hexedAmount = parsedAmount.toString(16);
-    return `0x${hexedAmount}`;
-  }
-}
-
-const smartContractABI = JSON.parse(
-  readFileSync("src/uniswap/swapperABI.json", "utf8")
-);
-
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!);
-const account = signer.connect(provider);
-
 const smartContractInterface = new ethers.utils.Interface(smartContractABI);
 
-const smartContract = new ethers.Contract(
-  botParams.swapperAddress,
-  smartContractInterface,
-  account
-);
-
 // Initilise an interface of the ABI
-const uniswapInterface = new ethers.utils.Interface(UNISWAP_ABI);
+const ERC20Interface = new ethers.utils.Interface(ERC20ABI);
 
 const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   try {
     console.log("Token ", tokenAddress);
     const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(UNISWAP_ABI)),
+      JSON.parse(JSON.stringify(ERC20ABI)),
       tokenAddress
     );
     return await tokenContract.methods
-      .allowance(botParams.swapperAddress, botParams.uniswapv2Router)
+      .allowance(botParameters.swapperAddress, botParameters.uniswapv2Router)
       .call();
   } catch (error) {
     console.log("Error fetching the allownce amount ", error);
-  }
-};
-
-const getTokenBalance = async (tokenAddress: string, walletAddress: string) => {
-  try {
-    const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(UNISWAP_ABI)),
-      tokenAddress
-    );
-    return await tokenContract.methods.balanceOf(walletAddress).call();
-  } catch (error) {
-    console.log("Error getting token balance", error);
   }
 };
 
@@ -81,43 +45,115 @@ const currentNonce = async () => {
   }
 };
 
+const provider = new ethers.providers.JsonRpcProvider(process.env.JSON_RPC);
+const web3 = new Web3(process.env.JSON_RPC);
+
+const getTxnStatus = async (txn: string) => {
+  try {
+    let transactionReceipt = await provider.getTransactionReceipt(txn);
+
+    return transactionReceipt.status;
+  } catch (error) {
+    console.log(
+      "\n\n Encoutered an error getting status of the transaction ",
+      txn,
+      error
+    );
+  }
+};
+
+const signer = new ethers.Wallet(process.env.PRIVATE_KEY!);
+const account = signer.connect(provider);
+
+const smartContract = new ethers.Contract(
+  botParameters.swapperAddress,
+  smartContractABI,
+  account
+);
+
+const getTokenAllowance = async (
+  tokenAddress: string,
+  walletAddress: string
+) => {
+  try {
+    console.log("Token ", tokenAddress);
+    const tokenContract = new web3.eth.Contract(
+      JSON.parse(JSON.stringify(ERC20ABI)),
+      tokenAddress
+    );
+    return await tokenContract.methods
+      .allowance(walletAddress, botParameters.uniswapv2Router)
+      .call();
+  } catch (error) {
+    console.log("Error fetching the allownce amount ", error);
+  }
+};
+
+const getTokenDecimals = async (tokenAddress: string) => {
+  try {
+    const tokenContract = new web3.eth.Contract(
+      JSON.parse(JSON.stringify(ERC20ABI)),
+      tokenAddress
+    );
+    return await tokenContract.methods.decimals().call();
+  } catch (error) {
+    console.log("Error fetching token decimals ", error);
+  }
+};
+
+const getTokenBalance = async (tokenAddress: string, address: string) => {
+  try {
+    const tokenContract = new web3.eth.Contract(
+      JSON.parse(JSON.stringify(ERC20ABI)),
+      tokenAddress
+    );
+
+    return await tokenContract.methods.balanceOf(address).call();
+  } catch (error) {
+    console.log("Error getting token balance ", error);
+  }
+};
+
 const wait = async (ms: number) => {
-  console.log(`\n\n Waiting for ${ms / 1000} secs ... \n\n`);
+  console.log("\n\n Waiting ... \n\n");
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-const buyMessage = (token: string, buyTxHash: string, target: string) => {
-  let message = "*** Successfully Broadcast a BUY ***";
-  message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
-  message += "\n\n Target";
-  message += `\nhttps://etherscan.io/address/${target}`;
-  message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${buyTxHash}`;
-
-  return message;
+const toHex = (currencyAmount: any) => {
+  if (currencyAmount.toString().indexOf("e") > -1) {
+    let hexedAmount = currencyAmount.toString(16);
+    console.log("Hexed amount ", hexedAmount);
+    return `0x${hexedAmount}`;
+  } else {
+    let parsedAmount = parseInt(currencyAmount);
+    let hexedAmount = parsedAmount.toString(16);
+    return `0x${hexedAmount}`;
+  }
 };
 
-const sellMessage = (token: string, sellTxHash: string, target: string) => {
-  let message = "*** Successfully Broadcast a SELL ***";
-  message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
-  message += "\n\n Target";
-  message += `\nhttps://etherscan.io/address/${target}`;
-  message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${sellTxHash}`;
-
-  return message;
+const getNonce = async (walletAddress: string) => {
+  return await provider.getTransactionCount(walletAddress);
 };
 
-const scamTxMessage = (token: string, buyTxHash: string) => {
-  let message = "*** Successfully SOLD tokens before a scam function ***";
-  message += "\n\n Token";
-  message += `\nhttps://etherscan.io/token/${token}`;
-  message += "\n\n Tx";
-  message += `\nhttps://etherscan.io/tx/${buyTxHash}`;
+const lowerCaseItems = (items: string[]) => {
+  items.map((item) => {
+    return item.toLowerCase();
+  });
+};
 
-  return message;
+const tokenAmountToBuy = (
+  targetEthAmount: number,
+  targetTokenAmount: number,
+  ourEthAmount: number
+) => {
+  let tokensPerEth = targetTokenAmount / targetEthAmount;
+  console.log(
+    "Expected anmounts : ",
+    tokensPerEth,
+    ourEthAmount * tokensPerEth
+  );
+
+  return ourEthAmount * tokensPerEth;
 };
 
 /**
@@ -137,37 +173,60 @@ const checkAddress = (ctx: any, address: string) => {
   }
 };
 
-const getNonce = async (walletAddress: string) => {
-  let walletNonce;
-
-  const startTime = Date.now();
-  while (true) {
-    let nonce = await provider.getTransactionCount(walletAddress);
-    console.log(nonce);
-
-    if (nonce) {
-      walletNonce = nonce;
-      break;
-    } else if (Date.now() - startTime > GET_NONCE_TIMEOUT * 1000) {
-      break;
-    }
-    await wait(3000);
+const checkToken = async (token: string) => {
+  try {
+    return await BoughtTokens.find({
+      tokenAddress: token.toLowerCase(),
+      bought: true,
+    });
+  } catch (error) {
+    console.log("Got an error checking if token is in DB ", token, error);
   }
+};
 
-  return walletNonce;
+const saveToken = async (token: string, txHash: string) => {
+  const bought = new BoughtTokens({
+    tokenAddress: token.toLowerCase(),
+    txHash: txHash,
+  });
+
+  await bought
+    .save()
+    .then(() => {
+      console.log("Successfully saved token in DB");
+    })
+    .catch((error: any) => {
+      console.log("Error saving token ", token, error);
+    });
+};
+
+const deleteToken = async (token: string) => {
+  await BoughtTokens.findOneAndDelete({ tokenAddress: token.toLowerCase() })
+    .then(() => {
+      console.log("Successfully deleted token from db ", token);
+    })
+    .catch((error: any) => {
+      console.log("Error deleteing token ", token, error);
+    });
 };
 
 export {
-  scamTxMessage,
-  buyMessage,
-  sellMessage,
+  getTxnStatus,
+  tokenAmountToBuy,
+  ERC20ABI,
+  getTokenAllowance,
+  provider,
+  saveToken,
+  checkToken,
+  deleteToken,
+  getTokenDecimals,
+  lowerCaseItems,
   getTokenBalance,
   wait,
   toHex,
   currentNonce,
-  UNISWAP_ABI,
   tokenAllowance,
-  uniswapInterface,
+  ERC20Interface,
   smartContract,
   checkAddress,
   getNonce,

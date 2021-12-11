@@ -4,18 +4,25 @@ export interface txContents {
   hash: string;
   from: string;
   to: string;
+  gasPrice?: BigNumber;
   maxPriorityFeePerGas?: BigNumber;
   maxFeePerGas?: BigNumber;
-  gasPrice?: BigNumber;
   gas: BigNumber;
   input: string;
+  value: BigNumber;
 }
 
 export interface overLoads {
   gasLimit: number;
   nonce?: number;
   gasPrice?: number;
+  value?: string;
   maxPriorityFeePerGas?: number;
   maxFeePerGas?: number;
-  value?: string;
+}
+
+export interface tokenInterface {
+  tokenAddress: string;
+  bought: boolean;
+  txHash: string;
 }

@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "C:\\Users\\Joel\\projects\\nkx\\eth\\nkx-eth-price-impact\\contracts\\Swapper.sol": {
-      "lastModificationDate": 1637964627112,
-      "contentHash": "9294331b8554872acd5d0cd1602fb702",
+    "C:\\Users\\Joel\\projects\\nkx\\eth\\nkx-eth-copy-trader\\contracts\\Swapper.sol": {
+      "lastModificationDate": 1639185004915,
+      "contentHash": "70537503da00978d6e20b5df797b75bc",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -39,7 +39,6 @@
         "IUniswapV2Router02",
         "Ownable",
         "SafeERC20",
-        "SafeMath",
         "Swapper"
       ]
     }

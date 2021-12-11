@@ -1,5 +1,5 @@
 import Web3 from "web3";
-import { botParams } from "./config/setup";
+import { botParameters } from "./config/setup";
 import { smartContract, toHex } from "./utils/common";
 
 const web3 = new Web3(process.env.JSON_RPC!);
@@ -22,7 +22,7 @@ const withdraw = async () => {
       from: process.env.WALLET_ADDRESS!,
       gas: toHex(700000),
       gasPrice: toHex(120 * 10 ** 9),
-      to: botParams.swapperAddress,
+      to: botParameters.swapperAddress,
       value: 0,
       data: withdrawData,
       nonce: 94,

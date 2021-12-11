@@ -1,13 +1,13 @@
 import {
-  botParams,
+  botParameters,
   DEFAULT_GAS_LIMIT,
-  DEFAULT_GAS_PRICE,
+  MAX_GAS_PRICE_TG,
+  TG_CHANNEL,
   TG_USERS,
 } from "../config/setup";
 import { checkAddress, getNonce, getTokenBalance } from "../utils/common";
 import { sell } from "../uniswap/swap";
-
-const { Telegraf } = require("telegraf");
+import { Telegraf } from "telegraf";
 
 if (!process.env.WALLET_ADDRESS || !process.env.BOT_TOKEN) {
   throw new Error("WALLET_ADDRESS or BOT_TOKEN was not provided in .env");
@@ -35,79 +35,75 @@ bot.on("text", async (ctx: any) => {
     let user = ctx.message.from.id.toString();
 
     if (TG_USERS.includes(user)) {
-      const tokenAddress = checkAddress(ctx, details[0].trim());
-      let gasPrice = details[1].trim();
+      if (details.length > 1) {
+        const tokenAddress = checkAddress(ctx, details[0].trim());
+        let gasPrice = details[1].trim();
 
-      if (tokenAddress && gasPrice) {
-        ctx.reply("Processing ...");
+        if (gasPrice && gasPrice < MAX_GAS_PRICE_TG) {
+          ctx.reply("Processing ...");
 
-        // if (details.length > 2) {
-        // const percentageToSell = parseInt(details[2].trim());
+          const tokenBalance = await getTokenBalance(
+            tokenAddress!,
+            botParameters.swapperAddress
+          );
 
-        // console.log("Percentage to sell : ", percentageToSell);
+          if (tokenBalance > 0) {
+            gasPrice = parseInt(gasPrice) * 10 ** 9;
 
-        //   if (
-        //     percentageToSell &&
-        //     !isNaN(percentageToSell) &&
-        //     percentageToSell > 0
-        //   ) {
-        //     const tokenBalance = await getTokenBalance(
-        //       tokenAddress!,
-        //       botParams.swapperAddress
-        //     );
+            const nonce = await getNonce(process.env.WALLET_ADDRESS!);
+            const overLoads = { gasPrice, nonce, gasLimit: DEFAULT_GAS_LIMIT };
 
-        //     console.log("Token balance ", tokenBalance);
+            const sellTx = await sell(
+              0,
+              [tokenAddress!, botParameters.wethAddrress],
+              overLoads
+            );
 
-        //     if (tokenBalance) {
-        //       const amountToSell = percentageToSell * tokenBalance;
+            if (sellTx!.success) {
+              let message = "Manual Sell Notification";
+              message += "\n\n Txn ";
+              message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
+              message += "\n\n Token";
+              message += `\nhttps://etherscan.io/token/${tokenAddress}`;
 
-        //       // TODO: implement selling portions of the token
-        //     }
-        //   }
-        // } else{
+              ctx.reply(message);
+            } else {
+              let message = "Manual Sell Error";
+              message += "\n\n Token";
+              message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+              message += "\n\n Error";
+              message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
 
-        gasPrice = parseInt(gasPrice) * 10 ** 9;
+              ctx.reply(message);
+            }
+          } else {
+            let message =
+              "Warning! Either could not get token balance (If this is the case, ensure the token is a token address and try again. Also refer to the information ";
+            message +=
+              "below for more insights on the cause of the error OR token balance is 0";
+            message += `\n\n Token Balance: ${tokenBalance}`;
+            message += "\n\nReason for error: ";
+            message += `\n${tokenBalance}`;
 
-        const nonce = await getNonce(process.env.WALLET_ADDRESS!);
-        const overLoads = {
-          gasLimit: DEFAULT_GAS_LIMIT,
-          nonce,
-          gasPrice,
-        };
-        const sellTx = await sell(
-          0,
-          [tokenAddress, botParams.wethAddrress],
-          overLoads
-        );
-
-        console.log("OverLoads  ", overLoads);
-
-        if (sellTx.success) {
-          let message = "Manual Sell Notification";
-          message += "\n\n Txn ";
-          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
-          message += "\n\n Token";
-          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
-
-          ctx.reply(message);
+            ctx.reply(message);
+          }
+          // }
         } else {
-          let message = "Manual Sell Error";
-          message += "\n\n Token";
-          message += `\nhttps://etherscan.io/token/${tokenAddress}`;
-          message += "\n\n Error";
-          message += `\nhttps://etherscan.io/tx/${sellTx.data}`;
-
+          let message =
+            "Error! You did not provide the gas price to be used for selling or You over priced the transaction";
+          message += `. You either did not provide the token address or the gas price value or provided a large amount of gas. `;
+          message += `Gas price cant be more than ${MAX_GAS_PRICE_TG}`;
+          message += "\n\nExample of a correct sell command";
+          message +=
+            "\n\n contractAddress, gasPrice, ie 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b, 30";
           ctx.reply(message);
         }
-        // }
       } else {
-        let message = "Wrong sell format";
-        message +=
-          "You either did not provide the token address or the gas price value";
-        message += "Example of a correct sell command";
-        message +=
-          "\n\n sell, contractAddress, gasPrice, sell, 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b, 100";
-        ctx.reply();
+        let message =
+          "Error! you did not provide enough parameteres for selling. You need to provide token to sell and gas to be used for selling in gwei. is contractAddress, gasPrice ";
+        message += "\n\nExample of a correct sell command";
+        message += "\n\n 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b, 30";
+        ctx.reply(message);
       }
     } else {
       ctx.reply("Error, You are not authorised to make this request");
@@ -115,27 +111,30 @@ bot.on("text", async (ctx: any) => {
   } catch (error) {
     let message = "Encoutered this error while selling";
     message += `\n\n\ ${error}`;
+
+    ctx.reply(message);
   }
 });
 
 const sendNotification = async (message: any) => {
   console.log("\n\nSending Tg notification...");
 
-  TG_USERS.forEach((chat) => {
-    bot.telegram
-      .sendMessage(chat, message, {
-        parse_mode: "HTML",
-        disable_web_page_preview: true,
-      })
-      .catch((error: any) => {
-        console.log(
-          "\n\n Encoutered an error while sending notification to ",
-          chat
-        );
-        console.log("==============================");
-        console.log(error);
-      });
-  });
+  // TG_USERS.forEach((chat) => {
+
+  bot.telegram
+    .sendMessage(TG_CHANNEL, message, {
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    })
+    .catch((error: any) => {
+      console.log(
+        "\n\n Encoutered an error while sending notification to ",
+        TG_CHANNEL
+      );
+      console.log("==============================");
+      console.log(error);
+    });
+  // });
   console.log("Done!");
 };
 

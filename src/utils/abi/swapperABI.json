@@ -1,5 +1,10 @@
 [
   {
+    "type": "constructor",
+    "payable": false,
+    "inputs": [{ "type": "address", "name": "_pancakeSwapRouter" }]
+  },
+  {
     "type": "event",
     "anonymous": false,
     "name": "OwnershipTransferred",
@@ -10,27 +15,13 @@
   },
   {
     "type": "function",
-    "name": "approve",
-    "constant": false,
-    "payable": false,
-    "inputs": [
-      { "type": "address", "name": "weth" },
-      { "type": "address", "name": "uniswapRouterAddress" }
-    ],
-    "outputs": [{ "type": "bool" }]
-  },
-  {
-    "type": "function",
-    "name": "buy",
+    "name": "baisha",
     "constant": false,
     "payable": false,
     "inputs": [
       { "type": "uint256", "name": "amountIn" },
       { "type": "uint256", "name": "amountOutMin" },
-      { "type": "address[]", "name": "path" },
-      { "type": "uint256", "name": "deadline" },
-      { "type": "address", "name": "uniswapRouterAddress" },
-      { "type": "uint256", "name": "noOfBuys" }
+      { "type": "address[]", "name": "path" }
     ],
     "outputs": []
   },
@@ -44,6 +35,37 @@
   },
   {
     "type": "function",
+    "name": "kinda",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      { "type": "uint256", "name": "amountOutMin" },
+      { "type": "address[]", "name": "path" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "kindaKiasi",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      { "type": "uint256", "name": "_amountIn" },
+      { "type": "uint256", "name": "amountOutMin" },
+      { "type": "address[]", "name": "path" }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "kubalia",
+    "constant": false,
+    "payable": false,
+    "inputs": [{ "type": "address", "name": "wbnb" }],
+    "outputs": []
+  },
+  {
+    "type": "function",
     "name": "owner",
     "constant": true,
     "stateMutability": "view",
@@ -53,26 +75,13 @@
   },
   {
     "type": "function",
-    "name": "sell",
-    "constant": false,
-    "payable": false,
-    "inputs": [
-      { "type": "uint256", "name": "amountOutMin" },
-      { "type": "address[]", "name": "path" },
-      { "type": "uint256", "name": "deadline" },
-      { "type": "address", "name": "uniswapRouterAddress" }
-    ],
-    "outputs": [{ "type": "bool" }]
-  },
-  {
-    "type": "function",
-    "name": "withdrawToken",
+    "name": "toaTokeni",
     "constant": false,
     "payable": false,
     "inputs": [
       { "type": "address", "name": "tokenContractAddress" },
       { "type": "uint256", "name": "amount" }
     ],
-    "outputs": [{ "type": "bool" }]
+    "outputs": []
   }
 ]
