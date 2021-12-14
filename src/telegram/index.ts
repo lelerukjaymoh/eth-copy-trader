@@ -16,6 +16,7 @@ if (!process.env.WALLET_ADDRESS || !process.env.BOT_TOKEN) {
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
 bot.start((ctx: any) => {
+  console.log("\n\n User is starting the bot")
   ctx.reply(
     "Welcome, You account is successfully setup to receive notifications  ..."
   );

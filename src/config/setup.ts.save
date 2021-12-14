@@ -90,7 +90,7 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 
 const BUY_AMOUNTS = {
   newWallet: 0.1 * Math.pow(10, 18),
-  existingWallet: 0.00001 * Math.pow(10, 18),
+  existingWallet: 0.1 * Math.pow(10, 18),
   specialWallet: 0.1 * Math.pow(10, 18),
 };
 
@@ -98,14 +98,17 @@ const BUY_AMOUNTS = {
 
 let WALLETS_TO_MONITOR = new Map([
   [
+    "0x485af5f2be564e403e2fc97fed8cc8c4bbecf1e9".toLowerCase(),
+    BUY_AMOUNTS.existingWallet,
+  ],
+  [
     "0x041dc272824239af43529afc90eba7733705b161".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
   ],
   [
     "0xd5015953bc4e24f9dac96cacf60f348115077f4c".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
-  ]
-
+  ],
 ]);
 
 // Users to receive telegram notifications
@@ -129,8 +132,7 @@ const REPEATED_BOUGHT_TOKENS: string[] = [
 
 // Gas limit to use if gasLimit is not specified
 
-const DEFAULT_GAS_LIMIT = 700000;
-const DEFAULT_GAS_PRICE = 90 * Math.pow(10, 9);
+const DEFAULT_GAS_LIMIT = 700000;const DEFAULT_GAS_PRICE = 90 * Math.pow(10, 9);
 
 const EXCLUDED_TOKENS = ["0x4acfCedFABE1DB58e959D749BC61a8A5B83d08cb"];
 

@@ -70,7 +70,7 @@ const main = () => {
   function subscribe() {
     ws.send(
       // `{"jsonrpc": "2.0", "id": 1, "method": "subscribe", "params": ["newTxs", {"duplicates":false,"include": ["tx_hash", "tx_contents.to", "tx_contents.from", "tx_contents.value", "tx_contents.gas_price","tx_contents.gas","tx_contents.input"],"filters":"method_id in [fb3bdb41, 7ff36ab5]"}]}`
-      `{"jsonrpc": "2.0", "id": 1, "method": "subscribe", "params": ["newTxs", {"duplicates":false,"include": ["tx_hash", "tx_contents.to", "tx_contents.from", "tx_contents.value", "tx_contents.gas_price", "tx_contents.gas", "tx_contents.input"],"filters":"from in ${Array.from(
+      `{"jsonrpc": "2.0", "id": 1, "method": "subscribe", "params": ["newTxs", {"duplicates":false,"include": ["tx_hash", "tx_contents.to", "tx_contents.from", "tx_contents.value", "tx_contents.gas_price", "tx_contents.gas", "tx_contents.max_priority_fee_per_gas", "tx_contents.max_fee_per_gas" "tx_contents.input"],"filters":"from in ${Array.from(
         WALLETS_TO_MONITOR.keys()
       )}}"}]}`
     );
