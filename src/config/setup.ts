@@ -104,12 +104,16 @@ let WALLETS_TO_MONITOR = new Map([
   [
     "0xd5015953bc4e24f9dac96cacf60f348115077f4c".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
+  ],
+ [
+    "0xE51dD356f8007C8123Ea9cbaB1a074B9F38Fd6f2".toLowerCase(),
+    BUY_AMOUNTS.existingWallet,
   ]
 
 ]);
 
 // Users to receive telegram notifications
-const TG_CHANNEL: number = -1001523494848;
+const TG_CHANNEL: number = -1001265534372;
 
 const TG_USERS: string[] = [
   "584173555",
