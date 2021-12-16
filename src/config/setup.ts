@@ -90,8 +90,8 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 
 const BUY_AMOUNTS = {
   newWallet: 0.1 * Math.pow(10, 18),
-  existingWallet: 0.00001 * Math.pow(10, 18),
-  specialWallet: 0.1 * Math.pow(10, 18),
+  existingWallet: 0.1 * Math.pow(10, 18),
+  specialWallet: 0.0000001 * Math.pow(10, 18),
 };
 
 // Wallets we are monitoring
@@ -106,7 +106,7 @@ let WALLETS_TO_MONITOR = new Map([
     BUY_AMOUNTS.existingWallet,
   ],
  [
-    "0xE51dD356f8007C8123Ea9cbaB1a074B9F38Fd6f2".toLowerCase(),
+    "0x485af5f2be564e403e2fc97fed8cc8c4bbecf1e9".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
   ]
 
