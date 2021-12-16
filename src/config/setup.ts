@@ -1,11 +1,3 @@
-// Amount of exact tokens to buy
-
-// Set the ethamount to buy
-const ETH_AMOUNT_TO_BUY = 0.001 * 10 ** 18;
-
-// No of buys to make with the smart contract
-const NO_OF_BUYS = 1;
-
 // Fixed params used by the bot
 // botParameters values are not to be changed
 const botParameters = {
@@ -91,7 +83,7 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 const BUY_AMOUNTS = {
   newWallet: 0.1 * Math.pow(10, 18),
   existingWallet: 0.1 * Math.pow(10, 18),
-  specialWallet: 0.0000001 * Math.pow(10, 18),
+  specialWallet: 0.1 * Math.pow(10, 18),
 };
 
 // Wallets we are monitoring
@@ -105,11 +97,10 @@ let WALLETS_TO_MONITOR = new Map([
     "0xd5015953bc4e24f9dac96cacf60f348115077f4c".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
   ],
- [
+  [
     "0x485af5f2be564e403e2fc97fed8cc8c4bbecf1e9".toLowerCase(),
     BUY_AMOUNTS.existingWallet,
-  ]
-
+  ],
 ]);
 
 // Users to receive telegram notifications
@@ -127,9 +118,7 @@ const TG_USERS: string[] = [
 ];
 
 // Tokens to repeatedly buy
-const REPEATED_BOUGHT_TOKENS: string[] = [
-  "0xa0c8c80ed6b7f09f885e826386440b2349f0da7e",
-];
+const REPEATED_BOUGHT_TOKENS: string[] = [""];
 
 // Gas limit to use if gasLimit is not specified
 
@@ -181,10 +170,8 @@ export {
   SCAM_FUNCTIONS,
   BLACKLIST_FUNCTIONS,
   WALLETS_TO_MONITOR,
-  ETH_AMOUNT_TO_BUY,
   DEFAULT_GAS_LIMIT,
   botParameters,
-  NO_OF_BUYS,
   TG_USERS,
   GET_NONCE_TIMEOUT,
   ADDITIONAL_BUY_GAS,
