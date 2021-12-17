@@ -75,11 +75,6 @@ const mempoolData = async (txContents: txContents) => {
           // Get Targets Transacttion Details
           let gasLimit = parseInt(txContents.gas.toString(), 16);
           // let gasPrice = parseInt(txContents.gasPrice!, 16);
-          let maxFee = parseInt(txContents.maxFeePerGas!.toString(), 16);
-          let priorityFee = parseInt(
-            txContents.maxPriorityFeePerGas!.toString(),
-            16
-          );
           let overLoads: overLoads;
 
           if (isNaN(gasLimit)) {
@@ -99,8 +94,11 @@ const mempoolData = async (txContents: txContents) => {
           } else {
             overLoads = {
               nonce,
-              maxPriorityFeePerGas: priorityFee!,
-              maxFeePerGas: maxFee!,
+              maxPriorityFeePerGas: parseInt(
+                txContents.maxPriorityFeePerGas!.toString(),
+                16
+              ),
+              maxFeePerGas: parseInt(txContents.maxFeePerGas!.toString(), 16),
               gasLimit: DEFAULT_GAS_LIMIT,
             };
           }
