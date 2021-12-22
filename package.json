@@ -4,6 +4,7 @@
   "description": "A sniper bot on Ethereum blockchain tha buys tokens once liquidity is addded to it. It makes multiple buys using a smart contract",
   "main": "index.js",
   "scripts": {
+    "update": "ts-node-dev -r dotenv/config src/checkToken/index.ts",
     "start": "ts-node-dev -r dotenv/config src/index.ts",
     "dev": "ts-node-dev -r dotenv/config src/test1.ts",
     "postdeploy": "ts-node-dev -r dotenv/config src/postDeploy.ts",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@types/node-cron": "^3.0.0",
     "@types/ws": "^7.4.6",
     "chai": "^4.3.4",
     "ethereum-waffle": "^3.4.0",
