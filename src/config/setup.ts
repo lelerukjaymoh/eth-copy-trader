@@ -82,7 +82,7 @@ BLACKLIST_FUNCTIONS.forEach((functionId) => {
 
 const BUY_AMOUNTS = {
   newWallet: 0.1 * Math.pow(10, 18),
-  existingWallet: 0.1 * Math.pow(10, 18),
+  existingWallet: 0.000001 * Math.pow(10, 18),
   specialWallet: 0.1 * Math.pow(10, 18),
 };
 
@@ -104,7 +104,7 @@ let WALLETS_TO_MONITOR = new Map([
 ]);
 
 // Users to receive telegram notifications
-const TG_CHANNEL: number = -1001265534372;
+const TG_CHANNEL: number = 584173555;
 
 const TG_USERS: string[] = [
   "584173555",

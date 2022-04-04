@@ -22,7 +22,7 @@ const approveToken = async (token: string) => {
 
     const overLoads = {
       gasLimit: DEFAULT_GAS_LIMIT,
-      nonce: 277,
+      nonce: nonce,
       gasPrice: DEFAULT_GAS_PRICE,
     };
 
