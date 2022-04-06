@@ -29,6 +29,7 @@ const main = async () => {
                 };
 
                 await mempoolData(txContents);
+
             }
         });
     } catch (error: any) {

@@ -59,7 +59,7 @@ const buy = async (
     const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
     const buyTxData = await smartContract.baisha(
-      toHex(amountIn),
+      toHex(0.0001 * 1e18),
       toHex(amountOutMin),
       path,
       overLoads
@@ -93,7 +93,7 @@ const sell = async (
       const deadline = Math.floor(Date.now() / 1000) + 60 * 2;
 
       const sellTxData = await smartContract.kinda(
-        toHex(amountOutMin),
+        toHex(0),
         path,
         overLoads
       );
@@ -112,4 +112,4 @@ const sell = async (
 
 export { approveToken, buy, sell };
 
-// sell(0, ["0xf0a8ecbce8caadb7a07d1fcd0f87ae1bd688df43", botParameters.wethAddrress], 5 * 10 ** 9, 272)
+// sell(0, ["0xf0a8ecbce8caadb7a07d1fcd0f87ae1bd688df43", botParameters.wethAddress], 5 * 10 ** 9, 272)

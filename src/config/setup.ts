@@ -1,15 +1,16 @@
 // Fixed params used by the bot
 // botParameters values are not to be changed
 const botParameters = {
-  uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+  uniswapv2Router: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+  uniswapv3Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
   swapperAddress: "0x3E9E2A987f47d6956aFE31f4D7FD6937582989Ab",
-  wethAddrress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  wethAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
 };
 
 // RINKEBY VALUES
 // uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
 //   swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
-//   wethAddrress: "0xc778417e063141139fce010982780140aa0cd5ab",
+//   wethAddress: "0xc778417e063141139fce010982780140aa0cd5ab",
 
 // LIQUIDITY_METHODS
 const LIQUIDITY_METHODS: string[] = [
@@ -108,13 +109,13 @@ const TG_CHANNEL: number = 584173555;
 
 const TG_USERS: string[] = [
   "584173555",
-  "1645102790",
-  "1295076847",
-  "1741013492",
-  "299108118",
-  "1610178949",
-  "2060423170",
-  "420331061",
+  // "1645102790",
+  // "1295076847",
+  // "1741013492",
+  // "299108118",
+  // "1610178949",
+  // "2060423170",
+  // "420331061",
 ];
 
 // Tokens to repeatedly buy

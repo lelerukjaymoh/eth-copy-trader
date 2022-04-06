@@ -29,21 +29,6 @@ ethers;
 const MAX_INT =
   "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 
-const walletNonce = async () => {
-  try {
-    let nonce = await provider.getTransactionCount(walletAddress);
-
-    if (nonce) {
-      return nonce;
-    } else {
-      let nonce = await provider.getTransactionCount(walletAddress);
-      return nonce;
-    }
-  } catch (error) {
-    console.log("Error fetching Wallet nonce ", error);
-  }
-};
-
 const FRONTRUNNER_ABI = JSON.parse(
   readFileSync("src/uniswap/erc20ABI.json", "utf8")
 );
@@ -115,4 +100,4 @@ const allowToken = async (token: string) => {
     });
 };
 
-export { approve, walletNonce };
+export { approve };

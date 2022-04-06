@@ -5,4 +5,4 @@ import { approveToken } from "./uniswap/swap";
 
 // It approves Uniswap v2 router to transfer Tokens from the swapper contract address
 
-approveToken(botParameters.wethAddrress);
+approveToken(botParameters.wethAddress);

@@ -1,11 +1,12 @@
 import { ethers, providers } from "ethers";
 import { readFileSync } from "fs";
 import Web3 from "web3";
-import { botParameters, GET_NONCE_TIMEOUT } from "../config/setup";
+import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
 import { BoughtTokens } from "../db/models";
 import "../db/connect";
+import { overLoads, txContents } from "../types";
 
 if (
   !process.env.JSON_RPC ||
@@ -33,17 +34,56 @@ const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
       .allowance(botParameters.swapperAddress, botParameters.uniswapv2Router)
       .call();
   } catch (error) {
-    console.log("Error fetching the allownce amount ", error);
+    console.log("Error fetching the allowance amount ", error);
   }
 };
 
-const currentNonce = async () => {
+export const walletNonce = async () => {
   try {
     return provider.getTransactionCount(process.env.WALLET_ADDRESS!);
   } catch (error) {
     console.log("Error getting wallet nonce : ", error);
   }
 };
+
+export const prepareOverLoads = async (txContents: txContents) => {
+  try {
+    // Prepare transaction overloads
+    let overLoads: overLoads;
+
+    let gasLimit = parseInt(txContents.gas.toString(), 16);
+
+    if (isNaN(gasLimit)) {
+      gasLimit = DEFAULT_GAS_LIMIT;
+    }
+
+    const nonce = await walletNonce();
+
+    if (txContents.gasPrice) {
+      overLoads = {
+        nonce,
+        gasPrice: parseInt(txContents.gasPrice!.toString(), 16),
+        gasLimit: DEFAULT_GAS_LIMIT,
+      };
+    } else {
+      overLoads = {
+        nonce,
+        maxPriorityFeePerGas: parseInt(
+          txContents.maxPriorityFeePerGas!.toString(),
+          16
+        ),
+        maxFeePerGas: parseInt(txContents.maxFeePerGas!.toString(), 16),
+        gasLimit: DEFAULT_GAS_LIMIT,
+      };
+    }
+
+    return overLoads
+  } catch (error) {
+    console.log("Error preparing overLoads : ", error);
+
+  }
+
+}
 
 const provider = new ethers.providers.JsonRpcProvider(process.env.JSON_RPC);
 const web3 = new Web3(process.env.JSON_RPC);
@@ -131,10 +171,6 @@ const toHex = (currencyAmount: any) => {
   }
 };
 
-const getNonce = async (walletAddress: string) => {
-  return await provider.getTransactionCount(walletAddress);
-};
-
 const lowerCaseItems = (items: string[]) => {
   items.map((item) => {
     return item.toLowerCase();
@@ -159,7 +195,7 @@ const tokenAmountToBuy = (
 /**
  * Returns a checksummed address or send a notification if the address is invalid
  * @param address Address to checksum
- * @returns A cheksummed address
+ * @returns A checksummed address
  */
 const checkAddress = (ctx: any, address: string) => {
   try {
@@ -210,6 +246,39 @@ const deleteToken = async (token: string) => {
     });
 };
 
+export const methodsExclusion = ["0x", "0x0"];
+
+export const multiCallMethods = ["0x5ae401dc", "0xac9650d8"]
+
+export const stableTokens = STABLE_TOKENS.map((token: string) => {
+  return token.toLowerCase();
+});
+
+export const repeatedTokens = REPEATED_BOUGHT_TOKENS.map((token: string) => {
+  return token.toLowerCase();
+});
+
+export const waitForTransaction = async (txnHash: string) => {
+  await provider.waitForTransaction(
+    txnHash,
+    1,
+    WAIT_TIME_AFTER_TRANSACTION
+  );
+}
+
+export const getBuyAmount = (targetWallet: string, value: number) => {
+  const MAX_ETH_AMOUNT_TO_BUY = WALLETS_TO_MONITOR.get(
+    targetWallet.toLowerCase()
+  )!;
+
+  console.log("Buy amount : ", MAX_ETH_AMOUNT_TO_BUY, value)
+
+  let buyAmount =
+    value > MAX_ETH_AMOUNT_TO_BUY ? MAX_ETH_AMOUNT_TO_BUY : value;
+
+  return buyAmount
+}
+
 export {
   getTxnStatus,
   tokenAmountToBuy,
@@ -224,10 +293,8 @@ export {
   getTokenBalance,
   wait,
   toHex,
-  currentNonce,
   tokenAllowance,
   ERC20Interface,
   smartContract,
   checkAddress,
-  getNonce,
 };

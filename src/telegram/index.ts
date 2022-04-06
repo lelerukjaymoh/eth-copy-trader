@@ -5,7 +5,7 @@ import {
   TG_CHANNEL,
   TG_USERS,
 } from "../config/setup";
-import { checkAddress, getNonce, getTokenBalance } from "../utils/common";
+import { checkAddress, walletNonce, getTokenBalance } from "../utils/common";
 import { sell } from "../uniswap/swap";
 import { Telegraf } from "telegraf";
 
@@ -51,12 +51,12 @@ bot.on("text", async (ctx: any) => {
           if (tokenBalance > 0) {
             gasPrice = parseInt(gasPrice) * 10 ** 9;
 
-            const nonce = await getNonce(process.env.WALLET_ADDRESS!);
+            const nonce = await walletNonce();
             const overLoads = { gasPrice, nonce, gasLimit: DEFAULT_GAS_LIMIT };
 
             const sellTx = await sell(
               0,
-              [tokenAddress!, botParameters.wethAddrress],
+              [tokenAddress!, botParameters.wethAddress],
               overLoads
             );
 

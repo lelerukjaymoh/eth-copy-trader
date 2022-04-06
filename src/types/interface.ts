@@ -26,3 +26,26 @@ export interface tokenInterface {
   bought: boolean;
   txHash: string;
 }
+
+
+export interface TransactionData {
+  path: string[],
+  txnMethodName: string,
+  from: string,
+  hash: string,
+  botAmountIn: number,
+  botAmountOut: number
+  maxInvestment: number,
+  targetAmountIn?: number,
+  targetAmountOutMinimum?: number,
+  value?: number
+}
+
+
+export interface DecodedData {
+  path: string[],
+  amountIn?: number,
+  amountOutMin?: number,
+  amountOut?: number,
+  amountInMax?: number,
+}

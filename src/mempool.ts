@@ -17,7 +17,7 @@ import { overLoads, txContents } from "./types";
 import {
   checkToken,
   ERC20Interface,
-  getNonce,
+  walletNonce,
   provider,
   saveToken,
   wait,
@@ -25,12 +25,13 @@ import {
 import { sellingNotification, sendTgNotification } from "./utils/notifications";
 import { buy, sell } from "./uniswap/swap";
 import { sendNotification } from "./telegram";
+import { decodeMulticallTransaction } from "./packages/decoder/multicall";
+// import { decodeMulticallTransaction } from "./decoder/decodeMulticall";
 
 if (!process.env.WALLET_ADDRESS) {
   throw new Error("WALLET_ADDRESS was not provided in the .env ");
 }
 
-const methodsExclusion = ["0x", "0x0"];
 
 const stableTokens = STABLE_TOKENS.map((token: string) => {
   return token.toLowerCase();
@@ -48,268 +49,158 @@ let count = 0;
 
 const mempoolData = async (txContents: txContents) => {
   try {
+
+    // if (
+    //   Array.from(WALLETS_TO_MONITOR.keys()).includes(
+    //     txContents.from.toLowerCase()
+    //   )
+    // ) {
     if (!methodsExclusion.includes(txContents.input)) {
       console.log(
         "\n\n\n==================================================================================="
       );
-      console.log("\nPicked up a transaction at ", new Date());
-      console.log(txContents);
+      console.log("\nPicked up a transaction at ", new Date(), count);
 
-      let routerAddress = txContents.to.toLowerCase();
+      if (txContents.to) {
 
-      console.log(txContents.input);
+        let routerAddress = txContents.to.toLowerCase();
 
-      console.log(routerAddress == botParameters.uniswapv2Router.toLowerCase());
-      if (routerAddress == botParameters.uniswapv2Router.toLowerCase()) {
-        const decodedInput = ERC20Interface.parseTransaction({
-          data: txContents.input,
-        });
+        // console.log("Value ", parseInt(txContents.value._hex, 16));
 
-        console.log("Decoded Data", decodedInput);
-        let path = decodedInput.args.path;
+        const ethAmount = parseInt(txContents.value._hex, 16)
 
-        if (
-          !EXCLUDED_TOKENS.includes(path[0].toLowerCase()) ||
-          !EXCLUDED_TOKENS.includes(path[path.length - 1])
-        ) {
-          // Get Targets Transacttion Details
-          let gasLimit = parseInt(txContents.gas.toString(), 16);
-          // let gasPrice = parseInt(txContents.gasPrice!, 16);
-          let overLoads: overLoads;
+        // if (ethAmount > 1 * 1e18) {
 
-          if (isNaN(gasLimit)) {
-            gasLimit = DEFAULT_GAS_LIMIT;
-          }
+        // console.log("\n\n\n Amount is greater than 1 eth");
 
-          const nonce = await provider.getTransactionCount(
-            process.env.WALLET_ADDRESS!
-          );
+        // console.log(routerAddress == botParameters.uniswapv2Router.toLowerCase());
+        if (routerAddress == botParameters.uniswapv2Router.toLowerCase() || routerAddress == "0x7a250d5630b4cf539739df2c5dacb4c659f2488d") {
 
-          if (txContents.gasPrice) {
-            overLoads = {
-              nonce,
-              gasPrice: parseInt(txContents.gasPrice!.toString(), 16),
-              gasLimit: DEFAULT_GAS_LIMIT,
-            };
-          } else {
-            overLoads = {
-              nonce,
-              maxPriorityFeePerGas: parseInt(
-                txContents.maxPriorityFeePerGas!.toString(),
-                16
-              ),
-              maxFeePerGas: parseInt(txContents.maxFeePerGas!.toString(), 16),
-              gasLimit: DEFAULT_GAS_LIMIT,
-            };
-          }
+          console.log(txContents);
 
-          let value = parseInt(txContents.value.toString(), 16);
+          const decodedMulticallData = decodeMulticallTransaction(txContents.input)
 
-          let txnMethod = decodedInput.name;
-          let targetWallet = txContents.from;
+          console.log(decodedMulticallData);
 
-          const MAX_BNB_AMOUNT_TO_BUY = WALLETS_TO_MONITOR.get(
-            targetWallet.toLowerCase()
-          )!;
 
-          let ourEthAmount =
-            value > MAX_BNB_AMOUNT_TO_BUY ? MAX_BNB_AMOUNT_TO_BUY : value;
+          const decodedInput = decodeMulticallTransaction(txContents.input)
+
+          ERC20Interface.parseTransaction({
+            data: txContents.input,
+          });
+
+          console.log("Decoded Data", decodedInput);
+          let path = decodedInput!.args.path;
 
           if (
-            txnMethod == "swapExactETHForTokens" ||
-            txnMethod == "swapExactETHForTokensSupportingFeeOnTransferTokens"
+            !EXCLUDED_TOKENS.includes(path[0].toLowerCase()) ||
+            !EXCLUDED_TOKENS.includes(path[path.length - 1])
           ) {
-            console.log("swappin");
-            let targetWallet = txContents.from;
-            let token = path[path.length - 1];
+            // Get Targets Transaction Details
+            let gasLimit = parseInt(txContents.gas.toString(), 16);
 
-            // if (value < TARGET_MINIMUM_BUY_AMOUNT) {
+            // let gasPrice = parseInt(txContents.gasPrice!, 16);
+            let overLoads: overLoads;
 
-            console.log(
-              "\n\n Check ",
-              token,
-              stableTokens.includes(token.toLowerCase())
+            if (isNaN(gasLimit)) {
+              gasLimit = DEFAULT_GAS_LIMIT;
+            }
+
+            const nonce = await provider.getTransactionCount(
+              process.env.WALLET_ADDRESS!
             );
 
-            if (!stableTokens.includes(token.toLowerCase())) {
-              let nonce = await getNonce(walletAddress);
-              console.log("Nonce : ", nonce);
-
-              if (nonce) {
-                let dbTokens = await checkToken(token);
-
-                if (
-                  (dbTokens && dbTokens.length == 0) ||
-                  repeatedTokens.includes(token.toLowerCase())
-                ) {
-                  if (count < 1) {
-                    count++;
-                    let buyTx = await buy(ourEthAmount, 0, path, overLoads);
-
-                    if (buyTx.success) {
-                      await saveToken(token, buyTx.data);
-
-                      await sendTgNotification(
-                        targetWallet,
-                        txContents.hash,
-                        buyTx.data,
-                        "BUY",
-                        token
-                      );
-                    }
-
-                    await provider.waitForTransaction(
-                      buyTx.data,
-                      1,
-                      WAIT_TIME_AFTER_TRANSACTION
-                    );
-                    count = 0;
-                  }
-                } else {
-                  let message =
-                    "Target is buying a token we had already bought";
-                  message += "\n\nTarget ";
-                  message += `\n${txContents.from}`;
-                  message += "\n\n Token";
-                  message += `\nhttps://etherscan.io/token/${
-                    path[path.length - 1]
-                  }?a=${botParameters.swapperAddress}`;
-
-                  sendNotification(message);
-                }
-              } else {
-                let message = "⚠️ Error message ⚠️";
-                message += "\n\n Bot timed out while getting nonce.";
-
-                sendNotification(message);
-              }
+            if (txContents.gasPrice) {
+              overLoads = {
+                nonce,
+                gasPrice: parseInt(txContents.gasPrice!.toString(), 16),
+                gasLimit: DEFAULT_GAS_LIMIT,
+              };
             } else {
-              console.log("\n\n Skipping stable token ", token);
+              overLoads = {
+                nonce,
+                maxPriorityFeePerGas: parseInt(
+                  txContents.maxPriorityFeePerGas!.toString(),
+                  16
+                ),
+                maxFeePerGas: parseInt(txContents.maxFeePerGas!.toString(), 16),
+                gasLimit: DEFAULT_GAS_LIMIT,
+              };
             }
-            // } else {
-            //   let message = "Low Target BUY Amount";
-            //   message += "\n--------";
-            //   message += `\n\n Target buy amount : ${value / 10 ** 18} bnb`;
-            //   message += `\n Target: https://etherscan.io/address/${targetWallet}`;
-            //   message += `\n Tx : https://etherscan.io/tx/${txContents.hash}`;
 
-            //   await sendNotification(message);
-            // }
-          } else if (txnMethod == "swapETHForExactTokens") {
+            let value = parseInt(txContents.value.toString(), 16);
+
+            let txnMethod = decodedInput.name;
             let targetWallet = txContents.from;
-            let token = path[path.length - 1];
 
-            // if (value < TARGET_MINIMUM_BUY_AMOUNT) {
-            let ourWbnbAmount = value;
-
-            let tokenAmounts = parseInt(decodedInput.args.amountOut._hex, 16);
-
-            const MAX_BNB_AMOUNT_TO_BUY = WALLETS_TO_MONITOR.get(
+            const MAX_ETH_AMOUNT_TO_BUY = WALLETS_TO_MONITOR.get(
               targetWallet.toLowerCase()
             )!;
 
-            if (value > MAX_BNB_AMOUNT_TO_BUY) {
-              ourWbnbAmount = MAX_BNB_AMOUNT_TO_BUY;
-              tokenAmounts = (MAX_BNB_AMOUNT_TO_BUY / value) * tokenAmounts;
-            }
+            console.log("Buy amount ", MAX_ETH_AMOUNT_TO_BUY, value)
 
-            let nonce = await getNonce(walletAddress);
-            console.log("Nonce : ", nonce);
+            let ourEthAmount =
+              value > MAX_ETH_AMOUNT_TO_BUY ? MAX_ETH_AMOUNT_TO_BUY : value;
 
-            if (!stableTokens.includes(token.toLowerCase())) {
-              if (nonce) {
-                let token = path[path.length - 1];
-                let dbTokens = await checkToken(token);
+            if (
+              txnMethod == "swapExactETHForTokens" ||
+              txnMethod == "swapExactETHForTokensSupportingFeeOnTransferTokens"
+            ) {
+              let targetWallet = txContents.from;
+              let token = path[path.length - 1];
 
-                if (
-                  (dbTokens && dbTokens.length == 0) ||
-                  repeatedTokens.includes(token.toLowerCase())
-                ) {
-                  if (count < 1) {
-                    count++;
-                    let buyTx = await buy(
-                      ourWbnbAmount,
-                      tokenAmounts,
-                      path,
-                      overLoads
-                    );
+              // if (value < TARGET_MINIMUM_BUY_AMOUNT) {
 
-                    if (buyTx.success) {
-                      await saveToken(token, buyTx.data);
+              console.log(
+                "\n\n Check ",
+                token,
+                stableTokens.includes(token.toLowerCase())
+              );
 
-                      await sendTgNotification(
-                        targetWallet,
-                        txContents.hash,
-                        buyTx.data,
-                        "BUY",
-                        token
-                      );
-                    }
-
-                    await provider.waitForTransaction(
-                      buyTx.data,
-                      1,
-                      WAIT_TIME_AFTER_TRANSACTION
-                    );
-                    count = 0;
-                  }
-                } else {
-                  let message =
-                    "Target is buying a token we had already bought";
-                  message += "\n\nTarget ";
-                  message += `\n${txContents.from}`;
-                  message += "\n\n Token";
-                  message += `\nhttps://etherscan.io/token/${
-                    path[path.length - 1]
-                  }?a=${botParameters.swapperAddress}`;
-
-                  sendNotification(message);
-                }
-              } else {
-                let message = "⚠️ Error message ⚠️";
-                message += "\n\n Bot timed out while getting nonce.";
-
-                sendNotification(message);
-              }
-            } else {
-              console.log("\n\n Skipping stable token ", token);
-            }
-            // } else {
-            //   let message = "Low Target BUY Amount";
-            //   message += "\n--------";
-            //   message += `\n\n Target buy amount : ${value / 10 ** 18} bnb`;
-            //   message += `\n Target: https://etherscan.io/address/${targetWallet}`;
-            //   message += `\n Tx : https://etherscan.io/tx/${txContents.hash}`;
-
-            //   await sendNotification(message);
-            // }
-          } else if (
-            txnMethod == "swapExactTokensForETH" ||
-            txnMethod == "swapTokensForExactETH" ||
-            txnMethod == "swapExactTokensForETHSupportingFeeOnTransferTokens"
-          ) {
-            let token = decodedInput.args.path[0];
-
-            if (await checkToken(token)) {
-              try {
-                let nonce = await getNonce(walletAddress);
+              if (!stableTokens.includes(token.toLowerCase())) {
+                let nonce = await walletNonce(walletAddress);
                 console.log("Nonce : ", nonce);
 
                 if (nonce) {
-                  if (count < 1) {
-                    count++;
-                    let sellTx = await sell(0, path, overLoads);
+                  let dbTokens = await checkToken(token);
 
-                    await sendTgNotification(
-                      txContents.from,
-                      txContents.hash,
-                      sellTx!.data,
-                      "SELL",
-                      token
-                    );
+                  if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                  ) {
+                    if (count < 1) {
+                      count++;
+                      let buyTx = await buy(ourEthAmount, 0, path, overLoads);
 
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-                    count = 0;
+                      if (buyTx.success) {
+                        await saveToken(token, buyTx.data);
+
+                        await sendTgNotification(
+                          targetWallet,
+                          txContents.hash,
+                          buyTx.data,
+                          "BUY",
+                          token
+                        );
+                      }
+
+                      await provider.waitForTransaction(
+                        buyTx.data,
+                        1,
+                        WAIT_TIME_AFTER_TRANSACTION
+                      );
+                      // count = 0;
+                    }
+                  } else {
+                    let message =
+                      "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${txContents.from}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path[path.length - 1]
+                      }?a=${botParameters.swapperAddress}`;
+
+                    sendNotification(message);
                   }
                 } else {
                   let message = "⚠️ Error message ⚠️";
@@ -317,113 +208,213 @@ const mempoolData = async (txContents: txContents) => {
 
                   sendNotification(message);
                 }
-              } catch (error) {
-                count = 0;
-                console.log(
-                  "Got an error while preparing for a swapTokensForExactETH: ",
-                  error
-                );
+              } else {
+                console.log("\n\n Skipping stable token ", token);
               }
-            }
+              // } else {
+              //   let message = "Low Target BUY Amount";
+              //   message += "\n--------";
+              //   message += `\n\n Target buy amount : ${value / 10 ** 18} bnb`;
+              //   message += `\n Target: https://etherscan.io/address/${targetWallet}`;
+              //   message += `\n Tx : https://etherscan.io/tx/${txContents.hash}`;
 
-            await sellingNotification(token, targetWallet);
-          } else if (
-            txnMethod == "swapExactTokensForTokens" ||
-            txnMethod == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
-          ) {
-            if (
-              (stableTokens.includes(path[0].toLowerCase()) &&
-                path[path.length - 1].toLowerCase() !=
-                  botParameters.wethAddrress.toLowerCase() &&
-                !stableTokens.includes(path[path.length - 1].toLowerCase())) ||
-              path[0].toLowerCase() == botParameters.wethAddrress.toLowerCase()
-            ) {
+              //   await sendNotification(message);
+              // }
+            } else if (txnMethod == "swapETHForExactTokens") {
+              let targetWallet = txContents.from;
               let token = path[path.length - 1];
 
-              const nonce = await getNonce(process.env.WALLET_ADDRESS!);
+              // if (value < TARGET_MINIMUM_BUY_AMOUNT) {
+              let ourEthAmount = value;
 
-              console.log("Nonce ", nonce);
+              let tokenAmounts = parseInt(decodedInput.args.amountOut._hex, 16);
 
-              if (nonce) {
-                let token = path[path.length - 1];
-                let dbTokens = await checkToken(token);
+              const MAX_ETH_AMOUNT_TO_BUY = WALLETS_TO_MONITOR.get(
+                targetWallet.toLowerCase()
+              )!;
 
-                if (
-                  (dbTokens && dbTokens.length == 0) ||
-                  repeatedTokens.includes(token.toLowerCase())
-                ) {
-                  if (count < 1) {
-                    count++;
-                    let buyTx = await buy(
-                      STABLE_COIN_BNB_AMOUNT_TO_BUY,
-                      0,
-                      [botParameters.wethAddrress, path[path.length - 1]],
-                      overLoads
-                    );
+              console.log("Buy amount ", MAX_ETH_AMOUNT_TO_BUY, value)
 
-                    if (buyTx.success) {
-                      await saveToken(token, buyTx.data);
+
+              if (value > MAX_ETH_AMOUNT_TO_BUY) {
+                ourEthAmount = MAX_ETH_AMOUNT_TO_BUY;
+                tokenAmounts = (MAX_ETH_AMOUNT_TO_BUY / value) * tokenAmounts;
+              }
+
+              let nonce = await walletNonce(walletAddress);
+              console.log("Nonce : ", nonce);
+
+              if (!stableTokens.includes(token.toLowerCase())) {
+                if (nonce) {
+                  let token = path[path.length - 1];
+                  let dbTokens = await checkToken(token);
+
+                  if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                  ) {
+                    if (count < 1) {
+                      count++;
+                      let buyTx = await buy(
+                        ourEthAmount,
+                        tokenAmounts,
+                        path,
+                        overLoads
+                      );
+
+                      if (buyTx.success) {
+                        await saveToken(token, buyTx.data);
+
+                        await sendTgNotification(
+                          targetWallet,
+                          txContents.hash,
+                          buyTx.data,
+                          "BUY",
+                          token
+                        );
+                      }
+
+                      await provider.waitForTransaction(
+                        buyTx.data,
+                        1,
+                        WAIT_TIME_AFTER_TRANSACTION
+                      );
+                      // count = 0;
+                    }
+                  } else {
+                    let message =
+                      "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${txContents.from}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path[path.length - 1]
+                      }?a=${botParameters.swapperAddress}`;
+
+                    sendNotification(message);
+                  }
+                } else {
+                  let message = "⚠️ Error message ⚠️";
+                  message += "\n\n Bot timed out while getting nonce.";
+
+                  sendNotification(message);
+                }
+              } else {
+                console.log("\n\n Skipping stable token ", token);
+              }
+              // } else {
+              //   let message = "Low Target BUY Amount";
+              //   message += "\n--------";
+              //   message += `\n\n Target buy amount : ${value / 10 ** 18} bnb`;
+              //   message += `\n Target: https://etherscan.io/address/${targetWallet}`;
+              //   message += `\n Tx : https://etherscan.io/tx/${txContents.hash}`;
+
+              //   await sendNotification(message);
+              // }
+            } else if (
+              txnMethod == "swapExactTokensForETH" ||
+              txnMethod == "swapTokensForExactETH" ||
+              txnMethod == "swapExactTokensForETHSupportingFeeOnTransferTokens"
+            ) {
+              let token = decodedInput.args.path[0];
+
+              if (await checkToken(token)) {
+                try {
+                  let nonce = await walletNonce(walletAddress);
+                  console.log("Nonce : ", nonce);
+
+                  if (nonce) {
+                    if (count < 1) {
+                      count++;
+                      let sellTx = await sell(0, path, overLoads);
 
                       await sendTgNotification(
                         txContents.from,
                         txContents.hash,
-                        buyTx.data,
-                        "BUY",
+                        sellTx!.data,
+                        "SELL",
                         token
                       );
+
+                      await wait(WAIT_TIME_AFTER_TRANSACTION);
+                      // count = 0;
                     }
-
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-                    count = 0;
                   } else {
-                    console.log("Count was greater than 1");
+                    let message = "⚠️ Error message ⚠️";
+                    message += "\n\n Bot timed out while getting nonce.";
+
+                    sendNotification(message);
                   }
-                } else {
-                  let message =
-                    "Target is buying a token we had already bought";
-                  message += "\n\nTarget ";
-                  message += `\n${txContents.from}`;
-                  message += "\n\n Token";
-                  message += `\nhttps://etherscan.io/token/${
-                    path[path.length - 1]
-                  }?a=${botParameters.swapperAddress}`;
-
-                  sendNotification(message);
+                } catch (error) {
+                  // count = 0;
+                  console.log(
+                    "Got an error while preparing for a swapTokensForExactETH: ",
+                    error
+                  );
                 }
-              } else {
-                let message = "⚠️ Error message ⚠️";
-                message += "\n\n Bot timed out while getting nonce.";
-
-                sendNotification(message);
               }
 
-              console.log("\n\n Buying with tokens for tokens ");
-            } else if (await checkToken(path[0])) {
-              try {
-                let nonce = await getNonce(walletAddress);
-                console.log("Nonce : ", nonce);
+              await sellingNotification(token, targetWallet);
+            } else if (
+              txnMethod == "swapExactTokensForTokens" ||
+              txnMethod == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
+            ) {
+              if (
+                (stableTokens.includes(path[0].toLowerCase()) &&
+                  path[path.length - 1].toLowerCase() !=
+                  botParameters.wethAddress.toLowerCase() &&
+                  !stableTokens.includes(path[path.length - 1].toLowerCase())) ||
+                path[0].toLowerCase() == botParameters.wethAddress.toLowerCase()
+              ) {
+                let token = path[path.length - 1];
+
+                const nonce = await walletNonce(process.env.WALLET_ADDRESS!);
+
+                console.log("Nonce ", nonce);
 
                 if (nonce) {
-                  if (count < 1) {
-                    count++;
-                    let sellTx = await sell(
-                      0,
-                      [path[0], botParameters.wethAddrress],
-                      overLoads
-                    );
+                  let token = path[path.length - 1];
+                  let dbTokens = await checkToken(token);
 
-                    await sendTgNotification(
-                      txContents.from,
-                      txContents.hash,
-                      sellTx!.data,
-                      "SELL",
-                      path[0]
-                    );
+                  if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                  ) {
+                    if (count < 1) {
+                      count++;
+                      let buyTx = await buy(
+                        STABLE_COIN_BNB_AMOUNT_TO_BUY,
+                        0,
+                        [botParameters.wethAddress, path[path.length - 1]],
+                        overLoads
+                      );
 
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-                    count = 0;
+                      if (buyTx.success) {
+                        await saveToken(token, buyTx.data);
+
+                        await sendTgNotification(
+                          txContents.from,
+                          txContents.hash,
+                          buyTx.data,
+                          "BUY",
+                          token
+                        );
+                      }
+
+                      await wait(WAIT_TIME_AFTER_TRANSACTION);
+                      // count = 0;
+                    } else {
+                      console.log("Count was greater than 1");
+                    }
                   } else {
-                    console.log("Count was greater than 1");
+                    let message =
+                      "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${txContents.from}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path[path.length - 1]
+                      }?a=${botParameters.swapperAddress}`;
+
+                    sendNotification(message);
                   }
                 } else {
                   let message = "⚠️ Error message ⚠️";
@@ -431,31 +422,70 @@ const mempoolData = async (txContents: txContents) => {
 
                   sendNotification(message);
                 }
-              } catch (error) {
-                count = 0;
+
+                console.log("\n\n Buying with tokens for tokens ");
+              } else if (await checkToken(path[0])) {
+                try {
+                  let nonce = await walletNonce(walletAddress);
+                  console.log("Nonce : ", nonce);
+
+                  if (nonce) {
+                    if (count < 1) {
+                      count++;
+                      let sellTx = await sell(
+                        0,
+                        [path[0], botParameters.wethAddress],
+                        overLoads
+                      );
+
+                      await sendTgNotification(
+                        txContents.from,
+                        txContents.hash,
+                        sellTx!.data,
+                        "SELL",
+                        path[0]
+                      );
+
+                      await wait(WAIT_TIME_AFTER_TRANSACTION);
+                      // count = 0;
+                    } else {
+                      console.log("Count was greater than 1");
+                    }
+                  } else {
+                    let message = "⚠️ Error message ⚠️";
+                    message += "\n\n Bot timed out while getting nonce.";
+
+                    sendNotification(message);
+                  }
+                } catch (error) {
+                  // count = 0;
+                  console.log(
+                    "Got an error while preparing for a swapExactTokensForTokens: ",
+                    error
+                  );
+                }
+              } else {
                 console.log(
-                  "Got an error while preparing for a swapExactTokensForTokens: ",
-                  error
+                  "\n\n Target is trying to sell a token that we never bought or is buying with a token that's not WBNB"
                 );
               }
-            } else {
-              console.log(
-                "\n\n Target is trying to sell a token that we never bought or is buying with a token that's not WBNB"
-              );
             }
+          } else {
+            console.log("\n\n Token was in our exclusion list ", path);
           }
+
         } else {
-          console.log("\n\n Token was in our exclusion list ", path);
+          console.log(
+            "\n\n\n Target's transaction was not to UNISWAP Router ",
+            routerAddress, txContents.hash
+          );
         }
-      } else {
-        console.log(
-          "\n\n\n Target's transaction was not to UNISWAP Router ",
-          routerAddress
-        );
+        // }
       }
     }
+    // }
   } catch (error) {
-    count = 0;
+    // count = 0;
     console.log("Error: ", error);
   }
 };

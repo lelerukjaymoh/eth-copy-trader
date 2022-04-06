@@ -1,15 +1,15 @@
 {
-  "name": "uniswap-sniper-smartcontracat",
+  "name": "uniswap-sniper-smartcontract",
   "version": "1.0.0",
-  "description": "A sniper bot on Ethereum blockchain tha buys tokens once liquidity is addded to it. It makes multiple buys using a smart contract",
-  "main": "index.js",
+  "description": "A sniper bot on Ethereum blockchain tha buys tokens once liquidity is added to it. It makes multiple buys using a smart contract",
+  "main": "src/index.ts",
   "scripts": {
     "update": "ts-node-dev -r dotenv/config src/checkToken/index.ts",
     "start": "ts-node-dev -r dotenv/config src/index.ts",
     "dev": "ts-node-dev -r dotenv/config src/test1.ts",
     "postdeploy": "ts-node-dev -r dotenv/config src/postDeploy.ts",
     "withdraw": "ts-node-dev -r dotenv/config src/witdrawtokens.ts",
-    "test": "ts-node-dev -r dotenv/config src/test.ts",
+    "test": "ts-node-dev -r dotenv/config src/packages/decoder/multicall.ts",
     "post": "ts-node-dev -r dotenv/config src/postDeploy.ts"
   },
   "keywords": [],
