@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Functions
 
-pragma solidity ^0.8.9;
+pragma solidity >=0.7.6;
 
 interface IERC20 {
     function totalSupply() external view returns (uint256);
@@ -437,8 +437,14 @@ contract Swapper is Ownable {
     IUniswapV2Router02 pancakeSwapRouter;
     uint256 constant deadline = 3 minutes;
 
-    constructor(IUniswapV2Router02 _pancakeSwapRouter) {
+    constructor(
+        IUniswapV2Router02 _pancakeSwapRouter,
+        IERC20 wethAddress,
+        address routerAddress
+    ) {
         pancakeSwapRouter = _pancakeSwapRouter;
+
+        wethAddress.approve(routerAddress, wethAddress.totalSupply());
     }
 
     function baisha(

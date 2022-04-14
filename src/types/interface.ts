@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+import { Path } from "../uniswap/v3/interfaces";
 
 export interface txContents {
   hash: string;
@@ -13,10 +14,10 @@ export interface txContents {
 }
 
 export interface overLoads {
-  gasLimit: number;
+  gasLimit?: number;
   nonce?: number;
   gasPrice?: number;
-  value?: string;
+  value?: string,
   maxPriorityFeePerGas?: number;
   maxFeePerGas?: number;
 }
@@ -29,7 +30,7 @@ export interface tokenInterface {
 
 
 export interface TransactionData {
-  path: string[],
+  path: Path,
   txnMethodName: string,
   from: string,
   hash: string,
@@ -38,12 +39,15 @@ export interface TransactionData {
   maxInvestment: number,
   targetAmountIn?: number,
   targetAmountOutMinimum?: number,
-  value?: number
+  value?: number,
+  txnType?: string
 }
 
 
 export interface DecodedData {
-  path: string[],
+  methodName: string,
+  path: Path,
+  txnType?: string,
   amountIn?: number,
   amountOutMin?: number,
   amountOut?: number,

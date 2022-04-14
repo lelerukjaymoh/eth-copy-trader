@@ -1,0 +1,160 @@
+[
+    {
+        "type": "event",
+        "anonymous": false,
+        "name": "OwnershipTransferred",
+        "inputs": [
+            {
+                "type": "address",
+                "name": "previousOwner",
+                "indexed": true
+            },
+            {
+                "type": "address",
+                "name": "newOwner",
+                "indexed": true
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "buy",
+        "constant": false,
+        "stateMutability": "payable",
+        "payable": true,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "tokenIn"
+            },
+            {
+                "type": "address",
+                "name": "tokenOut"
+            },
+            {
+                "type": "uint256",
+                "name": "amountOutMin"
+            },
+            {
+                "type": "uint24",
+                "name": "fee"
+            },
+            {
+                "type": "uint160",
+                "name": "sqrtPriceLimitX96"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "destroySmartContract",
+        "constant": false,
+        "payable": false,
+        "inputs": [],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "kubalia",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "wbnb"
+            },
+            {
+                "type": "address",
+                "name": "approvee"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "owner",
+        "constant": true,
+        "stateMutability": "view",
+        "payable": false,
+        "inputs": [],
+        "outputs": [
+            {
+                "type": "address"
+            }
+        ]
+    },
+    {
+        "type": "function",
+        "name": "removeeth",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "uint256",
+                "name": "amount"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "sell",
+        "constant": false,
+        "stateMutability": "payable",
+        "payable": true,
+        "inputs": [
+            {
+                "type": "uint256",
+                "name": "amountOut"
+            },
+            {
+                "type": "address",
+                "name": "tokenIn"
+            },
+            {
+                "type": "address",
+                "name": "tokenOut"
+            },
+            {
+                "type": "uint24",
+                "name": "fee"
+            },
+            {
+                "type": "uint160",
+                "name": "sqrtPriceLimitX96"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "toatokeni",
+        "constant": false,
+        "payable": false,
+        "inputs": [
+            {
+                "type": "address",
+                "name": "tokenContractAddress"
+            },
+            {
+                "type": "uint256",
+                "name": "amount"
+            }
+        ],
+        "outputs": []
+    },
+    {
+        "type": "function",
+        "name": "uniswapRouter",
+        "constant": true,
+        "stateMutability": "view",
+        "payable": false,
+        "inputs": [],
+        "outputs": [
+            {
+                "type": "address"
+            }
+        ]
+    }
+]

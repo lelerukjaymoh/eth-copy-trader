@@ -1,121 +1,57 @@
 // Fixed params used by the bot
 // botParameters values are not to be changed
 const botParameters = {
-  uniswapv2Router: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
-  uniswapv3Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+  uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+  uniswapv3Router: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
   swapperAddress: "0x3E9E2A987f47d6956aFE31f4D7FD6937582989Ab",
-  wethAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
-// RINKEBY VALUES
-// uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
-//   swapperAddress: "0xaf4375d1dd30c9C500518380Dc3DF08E74C8949A",
-//   wethAddress: "0xc778417e063141139fce010982780140aa0cd5ab",
-
-// LIQUIDITY_METHODS
-const LIQUIDITY_METHODS: string[] = [
-  "a9b70727",
-  "f305d719",
-  "e8e33700",
-  "e8078d94",
-  "c9567bf9",
-  "293230b8",
-  "8a8c523c",
-  "0bd05b69",
-  "01339c21",
-  "58780a82",
-  "8f70ccf7",
-  "fd2dbb0e",
-  "2cde6081",
-  "e01af92c",
-  "7ba4bf34",
-  "8f70ccf7",
-];
-
-const BLACKLIST_FUNCTIONS: string[] = [
-  "b515566a",
-  "4303443d",
-  "1d7ef879",
-  "83b61c8b",
-  "98d5a5cb",
-  "47a64f44",
-  "00b8cf2a",
-  "eec2744e",
-  "f2cc0c18",
-  "228e7a91",
-  "8326699d",
-  "d01dd6d2",
-  "41959586",
-  "f9f92be4",
-  "772558ce",
-  "cad6ebf9",
-  "e084ba59",
-  "455a4396",
-];
-
-const SCAM_FUNCTIONS: string[] = [
-  "baa2abde",
-  "02751cec",
-  "af2979eb",
-  "ded9382a",
-  "5b0d5984",
-  "2195995c",
-  "1031e36e",
-  "1bbae6e0",
-  "d543dbeb",
-];
-
-let METHODS_TO_MONITOR: string[] = [];
-
-LIQUIDITY_METHODS.forEach((functionId) => {
-  METHODS_TO_MONITOR.push(functionId);
-});
-
-SCAM_FUNCTIONS.forEach((functionId) => {
-  METHODS_TO_MONITOR.push(functionId);
-});
-
-BLACKLIST_FUNCTIONS.forEach((functionId) => {
-  METHODS_TO_MONITOR.push(functionId);
-});
-
-// Wallets being tracked
-
 const BUY_AMOUNTS = {
-  newWallet: 0.1 * Math.pow(10, 18),
-  existingWallet: 0.000001 * Math.pow(10, 18),
-  specialWallet: 0.1 * Math.pow(10, 18),
+  lowSpender: 0.05 * Math.pow(10, 18),
+  testingAmount: 0.000001 * Math.pow(10, 18),
+  highSpender: 0.1 * Math.pow(10, 18),
 };
 
 // Wallets we are monitoring
 
 let WALLETS_TO_MONITOR = new Map([
   [
-    "0x041dc272824239af43529afc90eba7733705b161".toLowerCase(),
-    BUY_AMOUNTS.existingWallet,
+    "0xdec08cb92a506B88411da9Ba290f3694BE223c26".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
   ],
   [
-    "0xd5015953bc4e24f9dac96cacf60f348115077f4c".toLowerCase(),
-    BUY_AMOUNTS.existingWallet,
+    "0x9F533382024F02632C832EA2B66F4Bbb1DBc4087".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
   ],
   [
-    "0x485af5f2be564e403e2fc97fed8cc8c4bbecf1e9".toLowerCase(),
-    BUY_AMOUNTS.existingWallet,
+    "0xFD91a20300546a2BAF80Fba713C3Aa0cd224620A".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
   ],
+  [
+    "0x3c1f60B578F3AaF06EDb594FAE223cB2AaA5bfD1".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0xFe76f05dc59fEC04184fA0245AD0C3CF9a57b964".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+
 ]);
 
 // Users to receive telegram notifications
-const TG_CHANNEL: number = 584173555;
+// TODO: Change the receiver of the message back to TG channel
+const TG_CHANNEL: number = -1001265534372;
 
 const TG_USERS: string[] = [
   "584173555",
-  // "1645102790",
-  // "1295076847",
-  // "1741013492",
-  // "299108118",
-  // "1610178949",
-  // "2060423170",
-  // "420331061",
+  "1645102790",
+  "1295076847",
+  "1741013492",
+  "299108118",
+  "1610178949",
+  "2060423170",
+  "420331061",
 ];
 
 // Tokens to repeatedly buy
@@ -124,7 +60,7 @@ const REPEATED_BOUGHT_TOKENS: string[] = [""];
 // Gas limit to use if gasLimit is not specified
 
 const DEFAULT_GAS_LIMIT = 700000;
-const DEFAULT_GAS_PRICE = 90 * Math.pow(10, 9);
+const DEFAULT_GAS_PRICE = 50 * Math.pow(10, 9);
 
 const EXCLUDED_TOKENS = ["0x4acfCedFABE1DB58e959D749BC61a8A5B83d08cb"];
 
@@ -144,10 +80,10 @@ const ADDITIONAL_BUY_GAS = 5 * Math.pow(10, 9);
 
 const WAIT_TIME_AFTER_TRANSACTION = 15 * 1000;
 
-// Time interval for running the token scheck cron job in secs
+// Time interval for running the token check cron job in secs
 const TOKEN_CHECK_TIME_INTERVAL = 30;
 
-// The interval in seconds the bots keep on checking the db and updating the amountof tokens we had bought
+// The interval in seconds the bots keep on checking the db and updating the amount of tokens we had bought
 const GET_NONCE_TIMEOUT = 5;
 
 const MAX_GAS_PRICE_TG = 100;
@@ -166,10 +102,6 @@ export {
   REPEATED_BOUGHT_TOKENS,
   DEFAULT_GAS_PRICE,
   ADDITIONAL_SELL_GAS,
-  LIQUIDITY_METHODS,
-  METHODS_TO_MONITOR,
-  SCAM_FUNCTIONS,
-  BLACKLIST_FUNCTIONS,
   WALLETS_TO_MONITOR,
   DEFAULT_GAS_LIMIT,
   botParameters,

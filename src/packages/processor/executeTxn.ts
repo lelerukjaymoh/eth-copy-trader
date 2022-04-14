@@ -1,9 +1,11 @@
-import { botParameters, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../../config/setup";
+import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIME_AFTER_TRANSACTION } from "../../config/setup";
 import { sendNotification } from "../../telegram";
 import { overLoads, TransactionData } from "../../types";
-import { buy, sell } from "../../uniswap/swap";
+import { buy, sell } from "../../uniswap/v2/swap";
 import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, walletNonce, wait } from "../../utils/common";
 import { sellingNotification, sendTgNotification } from "../../utils/notifications";
+import { v3buy, v3sell } from "../../uniswap/v3";
+
 
 // A patch to ensure the bot does not make several transactions at almost the same time. 
 // This could cause the transactions to fail due to the overlapping nonce value
@@ -14,22 +16,28 @@ import { sellingNotification, sendTgNotification } from "../../utils/notificatio
 // transaction is broadcast, the count is reset to 0 to allow other transactions to flow in. 
 let count = 0
 
-export const executeTxns = async (txnData: TransactionData, overLoads: overLoads) => {
+export const executeTxn = async (txnData: TransactionData, overLoads: overLoads) => {
     const path = txnData.path
+
+    // console.log("Executing transactions", path);
+
+
     const targetWallet = txnData.from;
 
     if (
         txnData.txnMethodName == "swapExactETHForTokens" ||
         txnData.txnMethodName == "swapExactETHForTokensSupportingFeeOnTransferTokens"
     ) {
-        const token = path[path.length - 1];
+        const token = path.tokenOut;
 
         // TODO: To remove this log once the check is validated
-        console.log(
-            "\n\n Check ",
-            token,
-            stableTokens.includes(token.toLowerCase())
-        );
+        // console.log(
+        //     "\n\n Check ",
+        //     token,
+        //     stableTokens.includes(token.toLowerCase())
+        // );
+
+        console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
 
 
         // Prevent the bot from copying trades involving stable tokens
@@ -38,13 +46,13 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
 
             let dbTokens = await checkToken(token);
 
+            // Prevent the bot from buying tokens we have already bought
             if (
-                txnData.value &&
                 (dbTokens && dbTokens.length == 0) ||
                 repeatedTokens.includes(token.toLowerCase())
             ) {
 
-                // Ensure the bot is investing more than the maximum amount it should be investing
+                // Ensure the bot is not investing more than the maximum amount it should be investing
                 const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
 
                 if (count < 1) {
@@ -64,7 +72,7 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                     }
 
                     // Wait for the transaction to be confirmed
-                    await waitForTransaction(buyTx.data)
+                    // await waitForTransaction(buyTx.data)
 
                     count = 0;
                 }
@@ -74,7 +82,7 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                 message += "\n\nTarget ";
                 message += `\n${targetWallet}`;
                 message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path[path.length - 1]
+                message += `\nhttps://etherscan.io/token/${path.tokenOut
                     }?a=${botParameters.swapperAddress}`;
 
                 await sendNotification(message);
@@ -85,18 +93,23 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
         }
 
     } else if (txnData.txnMethodName == "swapETHForExactTokens") {
-        const token = path[path.length - 1];
 
+        console.log("\n\n[PROCESSING] : SwapETHForExactTokens transaction to be routed to v2 ")
+
+        const token = path.tokenOut;
+
+        // Prevent the bot from buying a stable coin
         if (!stableTokens.includes(token.toLowerCase())) {
-            let token = path[path.length - 1];
+            let token = path.tokenOut;
             let dbTokens = await checkToken(token);
 
+            // Prevent the bot from buying tokens we have already bought
             if (
                 (dbTokens && dbTokens.length == 0) ||
                 repeatedTokens.includes(token.toLowerCase())
             ) {
 
-                // Ensure the bot is investing more than the maximum amount it should be investing
+                // Ensure the bot is not investing more than the maximum amount it should be investing
                 const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
 
                 if (count < 1) {
@@ -117,7 +130,7 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                     }
 
                     // Wait for the transaction to be confirmed
-                    await waitForTransaction(buyTx.data)
+                    // await waitForTransaction(buyTx.data)
 
                     count = 0;
                 }
@@ -127,7 +140,7 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                 message += "\n\nTarget ";
                 message += `\n${targetWallet}`;
                 message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path[path.length - 1]
+                message += `\nhttps://etherscan.io/token/${path.tokenOut
                     }?a=${botParameters.swapperAddress}`;
 
                 await sendNotification(message);
@@ -142,8 +155,12 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
         txnData.txnMethodName == "swapTokensForExactETH" ||
         txnData.txnMethodName == "swapExactTokensForETHSupportingFeeOnTransferTokens"
     ) {
-        let token = txnData.path[0];
 
+        console.log("\n\n [PROCESSING] : Sell transaction to be routed through v2 ")
+
+        let token = path.tokenIn;
+
+        // Check if we currently hold this token
         if (await checkToken(token)) {
             try {
 
@@ -176,20 +193,23 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
         txnData.txnMethodName == "swapExactTokensForTokens" ||
         txnData.txnMethodName == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
     ) {
+
+        console.log("\n\n [PROCESSING] : SwapTokensForTokens transaction to be routed through v2 ")
+
+        // This check are required so as to ensure we are buying or selling as required 
+        // since swapTokensForTokens transactions can either be a buy or sell.
+        // Checking several this as listed below :
+        // 1. The token IN is WETH, to ensure its a buy
+
         if (
-            (stableTokens.includes(path[0].toLowerCase()) &&
-                path[path.length - 1].toLowerCase() !=
-                botParameters.wethAddress.toLowerCase() &&
-                !stableTokens.includes(path[path.length - 1].toLowerCase())) ||
-            path[0].toLowerCase() == botParameters.wethAddress.toLowerCase()
+            (path.tokenIn.toLowerCase() == botParameters.wethAddress.toLowerCase())   // Token used to buy is WETH
         ) {
             const nonce = await walletNonce();
 
-            console.log("Nonce ", nonce);
-
-            let token = path[path.length - 1];
+            let token = path.tokenOut;
             let dbTokens = await checkToken(token);
 
+            // Check if we currently hold this token
             if (
                 (dbTokens && dbTokens.length == 0) ||
                 repeatedTokens.includes(token.toLowerCase())
@@ -197,12 +217,10 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                 if (count < 1) {
                     count++;
 
-                    console.log("\n\n Buying with tokens for tokens ");
-
                     let buyTx = await buy(
                         STABLE_COIN_BNB_AMOUNT_TO_BUY,
                         0,
-                        [botParameters.wethAddress, path[path.length - 1]],
+                        path,
                         overLoads
                     );
 
@@ -219,6 +237,8 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                     }
 
                     await wait(WAIT_TIME_AFTER_TRANSACTION);
+                    count = 0;
+
                 }
             } else {
                 let message =
@@ -226,22 +246,22 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                 message += "\n\nTarget ";
                 message += `\n${targetWallet}`;
                 message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path[path.length - 1]
-                    }?a=${botParameters.swapperAddress}`;
+                message += `\nhttps://etherscan.io/token/${path.tokenOut}?a=${botParameters.swapperAddress}`;
 
                 await sendNotification(message);
 
                 count = 0
             }
 
-        } else if (await checkToken(path[0])) {
+            // In TokensForTokens swap we check if its a sell by 
+        } else if (await checkToken(path.tokenIn)) {
             try {
 
                 if (count < 1) {
                     count++;
                     let sellTx = await sell(
                         0,
-                        [path[0], botParameters.wethAddress],
+                        path,
                         overLoads
                     );
 
@@ -250,7 +270,7 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
                         txnData.hash,
                         sellTx!.data,
                         "SELL",
-                        path[0]
+                        path.tokenIn
                     );
 
                     await wait(WAIT_TIME_AFTER_TRANSACTION);
@@ -274,11 +294,59 @@ export const executeTxns = async (txnData: TransactionData, overLoads: overLoads
         txnData.txnMethodName == "exactInputSingle"
     ) {
         // Buying or Selling with Multicall using exact input
+        console.log("\n\n [PROCESSING] : V3 transaction using exactInputSingle  to be routed through the smart contract and V3 router")
+
+        const txnParams = {
+            tokenIn: path.tokenIn,
+            tokenOut: path.tokenOut,
+            amountIn: txnData.botAmountIn,
+            amountOut: txnData.botAmountOut,
+            fee: 3000,
+            sqrtPriceLimitX96: 0
+        }
+        if (txnData.txnType == "buy") {
+
+            overLoads.value = txnData.value?.toString()
+            const buyTx = await v3buy(txnParams, overLoads)
+
+            if (buyTx && buyTx.success) {
+                await saveToken(txnParams.tokenOut, buyTx.data);
+
+                await sendTgNotification(
+                    targetWallet,
+                    txnData.hash,
+                    buyTx.data,
+                    "BUY",
+                    path.tokenOut
+                );
+            }
+
+
+        } else if (txnData.txnType == "sell") {
+
+            const sellTx = await v3sell(txnParams, overLoads)
+
+            if (sellTx && sellTx.success) {
+                await sendTgNotification(
+                    targetWallet,
+                    txnData.hash,
+                    sellTx!.data,
+                    "SELL",
+                    path.tokenIn
+                );
+            }
+        }
 
     } else if (
         txnData.txnMethodName == "exactOutputSingle"
     ) {
         // Buying or Selling with Multicall using exact output
+
+        if (txnData.txnType == "buy") {
+
+        } else if (txnData.txnType == "sell") {
+
+        }
 
     }
 }

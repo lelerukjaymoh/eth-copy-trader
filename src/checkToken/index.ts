@@ -9,8 +9,8 @@
  */
 
 import cron from "node-cron";
-import { BoughtTokens } from "../db/models";
 import "../db/connect";
+import { BoughtTokens } from "../db/models";
 import { getTxnStatus } from "../utils/common";
 import { TOKEN_CHECK_TIME_INTERVAL } from "../config/setup";
 

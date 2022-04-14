@@ -1,34 +1,27 @@
-import { ethers, providers } from "ethers";
-import { readFileSync } from "fs";
-import Web3 from "web3";
+import { ethers, providers, Transaction } from "ethers";
 import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
 import { BoughtTokens } from "../db/models";
 import "../db/connect";
 import { overLoads, txContents } from "../types";
+import { init } from "../initialize";
 
-if (
-  !process.env.JSON_RPC ||
-  !process.env.WALLET_ADDRESS ||
-  !process.env.PRIVATE_KEY
-) {
-  throw new Error(
-    "JSON_RPC or WALLET_ADDRESS || PRIVATE_KEY was not provided in .env"
-  );
-}
+// Ensure all .env variables are loaded 
+init()
 
 const smartContractInterface = new ethers.utils.Interface(smartContractABI);
 
-// Initilise an interface of the ABI
+// Initialize an interface of the ABI
 const ERC20Interface = new ethers.utils.Interface(ERC20ABI);
 
 const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
   try {
     console.log("Token ", tokenAddress);
-    const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(ERC20ABI)),
-      tokenAddress
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      provider
     );
     return await tokenContract.methods
       .allowance(botParameters.swapperAddress, botParameters.uniswapv2Router)
@@ -51,42 +44,45 @@ export const prepareOverLoads = async (txContents: txContents) => {
     // Prepare transaction overloads
     let overLoads: overLoads;
 
-    let gasLimit = parseInt(txContents.gas.toString(), 16);
+    let gasLimit = parseInt(txContents.gas._hex, 16);
 
     if (isNaN(gasLimit)) {
       gasLimit = DEFAULT_GAS_LIMIT;
     }
 
+    if (gasLimit < DEFAULT_GAS_LIMIT) {
+      gasLimit = DEFAULT_GAS_LIMIT
+    }
+
     const nonce = await walletNonce();
 
-    if (txContents.gasPrice) {
+    if (txContents.maxPriorityFeePerGas) {
       overLoads = {
         nonce,
-        gasPrice: parseInt(txContents.gasPrice!.toString(), 16),
-        gasLimit: DEFAULT_GAS_LIMIT,
+        maxPriorityFeePerGas: parseInt(
+          txContents.maxPriorityFeePerGas!._hex,
+          16
+        ),
+        maxFeePerGas: parseInt(txContents.maxFeePerGas!._hex, 16),
+        gasLimit,
       };
     } else {
       overLoads = {
         nonce,
-        maxPriorityFeePerGas: parseInt(
-          txContents.maxPriorityFeePerGas!.toString(),
-          16
-        ),
-        maxFeePerGas: parseInt(txContents.maxFeePerGas!.toString(), 16),
-        gasLimit: DEFAULT_GAS_LIMIT,
+        gasPrice: parseInt(txContents.gasPrice!._hex, 16),
+        gasLimit,
       };
     }
 
     return overLoads
   } catch (error) {
     console.log("Error preparing overLoads : ", error);
-
   }
 
 }
 
-const provider = new ethers.providers.JsonRpcProvider(process.env.JSON_RPC);
-const web3 = new Web3(process.env.JSON_RPC);
+const provider = new ethers.providers.WebSocketProvider(process.env.WS_RPC_URL!);
+
 
 const getTxnStatus = async (txn: string) => {
   try {
@@ -95,7 +91,7 @@ const getTxnStatus = async (txn: string) => {
     return transactionReceipt.status;
   } catch (error) {
     console.log(
-      "\n\n Encoutered an error getting status of the transaction ",
+      "\n\n Encountered an error getting status of the transaction ",
       txn,
       error
     );
@@ -116,24 +112,25 @@ const getTokenAllowance = async (
   walletAddress: string
 ) => {
   try {
-    console.log("Token ", tokenAddress);
-    const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(ERC20ABI)),
-      tokenAddress
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      provider
     );
     return await tokenContract.methods
       .allowance(walletAddress, botParameters.uniswapv2Router)
       .call();
   } catch (error) {
-    console.log("Error fetching the allownce amount ", error);
+    console.log("Error fetching the allowance amount ", error);
   }
 };
 
 const getTokenDecimals = async (tokenAddress: string) => {
   try {
-    const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(ERC20ABI)),
-      tokenAddress
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      provider
     );
     return await tokenContract.methods.decimals().call();
   } catch (error) {
@@ -141,21 +138,21 @@ const getTokenDecimals = async (tokenAddress: string) => {
   }
 };
 
-const getTokenBalance = async (tokenAddress: string, address: string) => {
+const getTokenBalance = async (tokenAddress: string, walletAddress: string) => {
   try {
-    const tokenContract = new web3.eth.Contract(
-      JSON.parse(JSON.stringify(ERC20ABI)),
-      tokenAddress
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ERC20ABI,
+      provider
     );
 
-    return await tokenContract.methods.balanceOf(address).call();
+    return await tokenContract.methods.balanceOf(walletAddress).call();
   } catch (error) {
     console.log("Error getting token balance ", error);
   }
 };
 
 const wait = async (ms: number) => {
-  console.log("\n\n Waiting ... \n\n");
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
@@ -184,7 +181,7 @@ const tokenAmountToBuy = (
 ) => {
   let tokensPerEth = targetTokenAmount / targetEthAmount;
   console.log(
-    "Expected anmounts : ",
+    "Expected amounts : ",
     tokensPerEth,
     ourEthAmount * tokensPerEth
   );
@@ -242,7 +239,7 @@ const deleteToken = async (token: string) => {
       console.log("Successfully deleted token from db ", token);
     })
     .catch((error: any) => {
-      console.log("Error deleteing token ", token, error);
+      console.log("Error deleting token ", token, error);
     });
 };
 
@@ -277,6 +274,22 @@ export const getBuyAmount = (targetWallet: string, value: number) => {
     value > MAX_ETH_AMOUNT_TO_BUY ? MAX_ETH_AMOUNT_TO_BUY : value;
 
   return buyAmount
+}
+
+export const prepareTxContents = (txnObject: ethers.providers.TransactionResponse): txContents => {
+  const txContents = {
+    hash: txnObject.hash!,
+    from: txnObject.from!,
+    to: txnObject.to!,
+    gasPrice: txnObject.gasPrice,
+    maxPriorityFeePerGas: txnObject.maxPriorityFeePerGas,
+    maxFeePerGas: txnObject.maxFeePerGas,
+    gas: txnObject.gasLimit,
+    input: txnObject.data,
+    value: txnObject.value,
+  };
+
+  return txContents;
 }
 
 export {

@@ -1,34 +1,46 @@
 import { ethers } from "ethers";
-import { mempoolData } from "./mempool";
+import { init } from "./initialize";
+import { processData } from "./packages/processor";
+import { sendNotification } from "./telegram";
+import { prepareTxContents, provider, wait } from "./utils/common";
 
-if (!process.env.WALLET_ADDRESS || !process.env.WS_RPC_URL) {
-    throw new Error("WS_RPC_URL or WALLET_ADDRESS not provided in .env");
-}
+// initializing the bot
+console.log("\n\n INITIALIZING THE BOT")
+
+init()
 
 const main = async () => {
+
     try {
         const _provider = new ethers.providers.WebSocketProvider(
-            process.env.WS_RPC_URL!
+            process.env.STREAMING_WS_RPC_URL!
         );
 
         _provider.on("pending", async (txHash: string) => {
             let txnTime = Date.now()
+
             const txnObject = await _provider.getTransaction(txHash);
 
             if (txnObject) {
-                const txContents = {
-                    hash: txnObject.hash,
-                    from: txnObject.from,
-                    to: txnObject.to!,
-                    gasPrice: txnObject.gasPrice,
-                    maxPriorityFeePerGas: txnObject.maxPriorityFeePerGas,
-                    maxFeePerGas: txnObject.maxFeePerGas,
-                    gas: txnObject.gasLimit,
-                    input: txnObject.data,
-                    value: txnObject.value,
-                };
+                const txContents = prepareTxContents(txnObject);
+                await processData(txContents);
 
-                await mempoolData(txContents);
+            } else {
+
+                // Some transactions are not fetched the first time we query using ether.getTransaction
+                // This because the transaction is not yet discovered by the node we are querying
+                // This is an indication that the node is fast at propagating pending transaction
+                // To solve this, a wait (of 3 secs) is used to give time for the node to discover the txn 
+
+                await wait(3000)
+
+                const txnObject = await provider.getTransaction(txHash);
+
+                if (txnObject) {
+                    const txContents = prepareTxContents(txnObject);
+                    await processData(txContents);
+
+                }
 
             }
         });

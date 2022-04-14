@@ -6,14 +6,14 @@ import {
   TG_USERS,
 } from "../config/setup";
 import { checkAddress, walletNonce, getTokenBalance } from "../utils/common";
-import { sell } from "../uniswap/swap";
 import { Telegraf } from "telegraf";
+import { sell } from "../uniswap/v2/swap";
+import { init } from "../initialize";
 
-if (!process.env.WALLET_ADDRESS || !process.env.BOT_TOKEN) {
-  throw new Error("WALLET_ADDRESS or BOT_TOKEN was not provided in .env");
-}
+// Ensure all .env variables are loaded 
+init()
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN!);
 
 bot.start((ctx: any) => {
   console.log("\n\n User is starting the bot")
@@ -40,8 +40,8 @@ bot.on("text", async (ctx: any) => {
         const tokenAddress = checkAddress(ctx, details[0].trim());
         let gasPrice = details[1].trim();
 
-        if (gasPrice && gasPrice < MAX_GAS_PRICE_TG) {
-          ctx.reply("Processing ...");
+        if (tokenAddress && gasPrice && gasPrice < MAX_GAS_PRICE_TG) {
+          ctx.reply("Processing Transaction ...");
 
           const tokenBalance = await getTokenBalance(
             tokenAddress!,
@@ -54,9 +54,14 @@ bot.on("text", async (ctx: any) => {
             const nonce = await walletNonce();
             const overLoads = { gasPrice, nonce, gasLimit: DEFAULT_GAS_LIMIT };
 
+            const path = {
+              tokenIn: tokenAddress,
+              tokenOut: botParameters.wethAddress
+            }
+
             const sellTx = await sell(
               0,
-              [tokenAddress!, botParameters.wethAddress],
+              path,
               overLoads
             );
 

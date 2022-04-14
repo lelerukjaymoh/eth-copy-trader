@@ -5,8 +5,14 @@ export const decodeNormalTxn = (inputData: string): DecodedData | undefined => {
     try {
         const decodedData = ERC20Interface.parseTransaction({ data: inputData })
 
+        const path = {
+            tokenIn: decodedData.args.path[0],
+            tokenOut: decodedData.args.path[1]
+        }
+
         const data = {
-            path: decodedData.args.path,
+            methodName: decodedData.name,
+            path,
             amountIn: decodedData.args.amountIn,
             amountOutMin: decodedData.args.amountOutMin,
             amountOut: decodedData.args.amountOut,
@@ -16,25 +22,6 @@ export const decodeNormalTxn = (inputData: string): DecodedData | undefined => {
         return data
 
     } catch (error) {
-        console.log("Error decoding a normal transaction : ", error);
+        console.log("Error decoding a normal transaction : ");
     }
 }
-
-/*
-
-swapExactETHForTokens
-    - amountOutMin
-
-swapExactTokensForTokens
-    - amountIn
-    - amountOutMin
-
-swapTokensForExactTokens
-    - amountOut
-    - amountInMax
-
-swapETHForExactTokens
-    - amountOut
-
-
-*/
