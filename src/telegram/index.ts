@@ -5,7 +5,7 @@ import {
   TG_CHANNEL,
   TG_USERS,
 } from "../config/setup";
-import { checkAddress, walletNonce, getTokenBalance } from "../utils/common";
+import { checkAddress, walletNonce, getTokenBalance, wait } from "../utils/common";
 import { Telegraf } from "telegraf";
 import { sell } from "../uniswap/v2/swap";
 import { init } from "../initialize";
@@ -26,7 +26,7 @@ bot.start((ctx: any) => {
  * Selling Manually using the bot
  */
 
-bot.on("text", async (ctx: any) => {
+bot.on("text", async (ctx) => {
   try {
     const text: any = ctx.message?.text
       ? ctx.message?.text
@@ -36,6 +36,17 @@ bot.on("text", async (ctx: any) => {
     let user = ctx.message.from.id.toString();
 
     if (TG_USERS.includes(user)) {
+      if (text.toLowerCase() == "stop") {
+
+        console.log("\n\n Stopping the bot")
+        ctx.reply("Stopping the bot")
+        bot.stop("Manual bot stop initiated from TG")
+
+        // REVIEW: IF the bot was stopped on Tg you need to uncomment this line run the bot then return it 
+        process.exit(1)
+
+      }
+
       if (details.length > 1) {
         const tokenAddress = checkAddress(ctx, details[0].trim());
         let gasPrice = details[1].trim();
@@ -112,10 +123,10 @@ bot.on("text", async (ctx: any) => {
         ctx.reply(message);
       }
     } else {
-      ctx.reply("Error, You are not authorised to make this request");
+      ctx.reply("Error, You are not authorized to make this request");
     }
   } catch (error) {
-    let message = "Encoutered this error while selling";
+    let message = "Encountered this error while selling";
     message += `\n\n\ ${error}`;
 
     ctx.reply(message);

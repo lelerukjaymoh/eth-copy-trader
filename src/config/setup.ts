@@ -8,8 +8,8 @@ const botParameters = {
 };
 
 const BUY_AMOUNTS = {
-  lowSpender: 0.05 * Math.pow(10, 18),
   testingAmount: 0.000001 * Math.pow(10, 18),
+  lowSpender: 0.05 * Math.pow(10, 18),
   highSpender: 0.1 * Math.pow(10, 18),
 };
 

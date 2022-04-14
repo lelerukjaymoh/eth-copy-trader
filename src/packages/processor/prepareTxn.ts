@@ -22,8 +22,6 @@ export const processData = async (txContents: txContents) => {
 
             if (routerAddress == botParameters.uniswapv2Router.toLowerCase() || routerAddress == botParameters.uniswapv3Router.toLowerCase()) {
 
-                console.log(txContents.hash, targetWallet);
-
                 console.log(`\n\n [STREAMING] : Captured a transaction to a Uniswap V2 or V3 Router ${txContents.hash}`)
 
                 if (WALLETS_TO_MONITOR.get(
