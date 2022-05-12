@@ -1,12 +1,11 @@
 import { ethers } from "ethers";
 import { init } from "./initialize";
 import { processData } from "./packages/processor";
-import { sendNotification } from "./telegram";
 import { prepareTxContents, provider, wait } from "./utils/common";
 
-// initializing the bot
 console.log("\n\n INITIALIZING THE BOT")
 
+// initializing the bot
 init()
 
 const main = async () => {
@@ -44,6 +43,10 @@ const main = async () => {
 
             }
         });
+
+        _provider.on("error", (error: any) => {
+            console.log("Got an error streaming : ", error)
+        })
     } catch (error: any) {
         console.log("Error on main function : ", error);
     }
