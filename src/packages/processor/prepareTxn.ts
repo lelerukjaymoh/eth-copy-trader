@@ -1,6 +1,6 @@
 import { botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
 import { DecodedData, overLoads, TransactionData, txContents } from "../../types";
-import { methodsExclusion, multiCallMethods, prepareOverLoads, provider, walletNonce } from "../../utils/common";
+import { methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce } from "../../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
 import { executeTxn } from "./executeTxn";
 
@@ -33,13 +33,15 @@ export const processData = async (txContents: txContents) => {
 
                     const methodId = txContents.input.substring(0, 10)
                     let decodedData: DecodedData
-
+                    let nonce;
                     // console.log("Method id : ", methodId, multiCallMethods, multiCallMethods.includes(methodId), txContents.hash)
 
                     if (multiCallMethods.includes(methodId)) {
                         decodedData = decodeMulticallTransaction(txContents.input)!
+                        nonce = await v3walletNonce()
                     } else {
                         decodedData = decodeNormalTxn(txContents.input)!
+                        nonce = await v2walletNonce()
                     }
 
                     // console.log(txContents.hash, decodedData);
@@ -75,7 +77,7 @@ export const processData = async (txContents: txContents) => {
                         ) {
 
                             // Prepare transaction overloads
-                            let overLoads = await prepareOverLoads(txContents);
+                            let overLoads = await prepareOverLoads(txContents, nonce!);
 
                             console.log("\n\n\n ===> Txn Data", txnData);
                             console.log("OverLoads", overLoads);
@@ -88,7 +90,6 @@ export const processData = async (txContents: txContents) => {
                 }
             }
         }
-
 
     }
 }

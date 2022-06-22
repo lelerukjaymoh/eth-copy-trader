@@ -14,9 +14,9 @@ const abi = [
 
 const provider = ethers.getDefaultProvider(process.env.JSON_RPC);
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY = process.env.V2_PRIVATE_KEY;
 
-const WALLET_ADDRESS = process.env.WALLET_ADDRESS;
+const WALLET_ADDRESS = process.env.V2_WALLET_ADDRESS;
 let walletAddress = ethers.utils.getAddress(WALLET_ADDRESS);
 const signer = new ethers.Wallet(PRIVATE_KEY);
 const account = signer.connect(provider);

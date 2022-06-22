@@ -2,7 +2,7 @@ import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIM
 import { sendNotification } from "../../telegram";
 import { overLoads, TransactionData } from "../../types";
 import { buy, sell } from "../../uniswap/v2/swap";
-import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, walletNonce, wait } from "../../utils/common";
+import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce } from "../../utils/common";
 import { sellingNotification, sendTgNotification } from "../../utils/notifications";
 import { v3buy, v3sell } from "../../uniswap/v3";
 
@@ -204,7 +204,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
         if (
             (path.tokenIn.toLowerCase() == botParameters.wethAddress.toLowerCase())   // Token used to buy is WETH
         ) {
-            const nonce = await walletNonce();
+            const nonce = await v2walletNonce();
 
             let token = path.tokenOut;
             let dbTokens = await checkToken(token);
