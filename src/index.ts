@@ -38,7 +38,6 @@ const main = async () => {
                 if (txnObject) {
                     const txContents = prepareTxContents(txnObject);
                     await processData(txContents);
-
                 }
 
             }

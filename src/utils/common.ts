@@ -23,23 +23,30 @@ const tokenAllowance = async (tokenAddress: string, walletAddress: string) => {
       ERC20ABI,
       provider
     );
-    return await tokenContract.methods
-      .allowance(botParameters.swapperAddress, botParameters.uniswapv2Router)
-      .call();
+    return await tokenContract
+      .allowance(botParameters.swapperAddress, botParameters.uniswapv2Router);
   } catch (error) {
     console.log("Error fetching the allowance amount ", error);
   }
 };
 
-export const walletNonce = async () => {
+export const v2walletNonce = async () => {
   try {
-    return provider.getTransactionCount(process.env.WALLET_ADDRESS!);
+    return provider.getTransactionCount(process.env.V2_WALLET_ADDRESS!);
   } catch (error) {
-    console.log("Error getting wallet nonce : ", error);
+    console.log("Error getting v2 wallet nonce : ", error);
   }
 };
 
-export const prepareOverLoads = async (txContents: txContents) => {
+export const v3walletNonce = async () => {
+  try {
+    return provider.getTransactionCount(process.env.V3_WALLET_ADDRESS!);
+  } catch (error) {
+    console.log("Error getting v3 wallet nonce : ", error);
+  }
+};
+
+export const prepareOverLoads = async (txContents: txContents, nonce: number) => {
   try {
     // Prepare transaction overloads
     let overLoads: overLoads;
@@ -53,8 +60,6 @@ export const prepareOverLoads = async (txContents: txContents) => {
     if (gasLimit < DEFAULT_GAS_LIMIT) {
       gasLimit = DEFAULT_GAS_LIMIT
     }
-
-    const nonce = await walletNonce();
 
     if (txContents.maxPriorityFeePerGas) {
       overLoads = {
@@ -98,13 +103,13 @@ const getTxnStatus = async (txn: string) => {
   }
 };
 
-const signer = new ethers.Wallet(process.env.PRIVATE_KEY!);
-const account = signer.connect(provider);
+const signer = new ethers.Wallet(process.env.V2_PRIVATE_KEY!);
+const v2account = signer.connect(provider);
 
-const smartContract = new ethers.Contract(
+const v2smartContract = new ethers.Contract(
   botParameters.swapperAddress,
   smartContractABI,
-  account
+  v2account
 );
 
 const getTokenAllowance = async (
@@ -117,9 +122,9 @@ const getTokenAllowance = async (
       ERC20ABI,
       provider
     );
-    return await tokenContract.methods
+    return await tokenContract
       .allowance(walletAddress, botParameters.uniswapv2Router)
-      .call();
+
   } catch (error) {
     console.log("Error fetching the allowance amount ", error);
   }
@@ -132,7 +137,7 @@ const getTokenDecimals = async (tokenAddress: string) => {
       ERC20ABI,
       provider
     );
-    return await tokenContract.methods.decimals().call();
+    return await tokenContract.decimals()
   } catch (error) {
     console.log("Error fetching token decimals ", error);
   }
@@ -146,7 +151,7 @@ const getTokenBalance = async (tokenAddress: string, walletAddress: string) => {
       provider
     );
 
-    return await tokenContract.methods.balanceOf(walletAddress).call();
+    return await tokenContract.balanceOf(walletAddress)
   } catch (error) {
     console.log("Error getting token balance ", error);
   }
@@ -308,6 +313,6 @@ export {
   toHex,
   tokenAllowance,
   ERC20Interface,
-  smartContract,
+  v2smartContract,
   checkAddress,
 };

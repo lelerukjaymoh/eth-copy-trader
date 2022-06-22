@@ -1,4 +1,4 @@
-import { walletNonce } from "../../../utils/common"
+import { v3walletNonce } from "../../../utils/common"
 import { getContract } from "../utils/common"
 import constants from "../utils/constants.json"
 
@@ -9,7 +9,7 @@ export const approve = async (tokenAddress: string, spender: string) => {
     const tokenContract = getContract(tokenAddress)!
 
     try {
-        const nonce = await walletNonce()
+        const nonce = await v3walletNonce()
 
         const overLoads = {
             nonce

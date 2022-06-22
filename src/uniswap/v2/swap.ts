@@ -2,7 +2,7 @@ import { toHex } from "@uniswap/v3-sdk";
 import { DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE, botParameters } from "../../config/setup";
 import { init } from "../../initialize";
 import { overLoads } from "../../types";
-import { smartContract, getTokenBalance } from "../../utils/common";
+import { v2smartContract, getTokenBalance } from "../../utils/common";
 import { Path } from "../v3/interfaces";
 
 // Ensure all environment variables are provided in .env
@@ -24,7 +24,7 @@ const buy = async (
 
     console.log("Buy OverLoads : ", overLoads);
 
-    const buyTxData = await smartContract.baisha(
+    const buyTxData = await v2smartContract.baisha(
       toHex(amountIn),
       toHex(amountOutMin),
       [path.tokenIn, path.tokenOut],
@@ -54,7 +54,7 @@ const sell = async (
     );
 
     if (tokenBalance && tokenBalance > 0) {
-      const sellTxData = await smartContract.kinda(
+      const sellTxData = await v2smartContract.kinda(
         toHex(0),
         [path.tokenIn, path.tokenOut],
         overLoads
@@ -72,4 +72,3 @@ const sell = async (
 
 export { buy, sell };
 
-// sell(0, ["0xf0a8ecbce8caadb7a07d1fcd0f87ae1bd688df43", botParameters.wethAddress], 5 * 10 ** 9, 272)

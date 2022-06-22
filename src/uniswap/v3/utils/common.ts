@@ -31,7 +31,7 @@ export const getTokenDecimals = async (tokenAddress: string) => {
 }
 
 export const provider = new ethers.providers.WebSocketProvider(process.env.WS_RPC_URL!)
-export const signer = new ethers.Wallet(process.env.PRIVATE_KEY!)
+export const signer = new ethers.Wallet(process.env.V3_PRIVATE_KEY!)
 export const account = signer.connect(provider)
 
 export const routerContract = new ethers.Contract(constants.UNISWAP_V3_ROUTER, uniswapRouterABI, account)
