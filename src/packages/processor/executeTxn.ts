@@ -59,6 +59,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     count++;
                     let buyTx = await buy(botAmountIn!, txnData.botAmountOut, path, overLoads);
 
+
                     if (buyTx.success) {
                         await saveToken(token, buyTx.data);
 
@@ -75,6 +76,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     // await waitForTransaction(buyTx.data)
 
                     count = 0;
+                } else {
+                    console.log("\n\n Count is not updated ", count)
                 }
             } else {
                 let message =
@@ -133,6 +136,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     // await waitForTransaction(buyTx.data)
 
                     count = 0;
+                } else {
+                    console.log("\n\n Count is not updated ", count)
                 }
             } else {
                 let message =
@@ -144,6 +149,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     }?a=${botParameters.swapperAddress}`;
 
                 await sendNotification(message);
+
             }
 
         } else {
@@ -179,12 +185,16 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                     await wait(WAIT_TIME_AFTER_TRANSACTION);
                     count = 0;
+                } else {
+                    console.log("\n\n Count is not updated ", count)
                 }
             } catch (error) {
                 console.log(
                     "Got an error while preparing for a swapTokensForExactETH: ",
                     error
                 );
+
+                count = 0;
             }
         }
 
@@ -204,7 +214,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
         if (
             (path.tokenIn.toLowerCase() == botParameters.wethAddress.toLowerCase())   // Token used to buy is WETH
         ) {
-            const nonce = await v2walletNonce();
+            // const nonce = await v2walletNonce();
 
             let token = path.tokenOut;
             let dbTokens = await checkToken(token);
@@ -239,6 +249,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     await wait(WAIT_TIME_AFTER_TRANSACTION);
                     count = 0;
 
+                } else {
+                    console.log("\n\n Count is not updated ", count)
                 }
             } else {
                 let message =
@@ -276,6 +288,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     await wait(WAIT_TIME_AFTER_TRANSACTION);
 
                     count = 0
+                } else {
+                    console.log("\n\n Count is not updated ", count)
                 }
 
             } catch (error) {
@@ -283,6 +297,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                     "Got an error while preparing for a swapExactTokensForTokens: ",
                     error
                 );
+
+                count = 0;
             }
         } else {
             console.log(

@@ -46,7 +46,7 @@ const sell = async (
   try {
     console.log("\n\n [SELLING] : Selling with these parameters ")
 
-    console.log(`Amount Out min: ${amountOutMin} \n Path: ${path}`);
+    console.log(`Amount Out min: ${amountOutMin} \n Path: ${JSON.stringify(path)} \n OverLoads: ${JSON.stringify(overLoads)} `);
 
     const tokenBalance = await getTokenBalance(
       path.tokenIn,
