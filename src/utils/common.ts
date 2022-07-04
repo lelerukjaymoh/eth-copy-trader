@@ -1,4 +1,4 @@
-import { ethers, providers, Transaction } from "ethers";
+import { ethers, providers, Transaction, utils } from "ethers";
 import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
@@ -46,38 +46,34 @@ export const v3walletNonce = async () => {
   }
 };
 
+export const fetchGasPrice = async () => {
+  try {
+    const gasData = await provider.getFeeData()
+
+    const maxFeePerGas = parseInt(utils.formatUnits(gasData.maxFeePerGas!, "gwei")) + 5
+    const maxPriorityFeePerGas = parseInt(utils.formatUnits(gasData.maxPriorityFeePerGas!, "gwei")) + 2
+
+    return { maxFeePerGas, maxPriorityFeePerGas }
+  } catch (error) {
+    console.log("Error checking the users ")
+  }
+}
+
 export const prepareOverLoads = async (txContents: txContents, nonce: number) => {
   try {
     // Prepare transaction overloads
-    let overLoads: overLoads;
-
     let gasLimit = parseInt(txContents.gas._hex, 16);
-
-    if (isNaN(gasLimit)) {
-      gasLimit = DEFAULT_GAS_LIMIT;
-    }
 
     if (gasLimit < DEFAULT_GAS_LIMIT) {
       gasLimit = DEFAULT_GAS_LIMIT
     }
 
-    if (txContents.maxPriorityFeePerGas) {
-      overLoads = {
-        nonce,
-        maxPriorityFeePerGas: parseInt(
-          txContents.maxPriorityFeePerGas!._hex,
-          16
-        ),
-        maxFeePerGas: parseInt(txContents.maxFeePerGas!._hex, 16),
-        gasLimit,
-      };
-    } else {
-      overLoads = {
-        nonce,
-        gasPrice: parseInt(txContents.gasPrice!._hex, 16),
-        gasLimit,
-      };
-    }
+    // Fetch the current average gas data to use for the transactions
+    const gasData = await fetchGasPrice()
+
+    console.log("Gas data ", gasData)
+    const overLoads = { maxFeePerGas: gasData?.maxFeePerGas! * 1e9, maxPriorityFeePerGas: gasData?.maxPriorityFeePerGas! * 1e9, nonce, gasLimit };
+
 
     return overLoads
   } catch (error) {

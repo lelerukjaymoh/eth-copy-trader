@@ -5,7 +5,7 @@ import {
   TG_CHANNEL,
   TG_USERS,
 } from "../config/setup";
-import { checkAddress, getTokenBalance, v2walletNonce, wait } from "../utils/common";
+import { checkAddress, fetchGasPrice, getTokenBalance, v2walletNonce, wait } from "../utils/common";
 import { Telegraf } from "telegraf";
 import { sell } from "../uniswap/v2/swap";
 import { init } from "../initialize";
@@ -47,11 +47,10 @@ bot.on("text", async (ctx) => {
 
       }
 
-      if (details.length > 1) {
+      if (details.length >= 1) {
         const tokenAddress = checkAddress(ctx, details[0].trim());
-        let gasPrice = details[1].trim();
 
-        if (tokenAddress && gasPrice && gasPrice < MAX_GAS_PRICE_TG) {
+        if (tokenAddress) {
           ctx.reply("Processing Transaction ...");
 
           const tokenBalance = await getTokenBalance(
@@ -60,38 +59,98 @@ bot.on("text", async (ctx) => {
           );
 
           if (tokenBalance > 0) {
-            gasPrice = parseInt(gasPrice) * 10 ** 9;
+            console.log("Selling ")
+            const gasData = await fetchGasPrice()
 
-            const nonce = await v2walletNonce();
-            const overLoads = { gasPrice, nonce, gasLimit: DEFAULT_GAS_LIMIT };
+            console.log("Gas data ", gasData)
 
-            const path = {
-              tokenIn: tokenAddress,
-              tokenOut: botParameters.wethAddress
-            }
+            // Check that the gas to be used is not greater that our limit
+            if (gasData?.maxFeePerGas! < MAX_GAS_PRICE_TG) {
 
-            const sellTx = await sell(
-              0,
-              path,
-              overLoads
-            );
+              console.log("Data is okay")
 
-            if (sellTx!.success) {
-              let message = "Manual Sell Notification";
-              message += "\n\n Txn ";
-              message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
-              message += "\n\n Token";
-              message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+              const nonce = await v2walletNonce();
+              const overLoads = { maxFeePerGas: gasData?.maxFeePerGas! * 1e9, maxPriorityFeePerGas: gasData?.maxPriorityFeePerGas! * 1e9, nonce, gasLimit: DEFAULT_GAS_LIMIT };
 
-              ctx.reply(message);
+              const path = {
+                tokenIn: tokenAddress,
+                tokenOut: botParameters.wethAddress
+              }
+
+              const sellTx = await sell(
+                0,
+                path,
+                overLoads
+              );
+
+              if (sellTx!.success) {
+                let message = "Manual Sell Notification";
+                message += "\n\n Txn ";
+                message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
+                message += "\n\n Token";
+                message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+
+                ctx.reply(message);
+              } else {
+                let message = "Manual Sell Error";
+                message += "\n\n Token";
+                message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+                message += "\n\n Error";
+                message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
+
+                ctx.reply(message);
+              }
             } else {
-              let message = "Manual Sell Error";
-              message += "\n\n Token";
-              message += `\nhttps://etherscan.io/token/${tokenAddress}`;
-              message += "\n\n Error";
-              message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
 
-              ctx.reply(message);
+              if (details.length > 1) {
+                const forceHighGwei = details[1].trim();
+
+                if (forceHighGwei && forceHighGwei?.toLowerCase() == "force") {
+                  const nonce = await v2walletNonce();
+                  const overLoads = { maxFeePerGas: gasData?.maxFeePerGas! * 1e9, maxPriorityFeePerGas: gasData?.maxPriorityFeePerGas! * 1e9, nonce, gasLimit: DEFAULT_GAS_LIMIT };
+
+                  console.log(nonce, overLoads)
+
+                  const path = {
+                    tokenIn: tokenAddress,
+                    tokenOut: botParameters.wethAddress
+                  }
+
+                  const sellTx = await sell(
+                    0,
+                    path,
+                    overLoads
+                  );
+
+                  if (sellTx!.success) {
+                    let message = "Manual Sell Notification";
+                    message += "\n\n Txn ";
+                    message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+
+                    ctx.reply(message);
+                  } else {
+                    let message = "Manual Sell Error";
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${tokenAddress}`;
+                    message += "\n\n Error";
+                    message += `\nhttps://etherscan.io/tx/${sellTx!.data}`;
+
+                    ctx.reply(message);
+                  }
+                } else {
+                  let message = "The current network fees are higher than our limit."
+                  message += `\n\n Network fees: ${gasData?.maxFeePerGas}`
+
+                  ctx.reply(message)
+                }
+              } else {
+                let message = "The current network fees are higher than our limit."
+                message += `\n\n Network fees: ${gasData?.maxFeePerGas}`
+
+                ctx.reply(message)
+              }
             }
           } else {
             let message =
@@ -104,7 +163,6 @@ bot.on("text", async (ctx) => {
 
             ctx.reply(message);
           }
-          // }
         } else {
           let message =
             "Error! You did not provide the gas price to be used for selling or You over priced the transaction";
@@ -117,15 +175,16 @@ bot.on("text", async (ctx) => {
         }
       } else {
         let message =
-          "Error! you did not provide enough parameteres for selling. You need to provide token to sell and gas to be used for selling in gwei. is contractAddress, gasPrice ";
+          "Error! you did not provide enough parameteres for selling. You need to provide token to sell only.";
         message += "\n\nExample of a correct sell command";
-        message += "\n\n 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b, 30";
+        message += "\n\n 0x4dbcdf9b62e891a7cec5a2568c3f4faf9e8abe2b";
         ctx.reply(message);
       }
     } else {
       ctx.reply("Error, You are not authorized to make this request");
     }
   } catch (error) {
+    console.log("Error while selling ", error)
     let message = "Encountered this error while selling";
     message += `\n\n\ ${error}`;
 

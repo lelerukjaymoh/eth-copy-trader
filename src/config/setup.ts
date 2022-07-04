@@ -18,6 +18,10 @@ const BUY_AMOUNTS = {
 
 let WALLETS_TO_MONITOR = new Map([
   [
+    "0xDb6A898EAb7302a860208076be9f856818F00744".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
+  ],
+  [
     "0x3fCea81Bf88704d4794F7B6C4B8c4000F9d106be".toLowerCase(),
     BUY_AMOUNTS.highSpender,
   ],
@@ -50,53 +54,53 @@ let WALLETS_TO_MONITOR = new Map([
     BUY_AMOUNTS.highSpender,
   ],
   [
-  "0x70b83E71c6F5b83fBf00914C1A45311849e19070".toLowerCase(),
+    "0x70b83E71c6F5b83fBf00914C1A45311849e19070".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
   ],
   [
-  "0x4eF45ea052eeAB1631DCa09d28946fE8e17633b5".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0xAE637BF6cAD3F3bfabc3215964b0af84cEAE2984".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0xd3a16d90439A6C3456848E7F8A9c6E2027d571E5".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x345eB826a33bec023A2fb09F35256398563129D4".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x276f62A8de3F74Fd5D3073B57EBb64c6d867113d".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x9dda370f43567b9C757A3F946705567BcE482C42".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x97DA67882b3F727c2fab876660785a6fba3fb3B5".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x75377155BAbB1512f390905c8DeAE378eb829105".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x68B531349EB44496943Be5FF15A5F510849D561f".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0xF3CD36797f0d8363768e8BB8F8BEA48c34e519E2".toLowerCase(),
-  BUY_AMOUNTS.lowSpender,
-  ],
-  [
-  "0x7FF0373F706E07eE326d538f6a6B2Cf8F7397e77".toLowerCase(),
+    "0x4eF45ea052eeAB1631DCa09d28946fE8e17633b5".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
   ],
+  [
+    "0xAE637BF6cAD3F3bfabc3215964b0af84cEAE2984".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0xd3a16d90439A6C3456848E7F8A9c6E2027d571E5".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x345eB826a33bec023A2fb09F35256398563129D4".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x276f62A8de3F74Fd5D3073B57EBb64c6d867113d".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x9dda370f43567b9C757A3F946705567BcE482C42".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x97DA67882b3F727c2fab876660785a6fba3fb3B5".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x75377155BAbB1512f390905c8DeAE378eb829105".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x68B531349EB44496943Be5FF15A5F510849D561f".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0xF3CD36797f0d8363768e8BB8F8BEA48c34e519E2".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  // [
+  //   "0x7FF0373F706E07eE326d538f6a6B2Cf8F7397e77".toLowerCase(),
+  //   BUY_AMOUNTS.lowSpender,
+  // ],
   [
     "0x3c1f60B578F3AaF06EDb594FAE223cB2AaA5bfD1".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
@@ -124,7 +128,7 @@ let WALLETS_TO_MONITOR = new Map([
   [
     "0x82adBa2a6b3D4Af8799D845e0593Ba85513a9D43".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
-  ]  
+  ]
 ]);
 
 // Users to receive telegram notifications
@@ -133,12 +137,13 @@ const TG_CHANNEL: number = -1001265534372;
 
 const TG_USERS: string[] = [
   "584173555",
+  "5035419034",
+  "2060423170",
   "1645102790",
   "1295076847",
   "1741013492",
   "299108118",
   "1610178949",
-  "2060423170",
   "420331061",
   "2059064846",
 ];
