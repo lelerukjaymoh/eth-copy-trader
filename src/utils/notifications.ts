@@ -1,9 +1,10 @@
 import { sendNotification } from "../telegram";
 
-const sellingNotification = async (token: any, target: any) => {
+const sellingNotification = async (token: any, target: any, tx: string) => {
   let message = `${target} is selling`;
-  message += "\n\n===============================";
   message += `\n\n Token: ${token}`;
+  message += "\n\n===============================";
+  message += `\n\n Tx: https://etherscan.io/tx/${token}`;
 
   await sendNotification(message);
 };

@@ -1,14 +1,42 @@
-import { ethers, providers, Transaction, utils } from "ethers";
-import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
+import { Contract, ethers, providers, Transaction, utils } from "ethers";
+import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, SLIPPAGE, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
 import { BoughtTokens } from "../db/models";
 import "../db/connect";
 import { overLoads, txContents } from "../types";
 import { init } from "../initialize";
+import { routerContract } from "../uniswap/v3/utils/common";
 
 // Ensure all .env variables are loaded 
 init()
+
+const routerABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "amountIn",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "path",
+        "type": "address[]"
+      }
+    ],
+    "name": "getAmountsOut",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "amounts",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
 
 const smartContractInterface = new ethers.utils.Interface(smartContractABI);
 
@@ -89,7 +117,9 @@ const getTxnStatus = async (txn: string) => {
   try {
     let transactionReceipt = await provider.getTransactionReceipt(txn);
 
-    return transactionReceipt.status;
+    return {
+      status: transactionReceipt.status, confirmations: transactionReceipt.confirmations
+    };
   } catch (error) {
     console.log(
       "\n\n Encountered an error getting status of the transaction ",
@@ -108,6 +138,32 @@ const v2smartContract = new ethers.Contract(
   v2account
 );
 
+export const uniswapv2RouterContract = new Contract(botParameters.uniswapv2Router, routerABI, provider)
+
+export const getSlippagedAmoutOut = async (amountIn: any, path: any) => {
+  try {
+
+    console.log("Path ", path)
+
+    const tokenDecimals = await getTokenDecimals(path.tokenIn)
+    amountIn = (amountIn / (1 * 10 ** tokenDecimals)).toFixed()
+
+    const _amountIn = utils.parseUnits(amountIn.toString, tokenDecimals)
+
+    console.log("[Slippage] Amount in ", _amountIn)
+
+    const amountsOut = await uniswapv2RouterContract.getAmountsOut(_amountIn, [path.tokenIn, path.tokenOut])
+
+    console.log("Amount outs ", amountsOut)
+
+    const amountOut = parseInt(amountsOut[1])
+
+    return ((100 - SLIPPAGE) / 100) * amountOut
+
+  } catch (error) {
+    console.log("Error getting the slippaged amount out ", error)
+  }
+}
 const getTokenAllowance = async (
   tokenAddress: string,
   walletAddress: string

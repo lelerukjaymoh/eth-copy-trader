@@ -17,6 +17,11 @@ const BUY_AMOUNTS = {
 // 27 wallets
 
 let WALLETS_TO_MONITOR = new Map([
+
+  // [
+  //   "0x0aEadd5bB47bB7ff133076972ff44212f3bE5541".toLowerCase(),
+  //   BUY_AMOUNTS.testingAmount,
+  // ],
   [
     "0xDb6A898EAb7302a860208076be9f856818F00744".toLowerCase(),
     BUY_AMOUNTS.highSpender,
@@ -175,7 +180,7 @@ const ADDITIONAL_BUY_GAS = 5 * Math.pow(10, 9);
 const WAIT_TIME_AFTER_TRANSACTION = 15 * 1000;
 
 // Time interval for running the token check cron job in secs
-const TOKEN_CHECK_TIME_INTERVAL = 30;
+const TOKEN_CHECK_TIME_INTERVAL = 15;
 
 // The interval in seconds the bots keep on checking the db and updating the amount of tokens we had bought
 const GET_NONCE_TIMEOUT = 5;
@@ -184,7 +189,11 @@ const MAX_GAS_PRICE_TG = 100;
 
 // Parameters used by the bot
 
+// Slippage 
+const SLIPPAGE = 20
+
 export {
+  SLIPPAGE,
   TG_CHANNEL,
   EXCLUDED_TOKENS,
   TARGET_MINIMUM_BUY_AMOUNT,

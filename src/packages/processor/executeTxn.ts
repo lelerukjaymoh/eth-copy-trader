@@ -2,7 +2,7 @@ import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIM
 import { sendNotification } from "../../telegram";
 import { overLoads, TransactionData } from "../../types";
 import { buy, sell } from "../../uniswap/v2/swap";
-import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce } from "../../utils/common";
+import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce, getSlippagedAmoutOut } from "../../utils/common";
 import { sellingNotification, sendTgNotification } from "../../utils/notifications";
 import { v3buy, v3sell } from "../../uniswap/v3";
 
@@ -19,7 +19,7 @@ let count = 0
 export const executeTxn = async (txnData: TransactionData, overLoads: overLoads) => {
     const path = txnData.path
 
-    // console.log("Executing transactions", path);
+    console.log("Executing transactions", path);
 
 
     const targetWallet = txnData.from;
@@ -57,7 +57,12 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                 if (count < 1) {
                     count++;
-                    let buyTx = await buy(botAmountIn!, txnData.botAmountOut, path, overLoads);
+
+                    const botAmountOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
+                    console.log("\n\nAmount out ", botAmountOut)
+
+                    let buyTx = await buy(botAmountIn!, botAmountOut!, path, overLoads);
 
 
                     if (buyTx.success) {
@@ -118,7 +123,11 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 if (count < 1) {
                     count++;
 
-                    let buyTx = await buy(botAmountIn!, txnData.botAmountOut, path, overLoads);
+                    const botAmountOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
+                    console.log("\n\nAmount out ", botAmountOut)
+
+                    let buyTx = await buy(botAmountIn!, botAmountOut!, path, overLoads);
 
                     if (buyTx.success) {
                         await saveToken(token, buyTx.data);
@@ -198,7 +207,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
             }
         }
 
-        await sellingNotification(token, targetWallet);
+        await sellingNotification(token, targetWallet, txnData.hash);
     } else if (
         txnData.txnMethodName == "swapExactTokensForTokens" ||
         txnData.txnMethodName == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
@@ -227,9 +236,13 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 if (count < 1) {
                     count++;
 
+                    const botAmountOut = await getSlippagedAmoutOut(STABLE_COIN_BNB_AMOUNT_TO_BUY!, path)
+
+                    console.log("\n\nAmount out ", botAmountOut)
+
                     let buyTx = await buy(
                         STABLE_COIN_BNB_AMOUNT_TO_BUY,
-                        0,
+                        botAmountOut!,
                         path,
                         overLoads
                     );

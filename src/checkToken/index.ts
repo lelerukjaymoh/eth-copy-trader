@@ -24,18 +24,36 @@ const main = async () => {
 
       if (dbTokens) {
         for (let i = 0; i < dbTokens.length; i++) {
-          const txnStatus = await getTxnStatus(dbTokens[i].txHash);
+          const txn = await getTxnStatus(dbTokens[i].txHash);
 
-          if (txnStatus && txnStatus == 1) {
-            await BoughtTokens.findByIdAndUpdate(dbTokens[i]._id, {
-              bought: true,
-            })
-              .then(() => {
-                console.log("Document updated successfully", dbTokens[i]._id);
+          if (txn) {
+            if (txn.status && txn.status == 1) {
+              await BoughtTokens.findByIdAndUpdate(dbTokens[i]._id, {
+                bought: true,
               })
-              .catch((error) =>
-                console.log("Error updating token bought status ", error)
-              );
+                .then(() => {
+                  console.log("Document updated successfully", dbTokens[i]._id);
+                })
+                .catch((error) =>
+                  console.log("Error updating token bought status ", error)
+                );
+            } else {
+
+              /* Delete the transaction from the database if it failed. 
+              * Mark the transactions as failed if its status fail and the
+              * transaction has more than 12 confirmations
+              */
+              if (txn.confirmations && txn?.confirmations > 12) {
+                await BoughtTokens.findByIdAndDelete(dbTokens[i]._id)
+                  .then(() => {
+                    console.log("Failed Txn deleted successfully", dbTokens[i]._id);
+                  })
+                  .catch((error) => {
+                    console.log("Error deleting failed Txn ", error)
+
+                  })
+              }
+            }
           }
         }
       }
