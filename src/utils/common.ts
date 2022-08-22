@@ -143,12 +143,14 @@ export const uniswapv2RouterContract = new Contract(botParameters.uniswapv2Route
 export const getSlippagedAmoutOut = async (amountIn: any, path: any) => {
   try {
 
-    console.log("Path ", path)
+    console.log("\n\nPath ", path, amountIn)
 
     const tokenDecimals = await getTokenDecimals(path.tokenIn)
-    amountIn = (amountIn / (1 * 10 ** tokenDecimals)).toFixed()
+    amountIn = (amountIn / (1 * 10 ** tokenDecimals))
 
-    const _amountIn = utils.parseUnits(amountIn.toString, tokenDecimals)
+    console.log("Decimals ", tokenDecimals, amountIn)
+
+    const _amountIn = utils.parseUnits(amountIn.toString(), tokenDecimals)
 
     console.log("[Slippage] Amount in ", _amountIn)
 
@@ -156,7 +158,7 @@ export const getSlippagedAmoutOut = async (amountIn: any, path: any) => {
 
     console.log("Amount outs ", amountsOut)
 
-    const amountOut = parseInt(amountsOut[1])
+    const amountOut: any = (parseInt(amountsOut[1])).toFixed()
 
     return ((100 - SLIPPAGE) / 100) * amountOut
 

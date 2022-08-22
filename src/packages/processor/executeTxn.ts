@@ -39,7 +39,6 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
         console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
 
-
         // Prevent the bot from copying trades involving stable tokens
         // Since the target could be cashing out
         if (!stableTokens.includes(token.toLowerCase())) {
@@ -98,6 +97,8 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 count = 0;
             }
 
+        } else {
+            console.log("Skipping trade, it involved a stable coin ", token)
         }
 
     } else if (txnData.txnMethodName == "swapETHForExactTokens") {

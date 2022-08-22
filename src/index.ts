@@ -12,7 +12,7 @@ const main = async () => {
 
     try {
         const _provider = new ethers.providers.WebSocketProvider(
-            process.env.STREAMING_WS_RPC_URL!
+            process.env.WS_RPC_URL!
         );
 
         _provider.on("pending", async (txHash: string) => {

@@ -24,6 +24,16 @@ const buy = async (
 
     console.log("Buy OverLoads : ", overLoads);
 
+    // Simulate the buy transaction before buying. If the transaction was to fail it wil be handled in the
+    // catch block and no transaction will be broadcast, saving on gas 
+    const buySimulation = await v2smartContract.callStatic.baisha(
+      toHex(amountIn),
+      toHex(amountOutMin),
+      [path.tokenIn, path.tokenOut],
+      overLoads
+    )
+
+    // If the transaction was successfully executed, broadcast it to the network
     const buyTxData = await v2smartContract.baisha(
       toHex(amountIn),
       toHex(amountOutMin),
@@ -54,6 +64,16 @@ const sell = async (
     );
 
     if (tokenBalance && tokenBalance > 0) {
+
+      // Simulate the sell transaction 
+
+      await v2smartContract.callStatic.kinda(
+        toHex(0),
+        [path.tokenIn, path.tokenOut],
+        overLoads
+      )
+
+      // If the simulation was a success, execute the sell txn
       const sellTxData = await v2smartContract.kinda(
         toHex(0),
         [path.tokenIn, path.tokenOut],
