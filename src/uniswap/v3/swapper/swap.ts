@@ -1,3 +1,5 @@
+import { sendNotification } from "../../../telegram";
+import { failedTxMessage } from "../../../telegram/message";
 import { TxnParams, overLoads, Path } from "../interfaces";
 import { v3swapperContract } from "../utils/common";
 
@@ -23,6 +25,8 @@ export const
             return data
 
         } catch (error) {
+            await sendNotification(failedTxMessage("SELL", params.tokenOut, JSON.stringify(error)))
+
             console.log("Error swapping Exact In: ", error);
         }
     }
@@ -50,6 +54,8 @@ export const v3sell = async (params: TxnParams, overLoads: overLoads) => {
 
 
     } catch (error) {
+        await sendNotification(failedTxMessage("SELL", params.tokenIn, JSON.stringify(error)))
+
         console.log("Error swapping Exact In: ", error);
     }
 }

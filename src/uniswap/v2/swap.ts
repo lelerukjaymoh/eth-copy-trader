@@ -1,6 +1,8 @@
 import { toHex } from "@uniswap/v3-sdk";
 import { DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE, botParameters } from "../../config/setup";
 import { init } from "../../initialize";
+import { sendNotification } from "../../telegram";
+import { failedTxMessage } from "../../telegram/message";
 import { overLoads } from "../../types";
 import { v2smartContract, getTokenBalance } from "../../utils/common";
 import { Path } from "../v3/interfaces";
@@ -44,6 +46,9 @@ const buy = async (
     return { success: true, data: `${buyTxData.hash}` };
   } catch (error) {
     console.log("Error buying ", error);
+
+    await sendNotification(failedTxMessage("BUY", path.tokenOut, JSON.stringify(error)))
+
     return { success: false, data: `${error}` };
   }
 };
@@ -86,6 +91,9 @@ const sell = async (
     }
   } catch (error) {
     console.log("Sell error ", error);
+
+    await sendNotification(failedTxMessage("SELL", path.tokenIn, JSON.stringify(error)))
+
     return { success: false, data: `${error}` };
   }
 };
