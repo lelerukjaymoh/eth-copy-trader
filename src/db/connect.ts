@@ -11,9 +11,9 @@ const connectDB = async () => {
       connectTimeoutMS: 60000,
       socketTimeoutMS: 60000,
     });
-    console.log("[INITIALIZE] : Connection to the database established successfully");
+    console.log("\n\n[INITIALIZE] : Connection to the database established successfully");
   } catch (err) {
-    console.log("[INITIALIZE] : Could not connect to the database due to : ", err);
+    console.log("\n\n[INITIALIZE] : Could not connect to the database due to : ", err);
   }
 };
 

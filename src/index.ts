@@ -2,8 +2,17 @@ import { ethers } from "ethers";
 import { init } from "./initialize";
 import { processData } from "./packages/processor";
 import { prepareTxContents, provider, wait } from "./utils/common";
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
 
 console.log("\n\n INITIALIZING THE BOT")
+
+console.log("\n STARTING SENTRY MONITORING")
+
+Sentry.init({
+    dsn: process.env.SENTRY_DNS,
+    tracesSampleRate: 1.0,
+});
 
 // initializing the bot
 init()
