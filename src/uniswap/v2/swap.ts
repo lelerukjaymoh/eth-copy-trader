@@ -1,4 +1,5 @@
 import { toHex } from "@uniswap/v3-sdk";
+import { BigNumber } from "ethers";
 import { DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE, botParameters } from "../../config/setup";
 import { init } from "../../initialize";
 import { sendNotification } from "../../telegram";
@@ -11,14 +12,14 @@ import { Path } from "../v3/interfaces";
 init()
 
 const buy = async (
-  amountIn: number,
-  amountOutMin: number,
+  amountIn: BigNumber,
+  amountOutMin: BigNumber,
   path: Path,
   overLoads: overLoads
 ) => {
   try {
 
-    console.log("\n\n [BUYING] : Buying with these parameters ")
+    console.log("\n\n [v2 BUYING] : Buying with these parameters ")
 
     console.log(
       `Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
@@ -29,16 +30,16 @@ const buy = async (
     // Simulate the buy transaction before buying. If the transaction was to fail it wil be handled in the
     // catch block and no transaction will be broadcast, saving on gas 
     const buySimulation = await v2smartContract.callStatic.baisha(
-      toHex(amountIn),
-      toHex(amountOutMin),
+      amountIn,
+      amountOutMin,
       [path.tokenIn, path.tokenOut],
       overLoads
     )
 
     // If the transaction was successfully executed, broadcast it to the network
     const buyTxData = await v2smartContract.baisha(
-      toHex(amountIn),
-      toHex(amountOutMin),
+      amountIn,
+      amountOutMin,
       [path.tokenIn, path.tokenOut],
       overLoads
     );

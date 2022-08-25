@@ -108,9 +108,9 @@ const STABLE_COIN_BNB_AMOUNT_TO_BUY = 0.1 * 10 ** 18;
 
 const TARGET_MINIMUM_BUY_AMOUNT = 0.01 * Math.pow(10, 18);
 
-const ADDITIONAL_SELL_GAS = 5 * Math.pow(10, 9);
+const ADDITIONAL_SELL_GAS = 10 * Math.pow(10, 9);
 
-const ADDITIONAL_BUY_GAS = 5 * Math.pow(10, 9);
+const ADDITIONAL_BUY_GAS = 10 * Math.pow(10, 9);
 
 const WAIT_TIME_AFTER_TRANSACTION = 15 * 1000;
 

@@ -2,9 +2,10 @@ import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIM
 import { sendNotification } from "../../telegram";
 import { overLoads, TransactionData } from "../../types";
 import { buy, sell } from "../../uniswap/v2/swap";
-import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce, getSlippagedAmoutOut } from "../../utils/common";
+import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce, getSlippagedAmoutOut, getTokenDecimals } from "../../utils/common";
 import { sellingNotification, sendTgNotification } from "../../utils/notifications";
 import { v3buy, v3sell } from "../../uniswap/v3";
+import { utils } from "ethers";
 
 
 // A patch to ensure the bot does not make several transactions at almost the same time. 
@@ -61,8 +62,20 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                     console.log("\n\nAmount out ", botAmountOut)
 
-                    let buyTx = await buy(botAmountIn!, botAmountOut!, path, overLoads);
+                    const tokenDecimals = await getTokenDecimals(path.tokenOut)
 
+                    // First convert the amount into the normal amount without the 1^decimals value 
+                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenDecimals).toFixed()
+
+                    // The parse it to the required amount
+                    const _amountOut = utils.parseUnits(amountOutEther, tokenDecimals)
+
+                    // REVIEW: We assume that the in amount will always be of a token that has 18 decimals
+                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
+                    const _botAmountIn = (botAmountIn! / 1 * 10 ** 18).toFixed()
+                    const amountIn = utils.parseUnits(_botAmountIn!, 18)
+
+                    let buyTx = await buy(amountIn!, _amountOut!, path, overLoads);
 
                     if (buyTx.success) {
                         await saveToken(token, buyTx.data);
@@ -128,7 +141,20 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                     console.log("\n\nAmount out ", botAmountOut)
 
-                    let buyTx = await buy(botAmountIn!, botAmountOut!, path, overLoads);
+                    const tokenDecimals = await getTokenDecimals(path.tokenOut)
+
+                    // First convert the amount into the normal amount without the 1^decimals value 
+                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenDecimals).toFixed()
+
+                    // The parse it to the required amount
+                    const _amountOut = utils.parseUnits(amountOutEther, tokenDecimals)
+
+                    // REVIEW: We assume that the in amount will always be of a token that has 18 decimals
+                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
+                    const _botAmountIn = (botAmountIn! / 1 * 10 ** 18).toFixed()
+                    const amountIn = utils.parseUnits(_botAmountIn!, 18)
+
+                    let buyTx = await buy(amountIn!, _amountOut!, path, overLoads);
 
                     if (buyTx.success) {
                         await saveToken(token, buyTx.data);
@@ -241,9 +267,26 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                     console.log("\n\nAmount out ", botAmountOut)
 
+                    const tokenOutDecimals = await getTokenDecimals(path.tokenOut)
+
+                    // First convert the amount into the normal amount without the 1^decimals value 
+                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenOutDecimals).toFixed()
+
+                    // The parse it to the required amount
+                    const _amountOut = utils.parseUnits(amountOutEther, tokenOutDecimals)
+
+
+                    // REVIEW: Since the amount in in this case can be any stable coin, we are not sure
+                    // the number of decimal places it will have hence we need to query in real time
+                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
+                    const _botAmountIn = (STABLE_COIN_BNB_AMOUNT_TO_BUY! / 1 * 10 ** 18).toFixed()
+
+                    const tokenInDecimals = await getTokenDecimals(path.tokenIn)
+                    const amountIn = utils.parseUnits(_botAmountIn!, tokenInDecimals)
+
                     let buyTx = await buy(
-                        STABLE_COIN_BNB_AMOUNT_TO_BUY,
-                        botAmountOut!,
+                        amountIn,
+                        _amountOut!,
                         path,
                         overLoads
                     );
