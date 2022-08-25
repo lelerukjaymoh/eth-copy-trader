@@ -14,8 +14,14 @@ export const
                 params.tokenIn, params.tokenOut, params.amountOut, params.fee, params.sqrtPriceLimitX96, overLoads
             )
 
+            console.log(
+                params.tokenIn, params.tokenOut, params.amountOut, params.fee, params.sqrtPriceLimitX96, overLoads
+            )
+
             // If simulation was successful, execute transaction
             const txn = await v3swapperContract.buy(params.tokenIn, params.tokenOut, params.amountOut, params.fee, params.sqrtPriceLimitX96, overLoads)
+
+            console.log("\n\n Successfully submitted BUY transaction on V3 ", txn.hash)
 
             const data = {
                 success: true,
@@ -37,6 +43,10 @@ export const v3sell = async (params: TxnParams, overLoads: overLoads) => {
 
         console.log("\n\n [SELLING] : Selling through V3 router using multicall function")
 
+        console.log(
+            params.amountOut, params.tokenIn, params.tokenOut, params.fee, params.sqrtPriceLimitX96, overLoads
+        )
+
         // Simulate the sell transaction.
         await v3swapperContract.callStatic.sell(
             params.amountOut, params.tokenIn, params.tokenOut, params.fee, params.sqrtPriceLimitX96, overLoads
@@ -44,6 +54,8 @@ export const v3sell = async (params: TxnParams, overLoads: overLoads) => {
 
         // If simulation was successful, execute the trade
         const txn = await v3swapperContract.sell(params.amountOut, params.tokenIn, params.tokenOut, params.fee, params.sqrtPriceLimitX96, overLoads)
+
+        console.log("\n\n Successfully submitted SELL transaction on V3 ", txn.hash)
 
         const data = {
             success: true,

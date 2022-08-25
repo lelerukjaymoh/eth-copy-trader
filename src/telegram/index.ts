@@ -59,10 +59,8 @@ bot.on("text", async (ctx) => {
           );
 
           if (tokenBalance > 0) {
-            console.log("Selling ")
+            console.log("\n Selling ")
             const gasData = await fetchGasPrice()
-
-            console.log("Gas data ", gasData)
 
             // Check that the gas to be used is not greater that our limit
             if (gasData?.maxFeePerGas! < MAX_GAS_PRICE_TG) {

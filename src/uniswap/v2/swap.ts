@@ -22,10 +22,10 @@ const buy = async (
     console.log("\n\n [v2 BUYING] : Buying with these parameters ")
 
     console.log(
-      `Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
+      `\n\n Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
     );
 
-    console.log("Buy OverLoads : ", overLoads);
+    console.log("\n\n Buy OverLoads : ", overLoads);
 
     // Simulate the buy transaction before buying. If the transaction was to fail it wil be handled in the
     // catch block and no transaction will be broadcast, saving on gas 
@@ -43,6 +43,8 @@ const buy = async (
       [path.tokenIn, path.tokenOut],
       overLoads
     );
+
+    console.log("\n\n Successfully submitted BUY transaction on V2 ", buyTxData.hash)
 
     return { success: true, data: `${buyTxData.hash}` };
   } catch (error) {
@@ -85,6 +87,8 @@ const sell = async (
         [path.tokenIn, path.tokenOut],
         overLoads
       );
+
+      console.log("\n\n Successfully submitted SELL transaction on V2 ", sellTxData.hash)
 
       return { success: true, data: `${sellTxData.hash}` };
     } else {

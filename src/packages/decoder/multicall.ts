@@ -9,6 +9,8 @@ const multicallInterface = new ethers.utils.Interface(multicall);
 export const decodeMulticallTransaction = (inputData: string): DecodedData | undefined => {
 
     try {
+        console.log(`\n\n [MULTICALL] : Start decoding multicall transaction`)
+
         const decodedData = multicallInterface.parseTransaction({ data: inputData })
         const txnData = multicallInterface.parseTransaction({ data: decodedData.args.data[0] })
         const txn = txnData.args.params

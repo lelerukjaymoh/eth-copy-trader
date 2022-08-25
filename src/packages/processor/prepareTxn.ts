@@ -37,9 +37,13 @@ export const processData = async (txContents: txContents) => {
                     // console.log("Method id : ", methodId, multiCallMethods, multiCallMethods.includes(methodId), txContents.hash)
 
                     if (multiCallMethods.includes(methodId)) {
+                        console.log(`\n\n [DECODING] : Transaction is a multicall transaction.`)
+
                         decodedData = decodeMulticallTransaction(txContents.input)!
                         nonce = await v3walletNonce()
                     } else {
+                        console.log(`\n\n [DECODING] : Transaction is a normal transaction.`)
+
                         decodedData = decodeNormalTxn(txContents.input)!
                         nonce = await v2walletNonce()
                     }
@@ -79,8 +83,13 @@ export const processData = async (txContents: txContents) => {
                             // Prepare transaction overloads
                             let overLoads = await prepareOverLoads(txContents, nonce!);
 
-                            console.log("\n\n\n ===> Txn Data", txnData);
-                            console.log("OverLoads", overLoads);
+                            console.log("\n\n Txn Data");
+                            for (let key in txnData) {
+                                console.log(key + ": " + txnData[key as keyof TransactionData]);
+                            }
+
+                            console.log("\n\n Txn Overloads ")
+                            console.log(overLoads);
 
                             if (overLoads && txnData) {
                                 await executeTxn(txnData, overLoads)

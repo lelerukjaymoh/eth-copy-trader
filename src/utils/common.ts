@@ -1,4 +1,4 @@
-import { Contract, ethers, providers, Transaction, utils } from "ethers";
+import { BigNumber, Contract, ethers, providers, Transaction, utils } from "ethers";
 import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, SLIPPAGE, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
@@ -99,9 +99,7 @@ export const prepareOverLoads = async (txContents: txContents, nonce: number) =>
     // Fetch the current average gas data to use for the transactions
     const gasData = await fetchGasPrice()
 
-    console.log("Gas data ", gasData)
     const overLoads = { maxFeePerGas: gasData?.maxFeePerGas! * 1e9, maxPriorityFeePerGas: gasData?.maxPriorityFeePerGas! * 1e9, nonce, gasLimit };
-
 
     return overLoads
   } catch (error) {
@@ -158,9 +156,9 @@ export const getSlippagedAmoutOut = async (amountIn: any, path: any) => {
 
     console.log("Amount outs ", amountsOut)
 
-    const amountOut: any = (parseInt(amountsOut[1])).toFixed()
+    const amountOut: BigNumber = amountsOut[1].mul(BigNumber.from(100 - SLIPPAGE)).div(BigNumber.from(100))
 
-    return ((100 - SLIPPAGE) / 100) * amountOut
+    return { amountOut, amountIn: amountsOut[0] }
 
   } catch (error) {
     console.log("Error getting the slippaged amount out ", error)

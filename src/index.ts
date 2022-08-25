@@ -20,12 +20,22 @@ init()
 const main = async () => {
 
     try {
+
+
         const _provider = new ethers.providers.WebSocketProvider(
             process.env.WS_RPC_URL!
         );
 
+        // REVIEW: Transaction for testing 
+        // const txnObject = await _provider.getTransaction("0x5310ffd37a7034b726482be516b6ac77116ca868db63036aafdd1a43ebcb37ed");
+
+        // const txContents = prepareTxContents(txnObject);
+        // await processData(txContents);
+
+        // await processData(txContents);
+
+
         _provider.on("pending", async (txHash: string) => {
-            let txnTime = Date.now()
 
             const txnObject = await _provider.getTransaction(txHash);
 

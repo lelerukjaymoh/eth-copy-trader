@@ -18,322 +18,349 @@ import { utils } from "ethers";
 let count = 0
 
 export const executeTxn = async (txnData: TransactionData, overLoads: overLoads) => {
-    const path = txnData.path
 
-    console.log("Executing transactions", path);
+    try {
 
+        console.log("\n\n[PROCESSING] : Strating Txn Processing ")
 
-    const targetWallet = txnData.from;
+        const path = txnData.path
 
-    if (
-        txnData.txnMethodName == "swapExactETHForTokens" ||
-        txnData.txnMethodName == "swapExactETHForTokensSupportingFeeOnTransferTokens"
-    ) {
-        const token = path.tokenOut;
+        const targetWallet = txnData.from;
 
-        // TODO: To remove this log once the check is validated
-        // console.log(
-        //     "\n\n Check ",
-        //     token,
-        //     stableTokens.includes(token.toLowerCase())
-        // );
+        if (
+            txnData.txnMethodName == "swapExactETHForTokens" ||
+            txnData.txnMethodName == "swapExactETHForTokensSupportingFeeOnTransferTokens"
+        ) {
+            const token = path.tokenOut;
 
-        console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
+            // TODO: To remove this log once the check is validated
+            // console.log(
+            //     "\n\n Check ",
+            //     token,
+            //     stableTokens.includes(token.toLowerCase())
+            // );
 
-        // Prevent the bot from copying trades involving stable tokens
-        // Since the target could be cashing out
-        if (!stableTokens.includes(token.toLowerCase())) {
+            console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
 
-            let dbTokens = await checkToken(token);
+            // Prevent the bot from copying trades involving stable tokens
+            // Since the target could be cashing out
+            if (!stableTokens.includes(token.toLowerCase())) {
 
-            // Prevent the bot from buying tokens we have already bought
-            if (
-                (dbTokens && dbTokens.length == 0) ||
-                repeatedTokens.includes(token.toLowerCase())
-            ) {
+                let dbTokens = await checkToken(token);
 
-                // Ensure the bot is not investing more than the maximum amount it should be investing
-                const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+                // Prevent the bot from buying tokens we have already bought
+                if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                ) {
 
-                if (count < 1) {
-                    count++;
+                    // Ensure the bot is not investing more than the maximum amount it should be investing
+                    const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
 
-                    const botAmountOut = await getSlippagedAmoutOut(botAmountIn!, path)
+                    if (count < 1) {
+                        count++;
 
-                    console.log("\n\nAmount out ", botAmountOut)
+                        const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
 
-                    const tokenDecimals = await getTokenDecimals(path.tokenOut)
+                        console.log("\n\nAmount out ", amountsOut)
 
-                    // First convert the amount into the normal amount without the 1^decimals value 
-                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenDecimals).toFixed()
+                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountIn, path, overLoads);
 
-                    // The parse it to the required amount
-                    const _amountOut = utils.parseUnits(amountOutEther, tokenDecimals)
+                        if (buyTx.success) {
+                            await saveToken(token, buyTx.data);
 
-                    // REVIEW: We assume that the in amount will always be of a token that has 18 decimals
-                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
-                    const _botAmountIn = (botAmountIn! / 1 * 10 ** 18).toFixed()
-                    const amountIn = utils.parseUnits(_botAmountIn!, 18)
+                            await sendTgNotification(
+                                targetWallet,
+                                txnData.hash,
+                                buyTx.data,
+                                "BUY",
+                                token
+                            );
+                        }
 
-                    let buyTx = await buy(amountIn!, _amountOut!, path, overLoads);
+                        // Wait for the transaction to be confirmed
+                        // await waitForTransaction(buyTx.data)
 
-                    if (buyTx.success) {
-                        await saveToken(token, buyTx.data);
+                        count = 0;
+                    } else {
+                        console.log("\n\n Count is not updated ", count)
+                    }
+                } else {
+                    let message =
+                        "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${targetWallet}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path.tokenOut
+                        }?a=${botParameters.swapperAddress}`;
+
+                    await sendNotification(message);
+
+                    count = 0;
+                }
+
+            } else {
+                console.log("Skipping trade, it involved a stable coin ", token)
+            }
+
+        } else if (txnData.txnMethodName == "swapETHForExactTokens") {
+
+            console.log("\n\n[PROCESSING] : SwapETHForExactTokens transaction to be routed to v2 ")
+
+            const token = path.tokenOut;
+
+            // Prevent the bot from buying a stable coin
+            if (!stableTokens.includes(token.toLowerCase())) {
+                let token = path.tokenOut;
+                let dbTokens = await checkToken(token);
+
+                // Prevent the bot from buying tokens we have already bought
+                if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                ) {
+
+                    // Ensure the bot is not investing more than the maximum amount it should be investing
+                    const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+
+                    if (count < 1) {
+                        count++;
+
+                        const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
+                        console.log("\n\nAmount out ", amountsOut)
+
+                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
+
+                        if (buyTx.success) {
+                            await saveToken(token, buyTx.data);
+
+                            await sendTgNotification(
+                                targetWallet,
+                                txnData.hash,
+                                buyTx.data,
+                                "BUY",
+                                token
+                            );
+                        }
+
+                        // Wait for the transaction to be confirmed
+                        // await waitForTransaction(buyTx.data)
+
+                        count = 0;
+                    } else {
+                        console.log("\n\n Count is not updated ", count)
+                    }
+                } else {
+                    let message =
+                        "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${targetWallet}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path.tokenOut
+                        }?a=${botParameters.swapperAddress}`;
+
+                    await sendNotification(message);
+
+                }
+
+            } else {
+                console.log("\n\n Skipping stable token ", token);
+            }
+
+        } else if (
+            txnData.txnMethodName == "swapExactTokensForETH" ||
+            txnData.txnMethodName == "swapTokensForExactETH" ||
+            txnData.txnMethodName == "swapExactTokensForETHSupportingFeeOnTransferTokens"
+        ) {
+
+            console.log("\n\n [PROCESSING] : Sell transaction to be routed through v2 ")
+
+            let token = path.tokenIn;
+
+            // Check if we currently hold this token
+            if (await checkToken(token)) {
+                try {
+
+                    if (count < 1) {
+                        count++;
+
+                        let sellTx = await sell(0, path, overLoads);
 
                         await sendTgNotification(
                             targetWallet,
                             txnData.hash,
-                            buyTx.data,
-                            "BUY",
+                            sellTx!.data,
+                            "SELL",
                             token
                         );
-                    }
 
-                    // Wait for the transaction to be confirmed
-                    // await waitForTransaction(buyTx.data)
+                        await wait(WAIT_TIME_AFTER_TRANSACTION);
+                        count = 0;
+                    } else {
+                        console.log("\n\n Count is not updated ", count)
+                    }
+                } catch (error) {
+                    console.log(
+                        "Got an error while preparing for a swapTokensForExactETH: ",
+                        error
+                    );
 
                     count = 0;
-                } else {
-                    console.log("\n\n Count is not updated ", count)
                 }
-            } else {
-                let message =
-                    "Target is buying a token we had already bought";
-                message += "\n\nTarget ";
-                message += `\n${targetWallet}`;
-                message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path.tokenOut
-                    }?a=${botParameters.swapperAddress}`;
-
-                await sendNotification(message);
-
-                count = 0;
             }
 
-        } else {
-            console.log("Skipping trade, it involved a stable coin ", token)
-        }
+            await sellingNotification(token, targetWallet, txnData.hash);
+        } else if (
+            txnData.txnMethodName == "swapExactTokensForTokens" ||
+            txnData.txnMethodName == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
+        ) {
 
-    } else if (txnData.txnMethodName == "swapETHForExactTokens") {
+            console.log("\n\n [PROCESSING] : SwapTokensForTokens transaction to be routed through v2 ")
 
-        console.log("\n\n[PROCESSING] : SwapETHForExactTokens transaction to be routed to v2 ")
+            // This check are required so as to ensure we are buying or selling as required 
+            // since swapTokensForTokens transactions can either be a buy or sell.
+            // Checking several this as listed below :
+            // 1. The token IN is WETH, to ensure its a buy
 
-        const token = path.tokenOut;
-
-        // Prevent the bot from buying a stable coin
-        if (!stableTokens.includes(token.toLowerCase())) {
-            let token = path.tokenOut;
-            let dbTokens = await checkToken(token);
-
-            // Prevent the bot from buying tokens we have already bought
             if (
-                (dbTokens && dbTokens.length == 0) ||
-                repeatedTokens.includes(token.toLowerCase())
+                (path.tokenIn.toLowerCase() == botParameters.wethAddress.toLowerCase())   // Token used to buy is WETH
             ) {
+                // const nonce = await v2walletNonce();
 
-                // Ensure the bot is not investing more than the maximum amount it should be investing
-                const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+                let token = path.tokenOut;
+                let dbTokens = await checkToken(token);
 
-                if (count < 1) {
-                    count++;
+                // Check if we currently hold this token
+                if (
+                    (dbTokens && dbTokens.length == 0) ||
+                    repeatedTokens.includes(token.toLowerCase())
+                ) {
+                    if (count < 1) {
+                        count++;
 
-                    const botAmountOut = await getSlippagedAmoutOut(botAmountIn!, path)
+                        const amountsOut = await getSlippagedAmoutOut(STABLE_COIN_BNB_AMOUNT_TO_BUY!, path)
 
-                    console.log("\n\nAmount out ", botAmountOut)
+                        console.log("\n\nAmount out ", amountsOut)
 
-                    const tokenDecimals = await getTokenDecimals(path.tokenOut)
 
-                    // First convert the amount into the normal amount without the 1^decimals value 
-                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenDecimals).toFixed()
 
-                    // The parse it to the required amount
-                    const _amountOut = utils.parseUnits(amountOutEther, tokenDecimals)
+                        let buyTx = await buy(
+                            amountsOut?.amountIn,
+                            amountsOut?.amountOut!,
+                            path,
+                            overLoads
+                        );
 
-                    // REVIEW: We assume that the in amount will always be of a token that has 18 decimals
-                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
-                    const _botAmountIn = (botAmountIn! / 1 * 10 ** 18).toFixed()
-                    const amountIn = utils.parseUnits(_botAmountIn!, 18)
+                        if (buyTx.success) {
+                            await saveToken(token, buyTx.data);
 
-                    let buyTx = await buy(amountIn!, _amountOut!, path, overLoads);
+                            await sendTgNotification(
+                                targetWallet,
+                                txnData.hash,
+                                buyTx.data,
+                                "BUY",
+                                token
+                            );
+                        }
 
-                    if (buyTx.success) {
-                        await saveToken(token, buyTx.data);
+                        await wait(WAIT_TIME_AFTER_TRANSACTION);
+                        count = 0;
+
+                    } else {
+                        console.log("\n\n Count is not updated ", count)
+                    }
+                } else {
+                    let message =
+                        "Target is buying a token we had already bought";
+                    message += "\n\nTarget ";
+                    message += `\n${targetWallet}`;
+                    message += "\n\n Token";
+                    message += `\nhttps://etherscan.io/token/${path.tokenOut}?a=${botParameters.swapperAddress}`;
+
+                    await sendNotification(message);
+
+                    count = 0
+                }
+
+                // In TokensForTokens swap we check if its a sell by 
+            } else if (await checkToken(path.tokenIn)) {
+                try {
+
+                    if (count < 1) {
+                        count++;
+                        let sellTx = await sell(
+                            0,
+                            path,
+                            overLoads
+                        );
 
                         await sendTgNotification(
                             targetWallet,
                             txnData.hash,
-                            buyTx.data,
-                            "BUY",
-                            token
+                            sellTx!.data,
+                            "SELL",
+                            path.tokenIn
                         );
+
+                        await wait(WAIT_TIME_AFTER_TRANSACTION);
+
+                        count = 0
+                    } else {
+                        console.log("\n\n Count is not updated ", count)
                     }
 
-                    // Wait for the transaction to be confirmed
-                    // await waitForTransaction(buyTx.data)
+                } catch (error) {
+                    console.log(
+                        "Got an error while preparing for a swapExactTokensForTokens: ",
+                        error
+                    );
 
                     count = 0;
-                } else {
-                    console.log("\n\n Count is not updated ", count)
                 }
             } else {
-                let message =
-                    "Target is buying a token we had already bought";
-                message += "\n\nTarget ";
-                message += `\n${targetWallet}`;
-                message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path.tokenOut
-                    }?a=${botParameters.swapperAddress}`;
-
-                await sendNotification(message);
+                console.log(
+                    "\n\n Target is trying to sell a token that we never bought or is buying with a token that's not WBNB"
+                );
 
             }
+        } else if (
+            txnData.txnMethodName == "exactInputSingle"
+        ) {
+            // Buying or Selling with Multicall using exact input
+            console.log("\n\n [PROCESSING] : V3 transaction using exactInputSingle  to be routed through the smart contract and V3 router")
 
-        } else {
-            console.log("\n\n Skipping stable token ", token);
-        }
+            const txnParams = {
+                tokenIn: path.tokenIn,
+                tokenOut: path.tokenOut,
+                amountIn: txnData.botAmountIn,
+                amountOut: txnData.botAmountOut,
+                fee: 3000,
+                sqrtPriceLimitX96: 0
+            }
+            if (txnData.txnType == "buy") {
 
-    } else if (
-        txnData.txnMethodName == "swapExactTokensForETH" ||
-        txnData.txnMethodName == "swapTokensForExactETH" ||
-        txnData.txnMethodName == "swapExactTokensForETHSupportingFeeOnTransferTokens"
-    ) {
+                overLoads.value = txnData.value?.toString()
+                const buyTx = await v3buy(txnParams, overLoads)
 
-        console.log("\n\n [PROCESSING] : Sell transaction to be routed through v2 ")
-
-        let token = path.tokenIn;
-
-        // Check if we currently hold this token
-        if (await checkToken(token)) {
-            try {
-
-                if (count < 1) {
-                    count++;
-
-                    let sellTx = await sell(0, path, overLoads);
+                if (buyTx && buyTx.success) {
+                    await saveToken(txnParams.tokenOut, buyTx.data);
 
                     await sendTgNotification(
                         targetWallet,
                         txnData.hash,
-                        sellTx!.data,
-                        "SELL",
-                        token
+                        buyTx.data,
+                        "BUY",
+                        path.tokenOut
                     );
-
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-                    count = 0;
-                } else {
-                    console.log("\n\n Count is not updated ", count)
                 }
-            } catch (error) {
-                console.log(
-                    "Got an error while preparing for a swapTokensForExactETH: ",
-                    error
-                );
-
-                count = 0;
-            }
-        }
-
-        await sellingNotification(token, targetWallet, txnData.hash);
-    } else if (
-        txnData.txnMethodName == "swapExactTokensForTokens" ||
-        txnData.txnMethodName == "swapExactTokensForTokensSupportingFeeOnTransferTokens"
-    ) {
-
-        console.log("\n\n [PROCESSING] : SwapTokensForTokens transaction to be routed through v2 ")
-
-        // This check are required so as to ensure we are buying or selling as required 
-        // since swapTokensForTokens transactions can either be a buy or sell.
-        // Checking several this as listed below :
-        // 1. The token IN is WETH, to ensure its a buy
-
-        if (
-            (path.tokenIn.toLowerCase() == botParameters.wethAddress.toLowerCase())   // Token used to buy is WETH
-        ) {
-            // const nonce = await v2walletNonce();
-
-            let token = path.tokenOut;
-            let dbTokens = await checkToken(token);
-
-            // Check if we currently hold this token
-            if (
-                (dbTokens && dbTokens.length == 0) ||
-                repeatedTokens.includes(token.toLowerCase())
-            ) {
-                if (count < 1) {
-                    count++;
-
-                    const botAmountOut = await getSlippagedAmoutOut(STABLE_COIN_BNB_AMOUNT_TO_BUY!, path)
-
-                    console.log("\n\nAmount out ", botAmountOut)
-
-                    const tokenOutDecimals = await getTokenDecimals(path.tokenOut)
-
-                    // First convert the amount into the normal amount without the 1^decimals value 
-                    const amountOutEther = (botAmountOut! / 1 * 10 ** tokenOutDecimals).toFixed()
-
-                    // The parse it to the required amount
-                    const _amountOut = utils.parseUnits(amountOutEther, tokenOutDecimals)
 
 
-                    // REVIEW: Since the amount in in this case can be any stable coin, we are not sure
-                    // the number of decimal places it will have hence we need to query in real time
-                    // The best way was to perform all this calculations in terms of bignumber. (TODO) 
-                    const _botAmountIn = (STABLE_COIN_BNB_AMOUNT_TO_BUY! / 1 * 10 ** 18).toFixed()
+            } else if (txnData.txnType == "sell") {
 
-                    const tokenInDecimals = await getTokenDecimals(path.tokenIn)
-                    const amountIn = utils.parseUnits(_botAmountIn!, tokenInDecimals)
+                const sellTx = await v3sell(txnParams, overLoads)
 
-                    let buyTx = await buy(
-                        amountIn,
-                        _amountOut!,
-                        path,
-                        overLoads
-                    );
-
-                    if (buyTx.success) {
-                        await saveToken(token, buyTx.data);
-
-                        await sendTgNotification(
-                            targetWallet,
-                            txnData.hash,
-                            buyTx.data,
-                            "BUY",
-                            token
-                        );
-                    }
-
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-                    count = 0;
-
-                } else {
-                    console.log("\n\n Count is not updated ", count)
-                }
-            } else {
-                let message =
-                    "Target is buying a token we had already bought";
-                message += "\n\nTarget ";
-                message += `\n${targetWallet}`;
-                message += "\n\n Token";
-                message += `\nhttps://etherscan.io/token/${path.tokenOut}?a=${botParameters.swapperAddress}`;
-
-                await sendNotification(message);
-
-                count = 0
-            }
-
-            // In TokensForTokens swap we check if its a sell by 
-        } else if (await checkToken(path.tokenIn)) {
-            try {
-
-                if (count < 1) {
-                    count++;
-                    let sellTx = await sell(
-                        0,
-                        path,
-                        overLoads
-                    );
-
+                if (sellTx && sellTx.success) {
                     await sendTgNotification(
                         targetWallet,
                         txnData.hash,
@@ -341,85 +368,24 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         "SELL",
                         path.tokenIn
                     );
-
-                    await wait(WAIT_TIME_AFTER_TRANSACTION);
-
-                    count = 0
-                } else {
-                    console.log("\n\n Count is not updated ", count)
                 }
-
-            } catch (error) {
-                console.log(
-                    "Got an error while preparing for a swapExactTokensForTokens: ",
-                    error
-                );
-
-                count = 0;
-            }
-        } else {
-            console.log(
-                "\n\n Target is trying to sell a token that we never bought or is buying with a token that's not WBNB"
-            );
-
-        }
-    } else if (
-        txnData.txnMethodName == "exactInputSingle"
-    ) {
-        // Buying or Selling with Multicall using exact input
-        console.log("\n\n [PROCESSING] : V3 transaction using exactInputSingle  to be routed through the smart contract and V3 router")
-
-        const txnParams = {
-            tokenIn: path.tokenIn,
-            tokenOut: path.tokenOut,
-            amountIn: txnData.botAmountIn,
-            amountOut: txnData.botAmountOut,
-            fee: 3000,
-            sqrtPriceLimitX96: 0
-        }
-        if (txnData.txnType == "buy") {
-
-            overLoads.value = txnData.value?.toString()
-            const buyTx = await v3buy(txnParams, overLoads)
-
-            if (buyTx && buyTx.success) {
-                await saveToken(txnParams.tokenOut, buyTx.data);
-
-                await sendTgNotification(
-                    targetWallet,
-                    txnData.hash,
-                    buyTx.data,
-                    "BUY",
-                    path.tokenOut
-                );
             }
 
+        } else if (
+            txnData.txnMethodName == "exactOutputSingle"
+        ) {
+            // Buying or Selling with Multicall using exact output
 
-        } else if (txnData.txnType == "sell") {
+            if (txnData.txnType == "buy") {
 
-            const sellTx = await v3sell(txnParams, overLoads)
+            } else if (txnData.txnType == "sell") {
 
-            if (sellTx && sellTx.success) {
-                await sendTgNotification(
-                    targetWallet,
-                    txnData.hash,
-                    sellTx!.data,
-                    "SELL",
-                    path.tokenIn
-                );
             }
-        }
-
-    } else if (
-        txnData.txnMethodName == "exactOutputSingle"
-    ) {
-        // Buying or Selling with Multicall using exact output
-
-        if (txnData.txnType == "buy") {
-
-        } else if (txnData.txnType == "sell") {
 
         }
 
+    } catch (error) {
+        console.log("Error executing the transaction ", error)
     }
+
 }
