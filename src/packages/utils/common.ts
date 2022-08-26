@@ -1,11 +1,11 @@
 import { BigNumber, Contract, ethers, providers, Transaction, utils } from "ethers";
-import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, SLIPPAGE, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../config/setup";
+import { botParameters, DEFAULT_GAS_LIMIT, GET_NONCE_TIMEOUT, REPEATED_BOUGHT_TOKENS, SLIPPAGE, STABLE_TOKENS, WAIT_TIME_AFTER_TRANSACTION, WALLETS_TO_MONITOR } from "../../config/setup";
 import ERC20ABI from "./abi/erc20ABI.json";
 import smartContractABI from "./abi/swapperABI.json";
-import { BoughtTokens } from "../db/models";
-import "../db/connect";
+import { BoughtTokens } from "../../db/models";
+import "../../db/connect";
 import { overLoads, txContents } from "../types";
-import { init } from "../initialize";
+import { init } from "../../initialize";
 import { routerContract } from "../uniswap/v3/utils/common";
 
 // Ensure all .env variables are loaded 
@@ -130,11 +130,12 @@ const getTxnStatus = async (txn: string) => {
 const signer = new ethers.Wallet(process.env.V2_PRIVATE_KEY!);
 const v2account = signer.connect(provider);
 
-const v2smartContract = new ethers.Contract(
-  botParameters.swapperAddress,
-  smartContractABI,
-  v2account
-);
+const
+  v2smartContract = new ethers.Contract(
+    botParameters.swapperAddress,
+    smartContractABI,
+    v2account
+  );
 
 export const uniswapv2RouterContract = new Contract(botParameters.uniswapv2Router, routerABI, provider)
 

@@ -1,5 +1,5 @@
-import { DecodedData } from "../../types";
-import { ERC20Interface } from "../../utils/common"
+import { DecodedData } from "../types";
+import { ERC20Interface } from "../utils/common"
 
 export const decodeNormalTxn = (inputData: string): DecodedData | undefined => {
     try {

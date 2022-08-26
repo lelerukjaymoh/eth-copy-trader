@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { tokenInterface } from "../types";
+import { tokenInterface } from "../packages/types";
 
 const TokenSchema = new Schema<tokenInterface>(
   {

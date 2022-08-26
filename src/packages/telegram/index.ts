@@ -4,11 +4,11 @@ import {
   MAX_GAS_PRICE_TG,
   TG_CHANNEL,
   TG_USERS,
-} from "../config/setup";
+} from "../../config/setup";
 import { checkAddress, fetchGasPrice, getTokenBalance, v2walletNonce, wait } from "../utils/common";
 import { Telegraf } from "telegraf";
 import { sell } from "../uniswap/v2/swap";
-import { init } from "../initialize";
+import { init } from "../../initialize";
 
 // Ensure all .env variables are loaded 
 init()

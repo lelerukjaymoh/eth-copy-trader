@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { init } from "./initialize";
 import { processData } from "./packages/processor";
-import { prepareTxContents, provider, wait } from "./utils/common";
+import { prepareTxContents, provider, wait } from "./packages/utils/common";
 import * as Sentry from '@sentry/node';
 import * as Tracing from '@sentry/tracing';
 

@@ -1,7 +1,7 @@
 import { toHex } from "@uniswap/v3-sdk";
 import { BigNumber } from "ethers";
-import { DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE, botParameters } from "../../config/setup";
-import { init } from "../../initialize";
+import { DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE, botParameters } from "../../../config/setup";
+import { init } from "../../../initialize";
 import { sendNotification } from "../../telegram";
 import { failedTxMessage } from "../../telegram/message";
 import { overLoads } from "../../types";

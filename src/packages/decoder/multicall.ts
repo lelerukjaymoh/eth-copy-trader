@@ -1,8 +1,8 @@
 
 import { ethers } from "ethers";
 import { botParameters } from "../../config/setup";
-import { DecodedData } from "../../types";
-import multicall from "../../utils/abi/multicall.json";
+import { DecodedData } from "../types";
+import multicall from "../utils/abi/multicall.json";
 
 const multicallInterface = new ethers.utils.Interface(multicall);
 

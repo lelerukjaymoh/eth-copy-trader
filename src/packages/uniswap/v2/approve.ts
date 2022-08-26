@@ -2,7 +2,7 @@ import {
   DEFAULT_GAS_PRICE,
   botParameters,
   DEFAULT_GAS_LIMIT,
-} from "../../config/setup";
+} from "../../../config/setup";
 import { overLoads } from "../../types";
 import { readFileSync } from "fs";
 

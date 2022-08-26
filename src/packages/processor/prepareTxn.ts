@@ -1,6 +1,6 @@
 import { botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
-import { DecodedData, overLoads, TransactionData, txContents } from "../../types";
-import { getSlippagedAmoutOut, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce } from "../../utils/common";
+import { DecodedData, overLoads, TransactionData, txContents } from "../types";
+import { getSlippagedAmoutOut, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
 import { executeTxn } from "./executeTxn";
 

@@ -5,7 +5,7 @@ import { CurrencyAmount, Token, TradeType } from "@uniswap/sdk-core";
 import constants from "../constants.json";
 import { ethers } from "ethers";
 import { abi as QuoterABI } from "@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json";
-import { provider } from "../../utils/common";
+import { provider } from "../common";
 import { Immutables } from "../../interfaces";
 
 const amountIn = 1500

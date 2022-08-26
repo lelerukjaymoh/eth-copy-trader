@@ -3,7 +3,7 @@ import { ethers } from "ethers"
 import ERC20ABI from "./abi/erc20ABI.json"
 import uniswapRouterABI from "./abi/uniswapv3RouterABI.json"
 import v3SwapperABI from "./abi/v3swapper.json"
-import constants from "../utils/constants.json"
+import constants from "./constants.json"
 
 
 const erc20interface = new ethers.utils.Interface(ERC20ABI)

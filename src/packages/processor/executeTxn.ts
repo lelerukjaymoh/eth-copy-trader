@@ -1,10 +1,10 @@
 import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIME_AFTER_TRANSACTION } from "../../config/setup";
-import { sendNotification } from "../../telegram";
-import { overLoads, TransactionData } from "../../types";
-import { buy, sell } from "../../uniswap/v2/swap";
-import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce, getSlippagedAmoutOut, getTokenDecimals } from "../../utils/common";
-import { sellingNotification, sendTgNotification } from "../../utils/notifications";
-import { v3buy, v3sell } from "../../uniswap/v3";
+import { sendNotification } from "../telegram";
+import { overLoads, TransactionData } from "../types";
+import { buy, sell } from "../uniswap/v2/swap";
+import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction, wait, v2walletNonce, getSlippagedAmoutOut, getTokenDecimals } from "../utils/common";
+import { sellingNotification, sendTgNotification } from "../utils/notifications";
+import { v3buy, v3sell } from "../uniswap/v3";
 import { utils } from "ethers";
 
 
