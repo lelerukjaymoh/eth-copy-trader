@@ -25,6 +25,7 @@ export interface overLoads {
 export interface tokenInterface {
   tokenAddress: string;
   bought: boolean;
+  sold: boolean;
   txHash: string;
 }
 
@@ -52,4 +53,8 @@ export interface DecodedData {
   amountOutMin?: number,
   amountOut?: number,
   amountInMax?: number,
+}
+
+export interface _BoughtTokens {
+  [key: string]: string;
 }

@@ -1,26 +1,37 @@
 import { botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
-import { DecodedData, overLoads, TransactionData, txContents } from "../types";
-import { getSlippagedAmoutOut, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce } from "../utils/common";
+import { DecodedData, overLoads, TransactionData, txContents, _BoughtTokens } from "../types";
+import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
 import { executeTxn } from "./executeTxn";
+import { BoughtTokens } from "../../db/models";
+
+let tokensBought: _BoughtTokens = {};
 
 /**
  * Process the transaction data, makes logical checks and call relevant buy functions 
  * @param txnContents Transaction input string 
  */
-export const processData = async (txContents: txContents) => {
+export const processData = async (txContents: any) => {
+
+    // Fetch bought tokens from db
+    await fetchBoughtTokens()
+
+    // Listen for newly bought tokens
+    listenBoughtTokens()
+
+    console.log("\n\n Tokens Bought  ", tokensBought)
 
     if (txContents.to) {
 
         // Exclude transfer txns
         if (!methodsExclusion.includes(txContents.input)) {
 
-            const routerAddress = txContents.to.toLowerCase()
+            const calledContract = txContents.to.toLowerCase()    // The contract being called by the target
             const targetWallet = txContents.from
 
-            // console.log(targetWallet, routerAddress)
+            // console.log(targetWallet, calledContract)
 
-            if (routerAddress == botParameters.uniswapv2Router.toLowerCase() || routerAddress == botParameters.uniswapv3Router.toLowerCase()) {
+            if (calledContract == botParameters.uniswapv2Router.toLowerCase() || calledContract == botParameters.uniswapv3Router.toLowerCase()) {
 
                 // console.log(`\n\n [STREAMING] : Captured a transaction to a Uniswap V2 or V3 Router ${txContents.hash}`)
 
@@ -97,8 +108,89 @@ export const processData = async (txContents: txContents) => {
                         }
                     }
                 }
+            } else {
+
+                // If the transaction is not to a Uniswap V2 or V3 router, 
+                // We should check if its to the token contract
+
+                console.log("Transaction data ", calledContract, tokensBought)
+
+                if (Object.values(tokensBought).includes(calledContract)) {
+                    console.log(`\n\n [STREAMING]: Captured a transaction to a token that we had bought before ${txContents.hash}`)
+                }
             }
+
         }
 
     }
 }
+
+
+
+const fetchBoughtTokens = async () => {
+    try {
+
+        // // Wait for 10 secs before fetching the bought tokens
+        // // This is to allow for the bot to establish the connection to the db first
+        // await wait(10000)
+
+        const tokens = await BoughtTokens.find({ bought: true, sold: false })
+
+        for (let each of tokens) {
+            const tokenAddress = each.tokenAddress.toLowerCase()
+            const collectionId = each._id.toString()
+
+            if (!Object.keys(tokensBought).includes(collectionId)) {
+                // Get the owner of the token contract
+
+                const tokenOwner = await getTokenOwner(tokenAddress)
+                console.log("Token owner ", tokenOwner)
+
+                // TODO: Research on a way of getting the token owner if the owner() does not exist on the token contract
+                if (tokenOwner) {
+                    // If the token owner can be queried from the bot,
+                }
+                tokensBought[collectionId] = tokenAddress
+            }
+        }
+
+    } catch (error) {
+        console.log("Error fetching bought tokens", error);
+    }
+
+};
+
+const listenBoughtTokens = () => {
+    const changeStream = BoughtTokens.watch();
+
+
+    changeStream.on("change", async (change: any) => {
+        try {
+
+            // console.log("Change ", change);
+
+            if (change.operationType == "update") {
+                const tokenData = await BoughtTokens.findById(change.documentKey._id);
+                const tokenAddress = tokenData!.tokenAddress.toLowerCase();
+                const collectionId = tokenData!._id.toString();
+
+                if (tokenData && tokenData!.bought && !tokenData.sold) {
+                    if (!Object.keys(tokensBought).includes(collectionId)) {
+                        tokensBought[collectionId] = tokenAddress
+                    }
+                } else if (tokenData && tokenData.sold) {
+                    if (Object.keys(tokensBought).includes(collectionId)) {
+                        // Delete the token from tokens bought list
+                        delete tokensBought[collectionId];
+                    }
+                }
+
+            }
+
+            console.log("[TRACK-TOKENS-BOUGHT]: Tokens have been updated", tokensBought);
+        } catch (error) {
+            console.log("Error saving or deleting bought or sold token", error);
+        }
+
+    });
+};

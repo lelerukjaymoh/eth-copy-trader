@@ -38,6 +38,20 @@ const routerABI = [
   }
 ]
 
+const ownerABI = [{
+  "type": "function",
+  "name": "owner",
+  "constant": true,
+  "stateMutability": "view",
+  "payable": false,
+  "inputs": [],
+  "outputs": [
+    {
+      "type": "address"
+    }
+  ]
+}]
+
 const smartContractInterface = new ethers.utils.Interface(smartContractABI);
 
 // Initialize an interface of the ABI
@@ -209,6 +223,22 @@ const getTokenBalance = async (tokenAddress: string, walletAddress: string) => {
     console.log("Error getting token balance ", error);
   }
 };
+
+export const getTokenOwner = async (tokenAddress: string) => {
+  try {
+    // TODO: Implement getting the token owner
+
+    const tokenContract = new ethers.Contract(
+      tokenAddress,
+      ownerABI,
+      provider
+    );
+
+    return await tokenContract.owner()
+  } catch (error) {
+    console.log("Error getting token owner ", error);
+  }
+}
 
 const wait = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
