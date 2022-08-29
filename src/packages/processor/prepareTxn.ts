@@ -1,12 +1,13 @@
-import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
+import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, REMOVE_LIQUIDITY_FUNCTIONS, SCAM_FUNCTIONS, WALLETS_TO_MONITOR } from "../../config/setup";
 import { DecodedData, overLoads, TokenData, TransactionData, txContents, _BoughtTokens } from "../types";
 import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
-import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
+import { decodeMulticallTransaction, decodeNormalTxn, getRemovedToken } from "../decoder";
 import { executeTxn } from "./executeTxn";
 import { BoughtTokens } from "../../db/models";
 import { getContractDeployer } from "../scraper/scrape";
 import { sell } from "../uniswap/v2/swap";
 import { failedToExitScamNotification, sendTgNotification } from "../utils/notifications";
+import { exitOnScamTx } from "../rug-saver/exit-scam";
 
 let tokensBought: _BoughtTokens = {};
 
@@ -23,14 +24,34 @@ export const processData = async (txContents: any) => {
 
             const calledContract = txContents.to.toLowerCase()    // The contract being called by the target
             const targetWallet = txContents.from
+            const txnMethodId = txContents.input.substring(2, 10);
 
             // console.log(targetWallet, calledContract)
-
             if (calledContract == botParameters.uniswapv2Router.toLowerCase() || calledContract == botParameters.uniswapv3Router.toLowerCase()) {
 
                 // console.log(`\n\n [STREAMING] : Captured a transaction to a Uniswap V2 or V3 Router ${txContents.hash}`)
 
-                if (WALLETS_TO_MONITOR.get(
+                // First check if the transaction is a remove liquidity transaction involving on of the tokens we have already bought
+                // We are giving priority to transactions that might be scams to ensure we get out of the trade as fast as possible
+                if (REMOVE_LIQUIDITY_FUNCTIONS.includes(txnMethodId)) {
+                    console.log(`\n\n [STREAMING] : Captured a Remove liquidity transaction `)
+                    const tokenRemoved = getRemovedToken(txContents.input)!
+
+                    if (tokenRemoved) {
+                        Object.values(tokensBought).map(async (token: TokenData) => {
+                            if (tokenRemoved.toLowerCase() == token.tokenAddress) {
+                                console.log(`\n\n [STREAMING] : A token we had bought is being removed liquidity`)
+
+                                // Sell to exit scam
+                                await exitOnScamTx(txContents, calledContract)
+                            }
+                        })
+                    }
+
+
+                    // if the transaction did not involve a remove liquidity transaction through the router 
+                    // check if it was a transaction by one of the targets we follow
+                } else if (WALLETS_TO_MONITOR.get(
                     targetWallet.toLowerCase()
                 )) {
 
@@ -106,58 +127,28 @@ export const processData = async (txContents: any) => {
             } else {
 
                 // If the transaction is not to a Uniswap V2 or V3 router, 
-                // We should check if its to the token contract
+                // Check if the transaction was a scam function through tht router
+                // This ensures we capture custom scam functions
 
                 Object.values(tokensBought).map(async (token: TokenData) => {
-                    if (token.tokenAddress == calledContract && targetWallet.toLowerCase() == token.tokenOwner) {
-                        console.log(`\n\n [STREAMING]: Captured a transaction to a token that we had bought before`)
-                        console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
+                    if (token.tokenAddress == calledContract) {
+                        if (SCAM_FUNCTIONS.includes(txnMethodId)) {
+                            console.log(`\n\n [STREAMING] : A token we had bought is invoking a known scam function`)
 
-                        // If the owner of the token made a transaction, to the token we need to sell FAST
-                        const nonce = await v2walletNonce()
+                            // The transaction calls a scam function on the token
+                            await exitOnScamTx(txContents, calledContract)
 
-                        let gasLimit = parseInt(txContents.gas._hex, 16);
-                        const path = {
-                            tokenIn: calledContract,
-                            tokenOut: botParameters.wethAddress,
-                        }
+                            // Token creator is calling a token contract function
+                        } else if (targetWallet.toLowerCase() == token.tokenOwner) {
+                            console.log(`\n\n [STREAMING]: Token owner is invoking a function on the token`)
+                            console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
 
-                        if (gasLimit < DEFAULT_GAS_LIMIT) {
-                            gasLimit = DEFAULT_GAS_LIMIT
-                        }
-
-                        let overLoads: any = {
-                            nonce,
-                            gasLimit
-                        };
-
-                        if (txContents.gasPrice) {
-                            overLoads["gasPrice"] = txContents.gasPrice.add(ADDITIONAL_EXIT_SCAM_GAS)
-                        } else {
-                            overLoads["maxPriorityFeePerGas"] = txContents.maxPriorityFeePerGas.add(ADDITIONAL_EXIT_SCAM_GAS)
-                            overLoads["maxFeePerGas"] = txContents.maxFeePerGas.add(ADDITIONAL_EXIT_SCAM_GAS)
-                        }
-
-                        const exitScamTx = await sell(0, path, overLoads)
-
-                        if (exitScamTx) {
-                            console.log("\n\n Exit scam txn ", exitScamTx)
-
-                            await sendTgNotification(
-                                targetWallet,
-                                txContents.hash,
-                                exitScamTx!.data,
-                                "SELL",
-                                calledContract
-                            );
-                        } else {
-                            //  Send a notification if the bot was unable to sell the token
-                            await failedToExitScamNotification(calledContract)
+                            // If the owner of the token made a transaction, to the token we need to sell FAST
+                            await exitOnScamTx(txContents, calledContract)
                         }
                     }
                 })
             }
-
         }
     }
 }

@@ -132,6 +132,53 @@ const MAX_GAS_PRICE_TG = 100;
 // Slippage 
 const SLIPPAGE = 20
 
+
+// Scam functions method Ids we use to capture events when the token dev wants to rug a token
+export const SCAM_FUNCTIONS: string[] = [
+  //  Blacklist methods 
+  "b515566a",
+  "4303443d",
+  "1d7ef879",
+  "83b61c8b",
+  "98d5a5cb",
+  "47a64f44",
+  "00b8cf2a",
+  "eec2744e",
+  "f2cc0c18",
+  "228e7a91",
+  "8326699d",
+  "d01dd6d2",
+  "41959586",
+  "f9f92be4",
+  "772558ce",
+  "cad6ebf9",
+  "e084ba59",
+  "455a4396",
+
+  // Scam methods
+  "baa2abde",
+  "02751cec",
+  "af2979eb",
+  "ded9382a",
+  "5b0d5984",
+  "2195995c",
+  "1031e36e",
+  "1bbae6e0",
+  "d543dbeb",
+];
+
+
+export const REMOVE_LIQUIDITY_FUNCTIONS = [
+  "ded9382a",   // removeLiquidityETHWithPermit
+  "2195995c",   // removeLiquidityWithPermit
+  "02751cec",   // removeLiquidityETH
+  "baa2abde",   // removeLiquidity
+  "5b0d5984",   // removeLiquidityETHWithPermitSupportingFeeOnTransferTokens
+  "af2979eb",   //removeLiquidityETHSupportingFeeOnTransferTokens
+]
+
+
+
 export {
   SLIPPAGE,
   TG_CHANNEL,
