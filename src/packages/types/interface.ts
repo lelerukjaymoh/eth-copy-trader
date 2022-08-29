@@ -55,6 +55,11 @@ export interface DecodedData {
   amountInMax?: number,
 }
 
+export interface TokenData {
+  tokenAddress: string;
+  tokenOwner: string;
+}
+
 export interface _BoughtTokens {
-  [key: string]: string;
+  [key: string]: TokenData;
 }

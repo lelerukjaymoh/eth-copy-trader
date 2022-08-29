@@ -9,6 +9,15 @@ const sellingNotification = async (token: any, target: any, tx: string) => {
   await sendNotification(message);
 };
 
+export const failedToExitScam = async (token: string) => {
+  let message = `\n\n Failed to exit scam`;
+  message += `\n\nToken: `;
+  message += `${token}`;
+
+  await sendNotification(message);
+
+}
+
 const sendTgNotification = async (
   target: string,
   targetTxhash: string,

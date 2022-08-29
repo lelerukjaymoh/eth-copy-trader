@@ -7,6 +7,7 @@ import "../../db/connect";
 import { overLoads, txContents } from "../types";
 import { init } from "../../initialize";
 import { routerContract } from "../uniswap/v3/utils/common";
+import { getContractDeployer } from "../scraper/scrape";
 
 // Ensure all .env variables are loaded 
 init()
@@ -236,7 +237,10 @@ export const getTokenOwner = async (tokenAddress: string) => {
 
     return await tokenContract.owner()
   } catch (error) {
-    console.log("Error getting token owner ", error);
+    console.log("Error getting token owner using contract method ");
+
+    const tokenOwner = await getContractDeployer(tokenAddress)
+    return tokenOwner
   }
 }
 

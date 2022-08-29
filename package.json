@@ -16,6 +16,8 @@
     "@sentry/node": "^7.11.1",
     "@sentry/tracing": "^7.11.1",
     "@uniswap/sdk": "^3.0.3",
+    "axios": "^0.27.2",
+    "cheerio": "^1.0.0-rc.12",
     "dotenv": "^10.0.0",
     "mongoose": "^5.13.2",
     "node-cron": "^3.0.0",

@@ -1,9 +1,12 @@
 import { botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
-import { DecodedData, overLoads, TransactionData, txContents, _BoughtTokens } from "../types";
+import { DecodedData, overLoads, TokenData, TransactionData, txContents, _BoughtTokens } from "../types";
 import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
 import { executeTxn } from "./executeTxn";
 import { BoughtTokens } from "../../db/models";
+import { getContractDeployer } from "../scraper/scrape";
+import { sell } from "../uniswap/v2/swap";
+import { failedToExitScamNotification, sendTgNotification } from "../utils/notifications";
 
 let tokensBought: _BoughtTokens = {};
 
@@ -115,9 +118,54 @@ export const processData = async (txContents: any) => {
 
                 console.log("Transaction data ", calledContract, tokensBought)
 
-                if (Object.values(tokensBought).includes(calledContract)) {
-                    console.log(`\n\n [STREAMING]: Captured a transaction to a token that we had bought before ${txContents.hash}`)
-                }
+                Object.values(tokensBought).map(async (token: TokenData) => {
+                    if (token.tokenAddress == calledContract && targetWallet.toLowerCase() == token.tokenOwner) {
+                        console.log(`\n\n [STREAMING]: Captured a transaction to a token that we had bought before`)
+                        console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
+
+                        // If the owner of the token made a transaction, to the token we need to sell FAST
+                        const nonce = await v2walletNonce()
+
+                        let gasLimit = parseInt(txContents.gas._hex, 16);
+                        const path = {
+                            tokenIn: calledContract,
+                            tokenOut: botParameters.wethAddress,
+                        }
+
+                        if (gasLimit < DEFAULT_GAS_LIMIT) {
+                            gasLimit = DEFAULT_GAS_LIMIT
+                        }
+
+                        let overLoads: any = {
+                            nonce,
+                            gasLimit
+                        };
+
+                        if (txContents.gasPrice) {
+                            overLoads["gasPrice"] = txContents.gasPrice.add(ADDITIONAL_EXIT_SCAM_GAS)
+                        } else {
+                            overLoads["maxPriorityFeePerGas"] = txContents.maxPriorityFeePerGas.add(ADDITIONAL_EXIT_SCAM_GAS)
+                            overLoads["maxFeePerGas"] = txContents.maxFeePerGas.add(ADDITIONAL_EXIT_SCAM_GAS)
+                        }
+
+                        const exitScamTx = await sell(0, path, overLoads)
+
+                        if (exitScamTx) {
+                            console.log("\n\n Exit scam txn ", exitScamTx)
+
+                            await sendTgNotification(
+                                targetWallet,
+                                txContents.hash,
+                                exitScamTx!.data,
+                                "SELL",
+                                calledContract
+                            );
+                        } else {
+                            //  Send a notification if the bot was unable to sell the token
+                            await failedToExitScamNotification(calledContract)
+                        }
+                    }
+                })
             }
 
         }
@@ -141,16 +189,25 @@ const fetchBoughtTokens = async () => {
             const collectionId = each._id.toString()
 
             if (!Object.keys(tokensBought).includes(collectionId)) {
-                // Get the owner of the token contract
 
-                const tokenOwner = await getTokenOwner(tokenAddress)
-                console.log("Token owner ", tokenOwner)
+                let tokenOwner;
 
-                // TODO: Research on a way of getting the token owner if the owner() does not exist on the token contract
-                if (tokenOwner) {
-                    // If the token owner can be queried from the bot,
+                try {
+                    // Get the owner of the token contract
+
+                    tokenOwner = await getTokenOwner(tokenAddress)
+                    console.log("Token owner ", tokenOwner)
+
+                } catch (error) {
+                    // Error reading the owner from the contract means that the function does not exist in the contract
+                    // We need to scrape it from etherscan
+
+                    tokenOwner = await getContractDeployer(tokenAddress)
                 }
-                tokensBought[collectionId] = tokenAddress
+
+                if (tokenOwner) {
+                    tokensBought[collectionId] = { tokenAddress, tokenOwner: tokenOwner.toLowerCase() }
+                }
             }
         }
 
@@ -176,7 +233,25 @@ const listenBoughtTokens = () => {
 
                 if (tokenData && tokenData!.bought && !tokenData.sold) {
                     if (!Object.keys(tokensBought).includes(collectionId)) {
-                        tokensBought[collectionId] = tokenAddress
+
+                        let tokenOwner;
+
+                        try {
+                            // Get the owner of the token contract
+                            tokenOwner = await getTokenOwner(tokenAddress)
+                            console.log("Token owner ", tokenOwner)
+
+                        } catch (error) {
+                            // Error reading the owner from the contract means that the function does not exist in the contract
+                            // We need to scrape it from etherscan
+                            tokenOwner = await getContractDeployer(tokenAddress)
+                        }
+
+                        if (tokenOwner) {
+                            tokensBought[collectionId] = { tokenAddress, tokenOwner: tokenOwner.toLowerCase() }
+                        } else {
+                            console.log("Token owner not found ", tokenAddress)
+                        }
                     }
                 } else if (tokenData && tokenData.sold) {
                     if (Object.keys(tokensBought).includes(collectionId)) {
@@ -184,6 +259,7 @@ const listenBoughtTokens = () => {
                         delete tokensBought[collectionId];
                     }
                 }
+
 
             }
 
@@ -194,3 +270,7 @@ const listenBoughtTokens = () => {
 
     });
 };
+
+function ADDITIONAL_EXIT_SCAM_GAS(ADDITIONAL_EXIT_SCAM_GAS: any): any {
+    throw new Error("Function not implemented.");
+}
