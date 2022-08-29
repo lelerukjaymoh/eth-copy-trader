@@ -1,4 +1,7 @@
 // Fixed params used by the bot
+
+import { BigNumber } from "ethers";
+
 // botParameters values are not to be changed
 const botParameters = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
@@ -19,7 +22,7 @@ const BUY_AMOUNTS = {
 let WALLETS_TO_MONITOR = new Map([
 
   // [
-  //   "0x0aEadd5bB47bB7ff133076972ff44212f3bE5541".toLowerCase(),
+  //   "0x5309Bc59C91E6fefA894c70381AbdC871c0D1b33".toLowerCase(),
   //   BUY_AMOUNTS.testingAmount,
   // ],
   [
@@ -106,13 +109,15 @@ const STABLE_TOKENS = [
 
 const STABLE_COIN_BNB_AMOUNT_TO_BUY = 0.1 * 10 ** 18;
 
+export const ADDITIONAL_EXIT_SCAM_GAS = BigNumber.from(20)
+
 const TARGET_MINIMUM_BUY_AMOUNT = 0.01 * Math.pow(10, 18);
 
 const ADDITIONAL_SELL_GAS = 10 * Math.pow(10, 9);
 
 const ADDITIONAL_BUY_GAS = 10 * Math.pow(10, 9);
 
-const WAIT_TIME_AFTER_TRANSACTION = 15 * 1000;
+const WAIT_TIME_AFTER_TRANSACTION = 8 * 1000;
 
 // Time interval for running the token check cron job in secs
 const TOKEN_CHECK_TIME_INTERVAL = 15;

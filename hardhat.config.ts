@@ -17,9 +17,9 @@ module.exports = {
       chainId: 1,
       gasPrice: DEFAULT_GAS_PRICE,
       accounts: [
-        process.env.PRIVATE_KEY!.startsWith("0x")
-          ? process.env.PRIVATE_KEY
-          : process.env.PRIVATE_KEY,
+        process.env.V2_PRIVATE_KEY!.startsWith("0x")
+          ? process.env.V2_PRIVATE_KEY
+          : process.env.V2_PRIVATE_KEY,
       ],
     },
     rinkeby: {
@@ -27,9 +27,9 @@ module.exports = {
       chainId: 4,
       gasPrice: 5 * 10 ** 9,
       accounts: [
-        process.env.PRIVATE_KEY!.startsWith("0x")
-          ? process.env.PRIVATE_KEY
-          : `0x${process.env.PRIVATE_KEY}`,
+        process.env.V2_PRIVATE_KEY!.startsWith("0x")
+          ? process.env.V2_PRIVATE_KEY
+          : `0x${process.env.V2_PRIVATE_KEY}`,
       ],
     },
   },

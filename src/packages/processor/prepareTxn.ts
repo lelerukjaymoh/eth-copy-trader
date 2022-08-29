@@ -1,4 +1,4 @@
-import { botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
+import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, WALLETS_TO_MONITOR } from "../../config/setup";
 import { DecodedData, overLoads, TokenData, TransactionData, txContents, _BoughtTokens } from "../types";
 import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn } from "../decoder";
@@ -15,14 +15,6 @@ let tokensBought: _BoughtTokens = {};
  * @param txnContents Transaction input string 
  */
 export const processData = async (txContents: any) => {
-
-    // Fetch bought tokens from db
-    await fetchBoughtTokens()
-
-    // Listen for newly bought tokens
-    listenBoughtTokens()
-
-    console.log("\n\n Tokens Bought  ", tokensBought)
 
     if (txContents.to) {
 
@@ -116,8 +108,6 @@ export const processData = async (txContents: any) => {
                 // If the transaction is not to a Uniswap V2 or V3 router, 
                 // We should check if its to the token contract
 
-                console.log("Transaction data ", calledContract, tokensBought)
-
                 Object.values(tokensBought).map(async (token: TokenData) => {
                     if (token.tokenAddress == calledContract && targetWallet.toLowerCase() == token.tokenOwner) {
                         console.log(`\n\n [STREAMING]: Captured a transaction to a token that we had bought before`)
@@ -169,10 +159,8 @@ export const processData = async (txContents: any) => {
             }
 
         }
-
     }
 }
-
 
 
 const fetchBoughtTokens = async () => {
@@ -184,6 +172,8 @@ const fetchBoughtTokens = async () => {
 
         const tokens = await BoughtTokens.find({ bought: true, sold: false })
 
+        console.log("\n\n Tokens bought ", tokens.length)
+
         for (let each of tokens) {
             const tokenAddress = each.tokenAddress.toLowerCase()
             const collectionId = each._id.toString()
@@ -194,7 +184,7 @@ const fetchBoughtTokens = async () => {
 
                 try {
                     // Get the owner of the token contract
-
+                    console.log("Getting token owner for ", tokenAddress)
                     tokenOwner = await getTokenOwner(tokenAddress)
                     console.log("Token owner ", tokenOwner)
 
@@ -271,6 +261,22 @@ const listenBoughtTokens = () => {
     });
 };
 
-function ADDITIONAL_EXIT_SCAM_GAS(ADDITIONAL_EXIT_SCAM_GAS: any): any {
-    throw new Error("Function not implemented.");
+
+// Fetches the bought tokens when starting the bot and whenever a new token is bought 
+const main = async () => {
+    try {
+        // Fetch bought tokens from db
+        await fetchBoughtTokens()
+
+        // Listen for newly bought tokens
+        listenBoughtTokens()
+
+        console.log("\n\n Tokens Bought  ", tokensBought)
+    } catch (error) {
+        console.log("Error in main function ", error)
+    }
 }
+
+
+main()
+
