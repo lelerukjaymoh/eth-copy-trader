@@ -139,13 +139,19 @@ export const processData = async (txContents: any) => {
                             await exitOnScamTx(txContents, token.tokenAddress)
 
                             // Token creator is calling a token contract function
-                        } else if (targetWallet.toLowerCase() == token.tokenOwner) {
-                            console.log(`\n\n [STREAMING]: Token owner is invoking a function on the token`)
-                            console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
-
-                            // If the owner of the token made a transaction, to the token we need to sell FAST
-                            await exitOnScamTx(txContents, token.tokenAddress)
                         }
+
+                        // REVIEW: Remove the functionality to exit trades whenever the token dev removes calls a token function
+                        // This is because on most occassions witnessed the functions called are not malicious
+                        // The feature only protects from remove liquity and known scam functions 
+
+                        // else if (targetWallet.toLowerCase() == token.tokenOwner) {
+                        //     console.log(`\n\n [STREAMING]: Token owner is invoking a function on the token`)
+                        //     console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
+
+                        //     // If the owner of the token made a transaction, to the token we need to sell FAST
+                        //     await exitOnScamTx(txContents, token.tokenAddress)
+                        // }
                     }
                 })
             }
@@ -171,24 +177,24 @@ const fetchBoughtTokens = async () => {
 
             if (!Object.keys(tokensBought).includes(collectionId)) {
 
-                let tokenOwner;
+                // let tokenOwner;
 
-                try {
-                    // Get the owner of the token contract
-                    console.log("Getting token owner for ", tokenAddress)
-                    tokenOwner = await getTokenOwner(tokenAddress)
-                    console.log("Token owner ", tokenOwner)
+                // try {
+                //     // Get the owner of the token contract
+                //     console.log("Getting token owner for ", tokenAddress)
+                //     tokenOwner = await getTokenOwner(tokenAddress)
+                //     console.log("Token owner ", tokenOwner)
 
-                } catch (error) {
-                    // Error reading the owner from the contract means that the function does not exist in the contract
-                    // We need to scrape it from etherscan
+                // } catch (error) {
+                //     // Error reading the owner from the contract means that the function does not exist in the contract
+                //     // We need to scrape it from etherscan
 
-                    tokenOwner = await getContractDeployer(tokenAddress)
-                }
+                //     tokenOwner = await getContractDeployer(tokenAddress)
+                // }
 
-                if (tokenOwner) {
-                    tokensBought[collectionId] = { tokenAddress, tokenOwner: tokenOwner.toLowerCase() }
-                }
+                // if (tokenOwner) {
+                tokensBought[collectionId] = { tokenAddress }
+                // }
             }
         }
 
@@ -215,24 +221,24 @@ const listenBoughtTokens = () => {
                 if (tokenData && tokenData!.bought && !tokenData.sold) {
                     if (!Object.keys(tokensBought).includes(collectionId)) {
 
-                        let tokenOwner;
+                        // let tokenOwner;
 
-                        try {
-                            // Get the owner of the token contract
-                            tokenOwner = await getTokenOwner(tokenAddress)
-                            console.log("Token owner ", tokenOwner)
+                        // try {
+                        //     // Get the owner of the token contract
+                        //     tokenOwner = await getTokenOwner(tokenAddress)
+                        //     console.log("Token owner ", tokenOwner)
 
-                        } catch (error) {
-                            // Error reading the owner from the contract means that the function does not exist in the contract
-                            // We need to scrape it from etherscan
-                            tokenOwner = await getContractDeployer(tokenAddress)
-                        }
+                        // } catch (error) {
+                        //     // Error reading the owner from the contract means that the function does not exist in the contract
+                        //     // We need to scrape it from etherscan
+                        //     tokenOwner = await getContractDeployer(tokenAddress)
+                        // }
 
-                        if (tokenOwner) {
-                            tokensBought[collectionId] = { tokenAddress, tokenOwner: tokenOwner.toLowerCase() }
-                        } else {
-                            console.log("Token owner not found ", tokenAddress)
-                        }
+                        // if (tokenOwner) {
+                        tokensBought[collectionId] = { tokenAddress }
+                        // } else {
+                        //     console.log("Token owner not found ", tokenAddress)
+                        // }
                     }
                 } else if (tokenData && tokenData.sold) {
                     if (Object.keys(tokensBought).includes(collectionId)) {

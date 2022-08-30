@@ -57,7 +57,7 @@ export interface DecodedData {
 
 export interface TokenData {
   tokenAddress: string;
-  tokenOwner: string;
+  // tokenOwner: string;
 }
 
 export interface _BoughtTokens {
