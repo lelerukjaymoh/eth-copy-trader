@@ -39,7 +39,7 @@ export const exitOnScamTx = async (txContents: txContents, tokenAddress: string)
                 txContents.from,
                 txContents.hash,
                 exitScamTx!.data,
-                "SELL",
+                "EXIT SCAM",
                 tokenAddress
             );
         } else {

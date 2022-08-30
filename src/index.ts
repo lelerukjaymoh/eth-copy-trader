@@ -31,9 +31,6 @@ const main = async () => {
         // 
         // const txContents = prepareTxContents(txnObject);
         // await processData(txContents);
-        // 
-        // await processData(txContents);
-
 
         _provider.on("pending", async (txHash: string) => {
 

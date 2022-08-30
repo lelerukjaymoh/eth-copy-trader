@@ -43,7 +43,7 @@ export const processData = async (txContents: any) => {
                                 console.log(`\n\n [STREAMING] : A token we had bought is being removed liquidity`)
 
                                 // Sell to exit scam
-                                await exitOnScamTx(txContents, calledContract)
+                                await exitOnScamTx(txContents, token.tokenAddress)
                             }
                         })
                     }
@@ -136,7 +136,7 @@ export const processData = async (txContents: any) => {
                             console.log(`\n\n [STREAMING] : A token we had bought is invoking a known scam function`)
 
                             // The transaction calls a scam function on the token
-                            await exitOnScamTx(txContents, calledContract)
+                            await exitOnScamTx(txContents, token.tokenAddress)
 
                             // Token creator is calling a token contract function
                         } else if (targetWallet.toLowerCase() == token.tokenOwner) {
@@ -144,7 +144,7 @@ export const processData = async (txContents: any) => {
                             console.log(`TRANSACTION:  ${txContents.hash} \n TOKEN : ${calledContract}`)
 
                             // If the owner of the token made a transaction, to the token we need to sell FAST
-                            await exitOnScamTx(txContents, calledContract)
+                            await exitOnScamTx(txContents, token.tokenAddress)
                         }
                     }
                 })
