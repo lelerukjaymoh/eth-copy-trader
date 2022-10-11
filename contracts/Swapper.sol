@@ -33,49 +33,7 @@ interface IERC20 {
     );
 }
 
-interface IUniswapV2Router01 {
-    function WETH() external pure returns (address);
-
-    function pairFor(address tokenA, address tokenB)
-        external
-        view
-        returns (address pair);
-
-    function swapExactTokensForTokens(
-        uint256 amountIn,
-        uint256 amountOutMin,
-        address[] calldata path,
-        address to,
-        uint256 deadline
-    ) external returns (uint256[] memory amounts);
-
-    function swapTokensForExactTokens(
-        uint256 amountOut,
-        uint256 amountInMax,
-        address[] calldata path,
-        address to,
-        uint256 deadline
-    ) external returns (uint256[] memory amounts);
-
-    function getAmountOut(
-        uint256 amountIn,
-        uint256 reserveIn,
-        uint256 reserveOut
-    ) external pure returns (uint256 amountOut);
-
-    function getAmountsOut(uint256 amountIn, address[] calldata path)
-        external
-        view
-        returns (uint256[] memory amounts);
-
-    function getAmountIn(
-        uint256 amountOut,
-        uint256 reserveIn,
-        uint256 reserveOut
-    ) external pure returns (uint256 amountIn);
-}
-
-interface IUniswapV2Router02 is IUniswapV2Router01 {
+interface IUniswapV2Router02 {
     function swapExactTokensForTokensSupportingFeeOnTransferTokens(
         uint256 amountIn,
         uint256 amountOutMin,
@@ -332,56 +290,6 @@ library Address {
     }
 }
 
-library SafeERC20 {
-    using Address for address;
-
-    function safeTransfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) internal {
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transfer.selector, to, value)
-        );
-    }
-
-    function safeTransferFrom(
-        IERC20 token,
-        address from,
-        address to,
-        uint256 value
-    ) internal {
-        _callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transferFrom.selector, from, to, value)
-        );
-    }
-
-    /**
-     * @dev Imitates a Solidity high-level call (i.e. a regular function call to a contract), relaxing the requirement
-     * on the return value: the return value is optional (but if data is returned, it must not be false).
-     * @param token The token targeted by the call.
-     * @param data The call data (encoded using abi.encode or one of its variants).
-     */
-    function _callOptionalReturn(IERC20 token, bytes memory data) private {
-        // We need to perform a low level call here, to bypass Solidity's return data size checking mechanism, since
-        // we're implementing it ourselves. We use {Address.functionCall} to perform this call, which verifies that
-        // the target address contains contract code and also asserts for success in the low-level call.
-
-        bytes memory returndata = address(token).functionCall(
-            data,
-            "SafeERC20: low-level call failed"
-        );
-        if (returndata.length > 0) {
-            // Return data is optional
-            require(
-                abi.decode(returndata, (bool)),
-                "SafeERC20: ERC20 operation did not succeed"
-            );
-        }
-    }
-}
 
 // Contract Context
 abstract contract Context {
@@ -447,7 +355,7 @@ contract Swapper is Ownable {
         wethAddress.approve(routerAddress, wethAddress.totalSupply());
     }
 
-    function baisha(
+    function buyatoken(
         uint256 amountIn,
         uint256 amountOutMin,
         address[] memory path
@@ -461,7 +369,7 @@ contract Swapper is Ownable {
             );
     }
 
-    function kinda(uint256 amountOutMin, address[] memory path)
+    function sellall(uint256 amountOutMin, address[] memory path)
         external
         onlyOwner
     {
@@ -478,7 +386,7 @@ contract Swapper is Ownable {
             );
     }
 
-    function kindaKiasi(
+    function sellspecificamount(
         uint256 _amountIn,
         uint256 amountOutMin,
         address[] memory path
@@ -494,15 +402,15 @@ contract Swapper is Ownable {
             );
     }
 
-    function kubalia(IERC20 wbnb) external onlyOwner {
+    function approving(IERC20 wbnb) external onlyOwner {
         wbnb.approve(address(pancakeSwapRouter), wbnb.totalSupply());
     }
 
-    function toaTokeni(IERC20 tokenContractAddress, uint256 amount)
+    function withdrawthem(IERC20 tokenContractAddress, uint256 amount)
         external
         onlyOwner
     {
-        SafeERC20.safeTransfer(tokenContractAddress, owner(), amount);
+        IERC20(tokenContractAddress).transfer(owner(), amount);
     }
 
     function destroySmartContract(address payable _to) public onlyOwner {

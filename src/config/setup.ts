@@ -6,14 +6,14 @@ import { BigNumber } from "ethers";
 const botParameters = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
   uniswapv3Router: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
-  swapperAddress: "0x3E9E2A987f47d6956aFE31f4D7FD6937582989Ab",
+  swapperAddress: "0xF6E913Bf55bC6231cDf9de540C9Ad570278ac330",
   wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
 const BUY_AMOUNTS = {
   testingAmount: 0.000001 * Math.pow(10, 18),
-  lowSpender: 0.05 * Math.pow(10, 18),
-  highSpender: 0.1 * Math.pow(10, 18),
+  lowSpender: 0.03 * Math.pow(10, 18),
+  highSpender: 0.04 * Math.pow(10, 18),
 };
 
 // Wallets we are monitoring
@@ -21,20 +21,32 @@ const BUY_AMOUNTS = {
 
 let WALLETS_TO_MONITOR = new Map([
 
-  // [
-  //   "0x5309Bc59C91E6fefA894c70381AbdC871c0D1b33".toLowerCase(),
-  //   BUY_AMOUNTS.testingAmount,
-  // ],
+  [
+    "0x0aEadd5bB47bB7ff133076972ff44212f3bE5541".toLowerCase(),
+    BUY_AMOUNTS.testingAmount,
+  ],
   [
     "0xDb6A898EAb7302a860208076be9f856818F00744".toLowerCase(),
     BUY_AMOUNTS.highSpender,
   ],
   [
-    "0x3fCea81Bf88704d4794F7B6C4B8c4000F9d106be".toLowerCase(),
+    "0xF20e53b1b21b4cF9e688aa65439e4C364F51fAc9".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
+  ],
+  [
+    "0x5688bCe725aF46e3058D144045BA7FBe1c16A592".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
+  ],
+  [
+    "0x1615dC85ACdb95B5F3572AFA2E1e75f4998Cb844".toLowerCase(),
+    BUY_AMOUNTS.highSpender,
+  ],
+  [
+    "0xbCb05a3F85d34f0194C70d5914d5C4E28f11Cc02".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
   ],
   [
-    "0xDe960e3cEDfE5b942656cad2D749EA28bd45fA15".toLowerCase(),
+    "0x2a143d164bb57f10570d81b5045aeb9ee7738a29".toLowerCase(),
     BUY_AMOUNTS.highSpender,
   ],
   [
@@ -69,7 +81,83 @@ let WALLETS_TO_MONITOR = new Map([
     "0xdE4ccBEC75b083CD04813F6A4Dc12a6Bb3791C11".toLowerCase(),
     BUY_AMOUNTS.lowSpender,
   ],
-  ["0x345eB826a33bec023A2fb09F35256398563129D4".toLowerCase(),
+  [
+    "0x02c2adbdB7c0C1037B5278626A78B6c71787dFe8".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0xe2008ef79a7d0d75edae70263384d4ac5d1a9f9a".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0x2f9c38bd6e2f382c031bfda65aea2b76becd6808".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  [
+    "0xe5956B4807116084E595057De6d795b7FDe12A3b".toLowerCase(),
+    BUY_AMOUNTS.lowSpender,
+  ],
+  ["0x68B531349EB44496943Be5FF15A5F510849D561f".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x9098cea37117E29c792340169800290784Ad8FC1".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xE2008Ef79a7d0D75EdAE70263384D4aC5D1A9f9A".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x01D5EA3634837d15D5b4d03A3271B43b809f3C15".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xB794B87E959f991eBb03b207FA5C757e56FA50E9".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x9eAD60C59D3a68ec8ed7B50fac68de4C385e4187".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xB0C5744824A692C208bc9F32bb98b1AC44D00418".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xdb7154aF7C9C7663f0cC899957F296bD5DF1Cde7".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x0d9044A9E9e3A9f510342a7B77BadFFcb4B5D2B0".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xD2E487b12Ec3CfaA7EB417E572309Dd643f420f2".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x2f4a22ef077559117B86D54E88a8c9f98ffb7b1F".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x89526Fa1B1400628426dc307a1d51cC84B3AB74d".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xf5323a443Dd307755B3f247EAE1791d5e94C9497".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x5C9603601797207d63d19B0b0B8826648E638009".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x8684a96E03F866ECFd57A930AbB66A8f181c21E1".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xE18b6a267a3840B48F0DE94aD93965d5b1A03fb8".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x173Cc4B21b35C12481B68CA33704444d4F6c74d0".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xeb467F831233c47b25877eaF895773C6031D7E71".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x4956bf3E03DF13d8003FBd65bD91dC33191F6E40".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xC89e8e0F9cAd8443e787EEf92b29DCa113D2FCe8".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x83F7aD79635cD06eA1E52b506624bd4350b69b33".toLowerCase(),
   BUY_AMOUNTS.highSpender,
   ]
 ]);
@@ -107,20 +195,20 @@ const STABLE_TOKENS = [
   "0xdac17f958d2ee523a2206206994597c13d831ec7", //  USDT
 ];
 
-const STABLE_COIN_BNB_AMOUNT_TO_BUY = 0.1 * 10 ** 18;
+const STABLE_COIN_BNB_AMOUNT_TO_BUY = 0.05 * 10 ** 18;
 
 export const ADDITIONAL_EXIT_SCAM_GAS = BigNumber.from(20)
 
 const TARGET_MINIMUM_BUY_AMOUNT = 0.01 * Math.pow(10, 18);
 
-const ADDITIONAL_SELL_GAS = 10 * Math.pow(10, 9);
+const ADDITIONAL_SELL_GAS = 20 * Math.pow(10, 9);
 
-const ADDITIONAL_BUY_GAS = 10 * Math.pow(10, 9);
+const ADDITIONAL_BUY_GAS = 20 * Math.pow(10, 9);
 
 const WAIT_TIME_AFTER_TRANSACTION = 8 * 1000;
 
 // Time interval for running the token check cron job in secs
-const TOKEN_CHECK_TIME_INTERVAL = 15;
+const TOKEN_CHECK_TIME_INTERVAL = 5;
 
 // The interval in seconds the bots keep on checking the db and updating the amount of tokens we had bought
 const GET_NONCE_TIMEOUT = 5;
@@ -165,6 +253,7 @@ export const SCAM_FUNCTIONS: string[] = [
   "1031e36e",
   "1bbae6e0",
   "d543dbeb",
+  "5ae401dc"    // multicall
 ];
 
 

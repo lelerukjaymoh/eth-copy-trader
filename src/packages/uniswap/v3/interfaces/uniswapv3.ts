@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber } from "ethers";
 
 export interface Immutables {
     factory: string;
@@ -6,13 +6,13 @@ export interface Immutables {
     token1: string;
     fee: number;
     tickSpacing: number;
-    maxLiquidityPerTick: ethers.BigNumber;
+    maxLiquidityPerTick: BigNumber;
 }
 
 
 export interface State {
-    liquidity: ethers.BigNumber;
-    sqrtPriceX96: ethers.BigNumber;
+    liquidity: BigNumber;
+    sqrtPriceX96: BigNumber;
     tick: number;
     observationIndex: number;
     observationCardinality: number;
@@ -30,7 +30,7 @@ export interface TxnParams {
     tokenIn: string,
     tokenOut: string,
     amountIn: number,
-    amountOut: number,
+    amountOut: BigNumber,
     fee: number,
     sqrtPriceLimitX96: number
 }

@@ -5,7 +5,6 @@
   "main": "src/index.ts",
   "scripts": {
     "prod": "pm2 start npm --name ethcopy -- run start --exp-backoff-restart-delay=50",
-    "update": "ts-node-dev --require pretty-error/start -r dotenv/config src/checkToken/index.ts",
     "start": "ts-node-dev --require pretty-error/start -r dotenv/config src/index.ts",
     "test": "ts-node-dev --require pretty-error/start -r dotenv/config src/test.ts"
   },

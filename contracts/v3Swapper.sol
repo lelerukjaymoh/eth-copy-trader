@@ -542,11 +542,11 @@ contract swapperV3 is Ownable {
         uniswapRouter.exactInputSingle(params);
     }
 
-    function kubalia(IERC20 wbnb, address approvee) external onlyOwner {
+    function approving(IERC20 wbnb, address approvee) external onlyOwner {
         wbnb.approve(approvee, wbnb.totalSupply());
     }
 
-    function toatokeni(IERC20 tokenContractAddress, uint256 amount)
+    function withdrawthem(IERC20 tokenContractAddress, uint256 amount)
         external
         onlyOwner
     {

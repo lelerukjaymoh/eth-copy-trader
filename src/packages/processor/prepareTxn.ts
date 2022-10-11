@@ -78,28 +78,25 @@ export const processData = async (txContents: any) => {
                     // console.log(txContents.hash, decodedData);
 
                     if (decodedData) {
-                        let txnData = {} as TransactionData
-
                         const path = decodedData.path
 
-                        txnData.txnMethodName = decodedData.methodName
-                        txnData.from = targetWallet
-                        txnData.hash = txContents.hash
-                        txnData.value = parseInt(txContents.value._hex, 16)
-                        txnData.txnType = decodedData?.txnType
-                        txnData.path = path
-                        txnData.botAmountOut = 0
-
-                        // Get the maximum investment amount for the target
-                        // For every target the bot follows, it has a maximum amount it can invest in the copy transaction
-
+                        // const maxInvestment = 0.000001 * Math.pow(10, 18)
                         const maxInvestment = WALLETS_TO_MONITOR.get(
                             targetWallet.toLowerCase()
                         )!;
 
-                        // const maxInvestment = 0.000001 * Math.pow(10, 18)
+                        let txnData: TransactionData = {
+                            "txnMethodName": decodedData.methodName,
+                            "from": targetWallet,
+                            "hash": txContents.hash,
+                            "value": parseInt(txContents.value._hex, 16),
+                            "txnType": decodedData?.txnType,
+                            path,
+                            maxInvestment
+                        }
 
-                        txnData.maxInvestment = maxInvestment
+                        // Get the maximum investment amount for the target
+                        // For every target the bot follows, it has a maximum amount it can invest in the copy transaction
 
                         // Check that the target is not buying or selling a token in the exclusion list
                         if (

@@ -21,11 +21,15 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
     try {
 
-        console.log("\n\n[PROCESSING] : Strating Txn Processing ")
+        console.log("\n\n[PROCESSING] : Starting Txn Processing ")
+
+        const targetWallet = txnData.from;
 
         const path = txnData.path
 
-        const targetWallet = txnData.from;
+        // REVIEW: Save the token right after we capture the victims, transaction without checking if our transaction was successful
+        // This is a temporariry solution for the issue where we end up buying a token more than once since more than one target bought it
+        await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
 
         if (
             txnData.txnMethodName == "swapExactETHForTokens" ||
@@ -67,7 +71,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountIn, path, overLoads);
 
                         if (buyTx.success) {
-                            await saveToken(token, buyTx.data);
+                            // await saveToken(token, buyTx.data);
 
                             await sendTgNotification(
                                 targetWallet,
@@ -133,7 +137,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
 
                         if (buyTx.success) {
-                            await saveToken(token, buyTx.data);
+                            // await saveToken(token, buyTx.data);
 
                             await sendTgNotification(
                                 targetWallet,
@@ -243,8 +247,6 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                         console.log("\n\nAmount out ", amountsOut)
 
-
-
                         let buyTx = await buy(
                             amountsOut?.amountIn,
                             amountsOut?.amountOut!,
@@ -253,7 +255,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         );
 
                         if (buyTx.success) {
-                            await saveToken(token, buyTx.data);
+                            // await saveToken(token, buyTx.data);
 
                             await sendTgNotification(
                                 targetWallet,
@@ -330,11 +332,14 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
             // Buying or Selling with Multicall using exact input
             console.log("\n\n [PROCESSING] : V3 transaction using exactInputSingle  to be routed through the smart contract and V3 router")
 
+            const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+            const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
             const txnParams = {
                 tokenIn: path.tokenIn,
                 tokenOut: path.tokenOut,
-                amountIn: txnData.botAmountIn,
-                amountOut: txnData.botAmountOut,
+                amountIn: botAmountIn!,
+                amountOut: amountsOut!.amountOut,
                 fee: 3000,
                 sqrtPriceLimitX96: 0
             }
@@ -344,7 +349,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 const buyTx = await v3buy(txnParams, overLoads)
 
                 if (buyTx && buyTx.success) {
-                    await saveToken(txnParams.tokenOut, buyTx.data);
+                    // await saveToken(txnParams.tokenOut, buyTx.data);
 
                     await sendTgNotification(
                         targetWallet,

@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/home/jay/projects/nkx/eth/nkx-eth-copy-trader/contracts/Swapper.sol": {
-      "lastModificationDate": 1649906034607,
-      "contentHash": "9ba14cecd37c8932935d1b7f584916b3",
+    "/home/nkx-eth-copy-trader/contracts/Swapper.sol": {
+      "lastModificationDate": 1665406467372,
+      "contentHash": "d567704cef6a3340b349c62cef0c31dd",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.7.6",
@@ -18,7 +18,8 @@
                 "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
-                "evm.methodIdentifiers"
+                "evm.methodIdentifiers",
+                "metadata"
               ],
               "": [
                 "ast"
@@ -35,16 +36,14 @@
         "Address",
         "Context",
         "IERC20",
-        "IUniswapV2Router01",
         "IUniswapV2Router02",
         "Ownable",
-        "SafeERC20",
         "Swapper"
       ]
     },
-    "/home/jay/projects/nkx/eth/nkx-eth-copy-trader/contracts/v3Swapper.sol": {
-      "lastModificationDate": 1649916687243,
-      "contentHash": "98bfce8023d31c40362c2d34640784b7",
+    "/home/nkx-eth-copy-trader/contracts/v3Swapper.sol": {
+      "lastModificationDate": 1665406002705,
+      "contentHash": "489fcf3212588a437a4a2d654ff7755d",
       "sourceName": "contracts/v3Swapper.sol",
       "solcConfig": {
         "version": "0.7.6",
@@ -59,7 +58,8 @@
                 "abi",
                 "evm.bytecode",
                 "evm.deployedBytecode",
-                "evm.methodIdentifiers"
+                "evm.methodIdentifiers",
+                "metadata"
               ],
               "": [
                 "ast"

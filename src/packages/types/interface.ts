@@ -35,8 +35,6 @@ export interface TransactionData {
   txnMethodName: string,
   from: string,
   hash: string,
-  botAmountIn: number,
-  botAmountOut: number
   maxInvestment: number,
   targetAmountIn?: number,
   targetAmountOutMinimum?: number,
