@@ -312,7 +312,6 @@ const checkToken = async (token: string) => {
 const saveToken = async (token: string, txHash: string) => {
   const bought = new BoughtTokens({
     tokenAddress: token.toLowerCase(),
-    txHash: txHash,
   });
 
   await bought

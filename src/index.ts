@@ -17,51 +17,59 @@ Sentry.init({
 // initializing the bot
 init()
 
+let count = 0
+
 const main = async () => {
 
     try {
-
 
         const _provider = new ethers.providers.WebSocketProvider(
             process.env.WS_RPC_URL!
         );
 
         // REVIEW: Transaction for testing (to be used for testing )
-        // const txnObject = await _provider.getTransaction("0x5310ffd37a7034b726482be516b6ac77116ca868db63036aafdd1a43ebcb37ed");
+        const txnObject = await _provider.getTransaction("0x3cb69c5821f5bc0349ff9d69de4ea3aa799debb7528faaf4db40a3742cfbe145");
+
+        console.log("Data ", txnObject, await _provider.getBlockNumber())
+
         // 
-        // const txContents = prepareTxContents(txnObject);
-        // await processData(txContents);
+        const txContents = prepareTxContents(txnObject);
 
-        _provider.on("pending", async (txHash: string) => {
+        if (count < 1) {
+            count++
+            await processData(txContents);
+        }
 
-            const txnObject = await _provider.getTransaction(txHash);
+        // _provider.on("pending", async (txHash: string) => {
 
-            if (txnObject) {
-                const txContents = prepareTxContents(txnObject);
-                await processData(txContents);
+        //     const txnObject = await _provider.getTransaction(txHash);
 
-            } else {
+        //     if (txnObject) {
+        //         const txContents = prepareTxContents(txnObject);
+        //         await processData(txContents);
 
-                // Some transactions are not fetched the first time we query using ether.getTransaction
-                // This because the transaction is not yet discovered by the node we are querying
-                // This is an indication that the node is fast at propagating pending transaction
-                // To solve this, a wait (of 3 secs) is used to give time for the node to discover the txn 
+        //     } else {
 
-                await wait(3000)
+        //         // Some transactions are not fetched the first time we query using ether.getTransaction
+        //         // This because the transaction is not yet discovered by the node we are querying
+        //         // This is an indication that the node is fast at propagating pending transaction
+        //         // To solve this, a wait (of 3 secs) is used to give time for the node to discover the txn 
 
-                const txnObject = await provider.getTransaction(txHash);
+        //         await wait(3000)
 
-                if (txnObject) {
-                    const txContents = prepareTxContents(txnObject);
-                    await processData(txContents);
-                }
+        //         const txnObject = await provider.getTransaction(txHash);
 
-            }
-        });
+        //         if (txnObject) {
+        //             const txContents = prepareTxContents(txnObject);
+        //             await processData(txContents);
+        //         }
 
-        _provider.on("error", (error: any) => {
-            console.log("Got an error streaming : ", error)
-        })
+        //     }
+        // });
+
+        // _provider.on("error", (error: any) => {
+        //     console.log("Got an error streaming : ", error)
+        // })
     } catch (error: any) {
         console.log("Error on main function : ", error);
     }

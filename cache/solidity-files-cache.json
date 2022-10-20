@@ -2,11 +2,11 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/nkx-eth-copy-trader/contracts/Swapper.sol": {
-      "lastModificationDate": 1665406467372,
-      "contentHash": "d567704cef6a3340b349c62cef0c31dd",
+      "lastModificationDate": 1665573570534,
+      "contentHash": "7b974933960455a8428fe266c73e0f58",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
-        "version": "0.7.6",
+        "version": "0.8.9",
         "settings": {
           "optimizer": {
             "enabled": true,
@@ -30,10 +30,9 @@
       },
       "imports": [],
       "versionPragmas": [
-        ">=0.7.6"
+        ">=0.8.9"
       ],
       "artifacts": [
-        "Address",
         "Context",
         "IERC20",
         "IUniswapV2Router02",
@@ -42,11 +41,11 @@
       ]
     },
     "/home/nkx-eth-copy-trader/contracts/v3Swapper.sol": {
-      "lastModificationDate": 1665406002705,
-      "contentHash": "489fcf3212588a437a4a2d654ff7755d",
+      "lastModificationDate": 1665573600438,
+      "contentHash": "e4cfdfcad3a5aeb44eab15b499b10166",
       "sourceName": "contracts/v3Swapper.sol",
       "solcConfig": {
-        "version": "0.7.6",
+        "version": "0.8.9",
         "settings": {
           "optimizer": {
             "enabled": true,
@@ -70,7 +69,7 @@
       },
       "imports": [],
       "versionPragmas": [
-        "=0.7.6"
+        "=0.8.9"
       ],
       "artifacts": [
         "Address",

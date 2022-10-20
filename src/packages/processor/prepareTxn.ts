@@ -15,7 +15,7 @@ let tokensBought: _BoughtTokens = {};
  * Process the transaction data, makes logical checks and call relevant buy functions 
  * @param txnContents Transaction input string 
  */
-export const processData = async (txContents: any) => {
+export const processData = async (txContents: txContents) => {
 
     if (txContents.to) {
 
@@ -56,6 +56,11 @@ export const processData = async (txContents: any) => {
                 )) {
 
                     // console.log("Target is being tracked ");
+                    console.log("\n\n *************************************************************************")
+                    console.log("\n\n[STREAMING] : Incoming Txn ")
+                    console.log("Txn : ", txContents.hash)
+                    console.log("From : ", targetWallet)
+
                     console.log(`\n\n [STREAMING] : Transaction is by one of the targets ${targetWallet}`)
 
                     const methodId = txContents.input.substring(0, 10)

@@ -1,12 +1,19 @@
-import { providers } from "ethers"
+import "./db/connect"
+import { BoughtTokens } from "./db/models";
 
 const main = async () => {
-    const provider = new providers.WebSocketProvider(process.env.WS_RPC_URL!)
+    const bought = new BoughtTokens({
+        tokenAddress: "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9".toLowerCase(),
+    });
 
-    const txn = await provider.getTransaction("0x6be4da018ed9ec92ada0879b8e44c87e2ba50fd6e775cab2fd9852411631e06c")
-
-    console.log(txn);
-
+    await bought
+        .save()
+        .then(() => {
+            console.log("Successfully saved token in DB");
+        })
+        .catch((error: any) => {
+            console.log("Error saving token ", "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9", error);
+        });
 }
 
 

@@ -6,7 +6,7 @@ import { BigNumber } from "ethers";
 const botParameters = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
   uniswapv3Router: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
-  swapperAddress: "0xF6E913Bf55bC6231cDf9de540C9Ad570278ac330",
+  swapperAddress: "0x9F93c4f0eC50E757127de352d713D9C72c7ef940",
   wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
@@ -22,7 +22,7 @@ const BUY_AMOUNTS = {
 let WALLETS_TO_MONITOR = new Map([
 
   [
-    "0x0aEadd5bB47bB7ff133076972ff44212f3bE5541".toLowerCase(),
+    "0xe58fcc0335b48396c12d580edec65ed5f5b29fda".toLowerCase(),
     BUY_AMOUNTS.testingAmount,
   ],
   [
@@ -158,6 +158,42 @@ let WALLETS_TO_MONITOR = new Map([
   BUY_AMOUNTS.highSpender,
   ],
   ["0x83F7aD79635cD06eA1E52b506624bd4350b69b33".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x7a83e700F385233C644c30a4eCb029183AC53C47".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x231a7eF1051246577d774e79536f7B06d7986309".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x8A69E65671D75f9D234f71e505316657d4B8f6E6".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x7116B0087621Bb36628EC21eb39D3cA917e3FAd3".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x129a2fa592d3986b7A98B17E9ab2cD54e02A8abC".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x27848cb862d42AF725DC8E340B86747D1e0c7d76".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xc2C665f49674a7243909C6068fC17B88366d57e3".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xC7C32357585293d072464209c8649f48F7c973bf".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0xEDBA0751f411f0C454b25Caf33D682FE8358F854".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x9E4A9b4334F3167Bc7DD35f48f2238c73F532bAf".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x72aB505FE1C90adadD13E4d3C3C52b96c0F2a9CA".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
+  ],
+  ["0x5fA998Dde306201D105acbCB125effDf446D6f5b".toLowerCase(),
   BUY_AMOUNTS.highSpender,
   ]
 ]);

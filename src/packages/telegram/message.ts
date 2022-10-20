@@ -1,6 +1,6 @@
 export const failedTxMessage = (txType: string, token: string, reason: any) => {
 
-    console.log("CHECK ", reason.reason)
+    console.log("CHECK ", reason)
 
     let message = `Failed to broadcast a ${txType}`
     message += `\n\n\ Token: https://etherscan.io/address/${token}`

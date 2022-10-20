@@ -21,7 +21,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
     try {
 
-        console.log("\n\n[PROCESSING] : Starting Txn Processing ")
+        console.log("\n\n[PROCESSING] : Processing Transaction ")
 
         const targetWallet = txnData.from;
 
