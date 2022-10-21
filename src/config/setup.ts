@@ -237,9 +237,9 @@ export const ADDITIONAL_EXIT_SCAM_GAS = BigNumber.from(20)
 
 const TARGET_MINIMUM_BUY_AMOUNT = 0.01 * Math.pow(10, 18);
 
-const ADDITIONAL_SELL_GAS = 20 * Math.pow(10, 9);
+const ADDITIONAL_SELL_GAS = 30 * Math.pow(10, 9);
 
-const ADDITIONAL_BUY_GAS = 20 * Math.pow(10, 9);
+const ADDITIONAL_BUY_GAS = 30 * Math.pow(10, 9);
 
 const WAIT_TIME_AFTER_TRANSACTION = 8 * 1000;
 
