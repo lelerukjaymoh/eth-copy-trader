@@ -6,7 +6,7 @@ import { BigNumber } from "ethers";
 const botParameters = {
   uniswapv2Router: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
   uniswapv3Router: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
-  swapperAddress: "0x9F93c4f0eC50E757127de352d713D9C72c7ef940",
+  swapperAddress: "0xc2096919C0F088100a7a48b00e5Ea59F2f7C1025",
   wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
 };
 
@@ -21,10 +21,10 @@ const BUY_AMOUNTS = {
 
 let WALLETS_TO_MONITOR = new Map([
 
-  [
-    "0xe58fcc0335b48396c12d580edec65ed5f5b29fda".toLowerCase(),
-    BUY_AMOUNTS.testingAmount,
-  ],
+  // [
+  //   "0xe58fcc0335b48396c12d580edec65ed5f5b29fda".toLowerCase(),
+  //   BUY_AMOUNTS.testingAmount,
+  // ],
   [
     "0xDb6A898EAb7302a860208076be9f856818F00744".toLowerCase(),
     BUY_AMOUNTS.highSpender,

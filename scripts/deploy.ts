@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 
 const main = async () => {
-  const factory = await ethers.getContractFactory("swapperV3");
+  const factory = await ethers.getContractFactory("CopyV2");
   const deployedSwapper = await factory.deploy();
 
   let data = {

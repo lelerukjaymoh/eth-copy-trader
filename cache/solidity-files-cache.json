@@ -1,9 +1,9 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/home/nkx-eth-copy-trader/contracts/Swapper.sol": {
-      "lastModificationDate": 1665573570534,
-      "contentHash": "7b974933960455a8428fe266c73e0f58",
+    "/root/projects/nkx-eth-copy-trader/contracts/Swapper.sol": {
+      "lastModificationDate": 1666357814034,
+      "contentHash": "9e23d6b7ba17fbc37062c0cc15a8e3dd",
       "sourceName": "contracts/Swapper.sol",
       "solcConfig": {
         "version": "0.8.9",
@@ -34,13 +34,13 @@
       ],
       "artifacts": [
         "Context",
+        "CopyV2",
         "IERC20",
         "IUniswapV2Router02",
-        "Ownable",
-        "Swapper"
+        "Ownable"
       ]
     },
-    "/home/nkx-eth-copy-trader/contracts/v3Swapper.sol": {
+    "/root/projects/nkx-eth-copy-trader/contracts/v3Swapper.sol": {
       "lastModificationDate": 1665573600438,
       "contentHash": "e4cfdfcad3a5aeb44eab15b499b10166",
       "sourceName": "contracts/v3Swapper.sol",

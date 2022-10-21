@@ -66,9 +66,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                         const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
 
-                        console.log("\n\nAmount out ", amountsOut)
-
-                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountIn, path, overLoads);
+                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
 
                         if (buyTx.success) {
                             // await saveToken(token, buyTx.data);
@@ -131,8 +129,6 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         count++;
 
                         const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
-
-                        console.log("\n\nAmount out ", amountsOut)
 
                         let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
 
@@ -244,8 +240,6 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         count++;
 
                         const amountsOut = await getSlippagedAmoutOut(STABLE_COIN_BNB_AMOUNT_TO_BUY!, path)
-
-                        console.log("\n\nAmount out ", amountsOut)
 
                         let buyTx = await buy(
                             amountsOut?.amountIn,

@@ -22,7 +22,7 @@ const buy = async (
     console.log("\n\n [v2 BUYING] : Buying with these parameters ")
 
     console.log(
-      `\n\n Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${path}`
+      `\n\n Amount in :  ${amountIn} \n Amount Out min: ${amountOutMin} \n Path: ${JSON.stringify(path)}`
     );
 
     console.log("\n\n Buy OverLoads : ", overLoads);

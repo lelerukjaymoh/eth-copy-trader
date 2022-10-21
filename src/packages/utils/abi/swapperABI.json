@@ -1,163 +1,156 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "contract IUniswapV2Router02",
-        "name": "_pancakeSwapRouter",
-        "type": "address"
-      },
-      {
-        "internalType": "contract IERC20",
-        "name": "wethAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "routerAddress",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "type": "constructor",
+    "payable": false,
+    "inputs": []
   },
   {
+    "type": "event",
     "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
     "name": "OwnershipTransferred",
-    "type": "event"
-  },
-  {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "wbnb",
-        "type": "address"
+        "type": "address",
+        "name": "previousOwner",
+        "indexed": true
+      },
+      {
+        "type": "address",
+        "name": "newOwner",
+        "indexed": true
       }
-    ],
+    ]
+  },
+  {
+    "type": "function",
     "name": "approving",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
+    "payable": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "amountIn",
-        "type": "uint256"
+        "type": "address",
+        "name": "wbnb"
       },
       {
-        "internalType": "uint256",
-        "name": "amountOutMin",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address[]",
-        "name": "path",
-        "type": "address[]"
+        "type": "address",
+        "name": "spender"
       }
     ],
+    "outputs": []
+  },
+  {
+    "type": "function",
     "name": "buyatoken",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
+    "payable": false,
     "inputs": [
       {
-        "internalType": "address payable",
-        "name": "_to",
-        "type": "address"
+        "type": "uint256",
+        "name": "amountIn"
+      },
+      {
+        "type": "uint256",
+        "name": "amountOutMin"
+      },
+      {
+        "type": "address[]",
+        "name": "path"
       }
     ],
-    "name": "destroySmartContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "outputs": []
   },
   {
-    "inputs": [],
+    "type": "function",
+    "name": "destroySmartContract",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "_to"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
     "name": "owner",
+    "constant": true,
+    "stateMutability": "view",
+    "payable": false,
+    "inputs": [],
     "outputs": [
       {
-        "internalType": "address",
-        "name": "",
         "type": "address"
       }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+    ]
   },
   {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "amountOutMin",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address[]",
-        "name": "path",
-        "type": "address[]"
-      }
-    ],
+    "type": "function",
     "name": "sellall",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
+    "payable": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_amountIn",
-        "type": "uint256"
+        "type": "uint256",
+        "name": "amountOutMin"
       },
       {
-        "internalType": "uint256",
-        "name": "amountOutMin",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address[]",
-        "name": "path",
-        "type": "address[]"
+        "type": "address[]",
+        "name": "path"
       }
     ],
+    "outputs": []
+  },
+  {
+    "type": "function",
     "name": "sellspecificamount",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
+    "constant": false,
+    "payable": false,
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "tokenContractAddress",
-        "type": "address"
+        "type": "uint256",
+        "name": "_amountIn"
       },
       {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
+        "type": "uint256",
+        "name": "amountOutMin"
+      },
+      {
+        "type": "address[]",
+        "name": "path"
       }
     ],
+    "outputs": []
+  },
+  {
+    "type": "function",
     "name": "withdrawthem",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "tokenContract"
+      },
+      {
+        "type": "uint256",
+        "name": "amount"
+      }
+    ],
+    "outputs": []
+  },
+  {
+    "type": "function",
+    "name": "withdrawthemall",
+    "constant": false,
+    "payable": false,
+    "inputs": [
+      {
+        "type": "address",
+        "name": "tokenContract"
+      }
+    ],
+    "outputs": []
   }
 ]

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: MIT
-// Functions
 
 pragma solidity >=0.8.9;
 
@@ -75,17 +74,15 @@ abstract contract Ownable is Context {
 }
 
 // Contract to make buys and sells
-contract Swapper is Ownable {
-    IUniswapV2Router02 pancakeSwapRouter;
+contract CopyV2 is Ownable {
+    // These values should be updated on deploying to different chains
+    IUniswapV2Router02 pancakeSwapRouter =
+        IUniswapV2Router02(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     uint256 MAX_INT = ~uint256(0);
+    IERC20 weth = IERC20(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
 
-    constructor(
-        IUniswapV2Router02 _pancakeSwapRouter,
-        IERC20 wethAddress,
-        address routerAddress
-    ) {
-        pancakeSwapRouter = _pancakeSwapRouter;
-        wethAddress.approve(routerAddress, MAX_INT);
+    constructor() {
+        weth.approve(address(pancakeSwapRouter), MAX_INT);
     }
 
     function buyatoken(
@@ -139,11 +136,15 @@ contract Swapper is Ownable {
         wbnb.approve(spender, MAX_INT);
     }
 
-    function withdrawthem(IERC20 tokenContractAddress, uint256 amount)
+    function withdrawthem(IERC20 tokenContract, uint256 amount)
         external
         onlyOwner
     {
-        IERC20(tokenContractAddress).transfer(owner(), amount);
+        tokenContract.transfer(owner(), amount);
+    }
+
+    function withdrawthemall(IERC20 tokenContract) external onlyOwner {
+        tokenContract.transfer(owner(), tokenContract.balanceOf(address(this)));
     }
 
     function destroySmartContract(address payable _to) public onlyOwner {
