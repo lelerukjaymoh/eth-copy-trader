@@ -17,6 +17,10 @@ import { utils } from "ethers";
 // transaction is broadcast, the count is reset to 0 to allow other transactions to flow in. 
 let count = 0
 
+// Temporary blacklist tokens that we are currently processing so that we dont buy them while still processing
+// Once the token has been processed but not purchased, remove it from the bloacklist to allow for a second trial
+let temporaryBlackList: string[] = []
+
 export const executeTxn = async (txnData: TransactionData, overLoads: overLoads) => {
 
     try {
@@ -29,20 +33,15 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
         // REVIEW: Save the token right after we capture the victims, transaction without checking if our transaction was successful
         // This is a temporariry solution for the issue where we end up buying a token more than once since more than one target bought it
-        await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+        // await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+
+        temporaryBlackList.push(path.tokenOut)
 
         if (
             txnData.txnMethodName == "swapExactETHForTokens" ||
             txnData.txnMethodName == "swapExactETHForTokensSupportingFeeOnTransferTokens"
         ) {
             const token = path.tokenOut;
-
-            // TODO: To remove this log once the check is validated
-            // console.log(
-            //     "\n\n Check ",
-            //     token,
-            //     stableTokens.includes(token.toLowerCase())
-            // );
 
             console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
 
@@ -55,7 +54,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 // Prevent the bot from buying tokens we have already bought
                 if (
                     (dbTokens && dbTokens.length == 0) ||
-                    repeatedTokens.includes(token.toLowerCase())
+                    temporaryBlackList.includes(token)
                 ) {
 
                     // Ensure the bot is not investing more than the maximum amount it should be investing
@@ -69,7 +68,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                         let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
 
                         if (buyTx.success) {
-                            // await saveToken(token, buyTx.data);
+                            await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
 
                             await sendTgNotification(
                                 targetWallet,
@@ -78,10 +77,10 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                                 "BUY",
                                 token
                             );
+                        } else {
+                            // If token was not successfully bought remove it from the temporaryBlacklist 
+                            temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
                         }
-
-                        // Wait for the transaction to be confirmed
-                        // await waitForTransaction(buyTx.data)
 
                         count = 0;
                     } else {
@@ -119,7 +118,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                 // Prevent the bot from buying tokens we have already bought
                 if (
                     (dbTokens && dbTokens.length == 0) ||
-                    repeatedTokens.includes(token.toLowerCase())
+                    temporaryBlackList.includes(token)
                 ) {
 
                     // Ensure the bot is not investing more than the maximum amount it should be investing
@@ -134,6 +133,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                         if (buyTx.success) {
                             // await saveToken(token, buyTx.data);
+                            await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
 
                             await sendTgNotification(
                                 targetWallet,
@@ -142,6 +142,9 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                                 "BUY",
                                 token
                             );
+                        } else {
+                            // If token was not successfully bought remove it from the temporaryBlacklist 
+                            temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
                         }
 
                         // Wait for the transaction to be confirmed
@@ -250,6 +253,7 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
 
                         if (buyTx.success) {
                             // await saveToken(token, buyTx.data);
+                            await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
 
                             await sendTgNotification(
                                 targetWallet,
@@ -258,6 +262,9 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
                                 "BUY",
                                 token
                             );
+                        } else {
+                            // If token was not successfully bought remove it from the temporaryBlacklist 
+                            temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
                         }
 
                         await wait(WAIT_TIME_AFTER_TRANSACTION);
