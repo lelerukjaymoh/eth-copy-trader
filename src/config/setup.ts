@@ -8,12 +8,13 @@ const botParameters = {
   uniswapv3Router: "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
   swapperAddress: "0xc2096919C0F088100a7a48b00e5Ea59F2f7C1025",
   wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+  rugCheckerAddress: "0xa6c35951ca57a0739d770113b8320316bbe505a7"
 };
 
 const BUY_AMOUNTS = {
   testingAmount: 0.000001 * Math.pow(10, 18),
-  lowSpender: 0.03 * Math.pow(10, 18),
-  highSpender: 0.04 * Math.pow(10, 18),
+  lowSpender: 0.01 * Math.pow(10, 18),
+  highSpender: 0.02 * Math.pow(10, 18),
 };
 
 // Wallets we are monitoring
@@ -58,11 +59,11 @@ let WALLETS_TO_MONITOR = new Map([
     BUY_AMOUNTS.highSpender,
   ],
   [
-    "0x9dda370f43567b9C757A3F946705567BcE482C42".toLowerCase(),
+    "0x9081dDf23634d9ae86E83B5d812a342D0565fab3".toLowerCase(),
     BUY_AMOUNTS.highSpender,
   ],
   [
-    "0x75377155BAbB1512f390905c8DeAE378eb829105".toLowerCase(),
+    "0x66C039A152730f07932466598D88883d811707Ad".toLowerCase(),
     BUY_AMOUNTS.highSpender,
   ],
   [
@@ -195,6 +196,9 @@ let WALLETS_TO_MONITOR = new Map([
   ],
   ["0x5fA998Dde306201D105acbCB125effDf446D6f5b".toLowerCase(),
   BUY_AMOUNTS.highSpender,
+  ],
+  ["0x9dda370f43567b9C757A3F946705567BcE482C42".toLowerCase(),
+  BUY_AMOUNTS.highSpender,
   ]
 ]);
 
@@ -255,6 +259,12 @@ const MAX_GAS_PRICE_TG = 100;
 
 // Slippage 
 const SLIPPAGE = 20
+
+// Minimum tax a token charges for buy transactions
+export const MINIMUM_BUY_TAX = 0
+
+// Minimum tax a token charges for sell transactions
+export const MINIMUM_SELL_TAX = 3
 
 
 // Scam functions method Ids we use to capture events when the token dev wants to rug a token

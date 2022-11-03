@@ -1,3 +1,5 @@
+import { sendNotification } from "."
+
 export const failedTxMessage = (txType: string, token: string, error: any) => {
 
     error = JSON.parse(error)
@@ -10,4 +12,22 @@ export const failedTxMessage = (txType: string, token: string, error: any) => {
     message += `\n ${error.args ? JSON.stringify(error.args) : null}`
 
     return message
+}
+
+
+export const tokenTaxMessage = (token: string, buyTax: number, sellTax: number) => {
+    let message = "Token Tax is more than our minimum"
+    message += `\n\nToken`
+    message += `\n${token}`
+    message += `\n\nBuy Tax`
+    message += `\n${buyTax}`
+    message += `\n\nSell Tax`
+    message += `\n${sellTax}`
+    message += `\n\nhttps://honeypot.is/${token}`
+
+    return message
+}
+
+export const sendTaxMessage = async (token: string, buyTax: number, sellTax: number) => {
+    await sendNotification(tokenTaxMessage(token, buyTax, sellTax))
 }

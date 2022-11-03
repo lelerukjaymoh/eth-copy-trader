@@ -46,6 +46,10 @@ const buy = async (
 
     console.log("\n\n Successfully submitted BUY transaction on V2 ", buyTxData.hash)
 
+    await sendNotification("Transaction submitted, awaiting confirmation ...")
+
+    await buyTxData.wait()
+
     return { success: true, data: `${buyTxData.hash}` };
   } catch (error) {
     console.log("Error buying ", error);

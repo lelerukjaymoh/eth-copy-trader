@@ -1,4 +1,4 @@
-import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, REMOVE_LIQUIDITY_FUNCTIONS, SCAM_FUNCTIONS, WALLETS_TO_MONITOR } from "../../config/setup";
+import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, MINIMUM_BUY_TAX, MINIMUM_SELL_TAX, REMOVE_LIQUIDITY_FUNCTIONS, SCAM_FUNCTIONS, WALLETS_TO_MONITOR } from "../../config/setup";
 import { DecodedData, overLoads, TokenData, TransactionData, txContents, _BoughtTokens } from "../types";
 import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn, getRemovedToken } from "../decoder";
@@ -8,6 +8,8 @@ import { getContractDeployer } from "../scraper/scrape";
 import { sell } from "../uniswap/v2/swap";
 import { failedToExitScamNotification, sendTgNotification } from "../utils/notifications";
 import { exitOnScamTx } from "../rug-saver/exit-scam";
+import { checkRug } from "../rug-saver/screen";
+import { sendTaxMessage } from "../telegram/message";
 
 let tokensBought: _BoughtTokens = {};
 
@@ -109,19 +111,29 @@ export const processData = async (txContents: txContents) => {
                             !EXCLUDED_TOKENS.includes(path.tokenOut.toLowerCase())
                         ) {
 
-                            // Prepare transaction overloads
-                            let overLoads = await prepareOverLoads(txContents, nonce!);
 
-                            console.log("\n\n Txn Data");
-                            for (let key in txnData) {
-                                console.log(key + ": " + txnData[key as keyof TransactionData]);
-                            }
+                            // Screen if token is a rug
+                            const rugCheck = await checkRug(path.tokenOut)
 
-                            console.log("\n\n Txn Overloads ")
-                            console.log(overLoads);
+                            if (rugCheck.buyTax > MINIMUM_BUY_TAX && rugCheck.sellTax > MINIMUM_SELL_TAX) {
+                                // Prepare transaction overloads
+                                let overLoads = await prepareOverLoads(txContents, nonce!);
 
-                            if (overLoads && txnData) {
-                                await executeTxn(txnData, overLoads)
+                                console.log("\n\n Txn Data");
+                                for (let key in txnData) {
+                                    console.log(key + ": " + txnData[key as keyof TransactionData]);
+                                }
+
+                                console.log("\n\n Txn Overloads ")
+                                console.log(overLoads);
+
+                                if (overLoads && txnData) {
+                                    await executeTxn(txnData, overLoads)
+                                }
+                            } else {
+
+                                // Send notification if the token had a tax greater than the minimum amount
+                                await sendTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax)
                             }
                         }
                     }

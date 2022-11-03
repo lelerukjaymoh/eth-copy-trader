@@ -9,6 +9,8 @@ import { init } from "../../initialize";
 import { routerContract } from "../uniswap/v3/utils/common";
 import { getContractDeployer } from "../scraper/scrape";
 
+import rugCheckerABI from "../utils/abi/rugcheckerABI.json"
+
 // Ensure all .env variables are loaded 
 init()
 
@@ -153,6 +155,8 @@ const
   );
 
 export const uniswapv2RouterContract = new Contract(botParameters.uniswapv2Router, routerABI, provider)
+
+export const rugCheckerContract = new Contract(botParameters.rugCheckerAddress, rugCheckerABI, v2account)
 
 export const getSlippagedAmoutOut = async (amountIn: any, path: any) => {
   try {
