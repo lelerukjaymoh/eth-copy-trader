@@ -23,7 +23,7 @@ export const tokenTaxMessage = (token: string, buyTax: number, sellTax: number) 
     message += `\n${buyTax}`
     message += `\n\nSell Tax`
     message += `\n${sellTax}`
-    message += `\n\nhttps://honeypot.is/${token}`
+    message += `\n\nhttps://honeypot.is/ethereum?address=${token}`
 
     return message
 }

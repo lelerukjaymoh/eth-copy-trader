@@ -1,6 +1,6 @@
 import { ADDITIONAL_EXIT_SCAM_GAS, botParameters, DEFAULT_GAS_LIMIT, EXCLUDED_TOKENS, MINIMUM_BUY_TAX, MINIMUM_SELL_TAX, REMOVE_LIQUIDITY_FUNCTIONS, SCAM_FUNCTIONS, WALLETS_TO_MONITOR } from "../../config/setup";
 import { DecodedData, overLoads, TokenData, TransactionData, txContents, _BoughtTokens } from "../types";
-import { getSlippagedAmoutOut, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
+import { getSlippagedAmoutOut, getTokenBalance, getTokenOwner, methodsExclusion, multiCallMethods, prepareOverLoads, v2walletNonce, v3walletNonce, wait } from "../utils/common";
 import { decodeMulticallTransaction, decodeNormalTxn, getRemovedToken } from "../decoder";
 import { executeTxn } from "./executeTxn";
 import { BoughtTokens } from "../../db/models";
@@ -116,9 +116,9 @@ export const processData = async (txContents: txContents) => {
                             // Screen if token is a rug
                             const rugCheck = await checkRug(path.tokenOut)
 
-                            await sendNotification(tokenTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax))
+                            // await sendNotification(tokenTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax))
 
-                            if (rugCheck.buyTax > MINIMUM_BUY_TAX && rugCheck.sellTax > MINIMUM_SELL_TAX) {
+                            if (rugCheck.buyTax < MINIMUM_BUY_TAX && rugCheck.sellTax < MINIMUM_SELL_TAX) {
                                 // Prepare transaction overloads
                                 let overLoads = await prepareOverLoads(txContents, nonce!);
 
@@ -210,7 +210,13 @@ const fetchBoughtTokens = async () => {
                 // }
 
                 // if (tokenOwner) {
-                tokensBought[collectionId] = { tokenAddress }
+
+                // Check that we still hold the token before adding it to the list of tokens to save from scam
+                const tokenBalance = await getTokenBalance(tokenAddress, botParameters.swapperAddress)
+
+                if (tokenBalance > 0) {
+                    tokensBought[collectionId] = { tokenAddress }
+                }
                 // }
             }
         }
@@ -252,7 +258,13 @@ const listenBoughtTokens = () => {
                         // }
 
                         // if (tokenOwner) {
-                        tokensBought[collectionId] = { tokenAddress }
+
+                        // Check that we still hold the token before adding it to the list of tokens to save from scam
+                        const tokenBalance = await getTokenBalance(tokenAddress, botParameters.swapperAddress)
+
+                        if (tokenBalance > 0) {
+                            tokensBought[collectionId] = { tokenAddress }
+                        }
                         // } else {
                         //     console.log("Token owner not found ", tokenAddress)
                         // }
