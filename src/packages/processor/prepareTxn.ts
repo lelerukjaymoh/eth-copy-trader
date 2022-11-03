@@ -9,7 +9,8 @@ import { sell } from "../uniswap/v2/swap";
 import { failedToExitScamNotification, sendTgNotification } from "../utils/notifications";
 import { exitOnScamTx } from "../rug-saver/exit-scam";
 import { checkRug } from "../rug-saver/screen";
-import { sendTaxMessage } from "../telegram/message";
+import { sendTaxMessage, tokenTaxMessage } from "../telegram/message";
+import { sendNotification } from "../telegram";
 
 let tokensBought: _BoughtTokens = {};
 
@@ -114,6 +115,8 @@ export const processData = async (txContents: txContents) => {
 
                             // Screen if token is a rug
                             const rugCheck = await checkRug(path.tokenOut)
+
+                            await sendNotification(tokenTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax))
 
                             if (rugCheck.buyTax > MINIMUM_BUY_TAX && rugCheck.sellTax > MINIMUM_SELL_TAX) {
                                 // Prepare transaction overloads
