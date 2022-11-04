@@ -1,4 +1,4 @@
-import { botParameters, EXCLUDED_TOKENS, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIME_AFTER_TRANSACTION } from "../../config/setup";
+import { botParameters, EXCLUDED_TOKENS, MINIMUM_BUY_TAX, MINIMUM_SELL_TAX, STABLE_COIN_BNB_AMOUNT_TO_BUY, WAIT_TIME_AFTER_TRANSACTION } from "../../config/setup";
 import { sendNotification } from "../telegram";
 import { overLoads, TransactionData } from "../types";
 import { buy, sell } from "../uniswap/v2/swap";
@@ -6,6 +6,8 @@ import { checkToken, repeatedTokens, saveToken, stableTokens, waitForTransaction
 import { sellingNotification, sendTgNotification } from "../utils/notifications";
 import { v3buy, v3sell } from "../uniswap/v3";
 import { utils } from "ethers";
+import { checkRug } from "../rug-saver/screen";
+import { sendTaxMessage } from "../telegram/message";
 
 
 // A patch to ensure the bot does not make several transactions at almost the same time. 
@@ -43,128 +45,151 @@ export const executeTxn = async (txnData: TransactionData, overLoads: overLoads)
         ) {
             const token = path.tokenOut;
 
-            console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
+            // Screen if token is a rug
+            const rugCheck = await checkRug(path.tokenOut)
 
-            // Prevent the bot from copying trades involving stable tokens
-            // Since the target could be cashing out
-            if (!stableTokens.includes(token.toLowerCase())) {
+            // await sendNotification(tokenTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax))
 
-                let dbTokens = await checkToken(token);
+            if (rugCheck?.buyTax! < MINIMUM_BUY_TAX && rugCheck?.sellTax! < MINIMUM_SELL_TAX) {
 
-                // Prevent the bot from buying tokens we have already bought
-                if (
-                    (dbTokens && dbTokens.length == 0) ||
-                    temporaryBlackList.includes(token)
-                ) {
+                console.log("\n\n[PROCESSING] : SwapExactETH transaction to be routed to v2 ")
 
-                    // Ensure the bot is not investing more than the maximum amount it should be investing
-                    const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+                // Prevent the bot from copying trades involving stable tokens
+                // Since the target could be cashing out
+                if (!stableTokens.includes(token.toLowerCase())) {
 
-                    if (count < 1) {
-                        count++;
+                    let dbTokens = await checkToken(token);
 
-                        const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+                    // Prevent the bot from buying tokens we have already bought
+                    if (
+                        (dbTokens && dbTokens.length == 0) ||
+                        temporaryBlackList.includes(token)
+                    ) {
 
-                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
+                        // Ensure the bot is not investing more than the maximum amount it should be investing
+                        const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
 
-                        if (buyTx.success) {
-                            await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+                        if (count < 1) {
+                            count++;
 
-                            await sendTgNotification(
-                                targetWallet,
-                                txnData.hash,
-                                buyTx.data,
-                                "BUY",
-                                token
-                            );
+                            const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
+                            let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
+
+                            if (buyTx.success) {
+                                await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+
+                                await sendTgNotification(
+                                    targetWallet,
+                                    txnData.hash,
+                                    buyTx.data,
+                                    "BUY",
+                                    token
+                                );
+                            } else {
+                                // If token was not successfully bought remove it from the temporaryBlacklist 
+                                temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
+                            }
+
+                            count = 0;
                         } else {
-                            // If token was not successfully bought remove it from the temporaryBlacklist 
-                            temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
+                            console.log("\n\n Count is not updated ", count)
                         }
+                    } else {
+                        let message =
+                            "Target is buying a token we had already bought";
+                        message += "\n\nTarget ";
+                        message += `\n${targetWallet}`;
+                        message += "\n\n Token";
+                        message += `\nhttps://etherscan.io/token/${path.tokenOut
+                            }?a=${botParameters.swapperAddress}`;
+
+                        await sendNotification(message);
 
                         count = 0;
-                    } else {
-                        console.log("\n\n Count is not updated ", count)
                     }
+
                 } else {
-                    let message =
-                        "Target is buying a token we had already bought";
-                    message += "\n\nTarget ";
-                    message += `\n${targetWallet}`;
-                    message += "\n\n Token";
-                    message += `\nhttps://etherscan.io/token/${path.tokenOut
-                        }?a=${botParameters.swapperAddress}`;
-
-                    await sendNotification(message);
-
-                    count = 0;
+                    console.log("Skipping trade, it involved a stable coin ", token)
                 }
-
             } else {
-                console.log("Skipping trade, it involved a stable coin ", token)
+                // Send notification if the token had a tax greater than the minimum amount
+                await sendTaxMessage(path.tokenOut, rugCheck?.buyTax!, rugCheck?.sellTax!)
             }
 
         } else if (txnData.txnMethodName == "swapETHForExactTokens") {
 
-            console.log("\n\n[PROCESSING] : SwapETHForExactTokens transaction to be routed to v2 ")
-
             const token = path.tokenOut;
 
-            // Prevent the bot from buying a stable coin
-            if (!stableTokens.includes(token.toLowerCase())) {
-                let token = path.tokenOut;
-                let dbTokens = await checkToken(token);
+            // Screen if token is a rug
+            const rugCheck = await checkRug(path.tokenOut)
 
-                // Prevent the bot from buying tokens we have already bought
-                if (
-                    (dbTokens && dbTokens.length == 0) ||
-                    temporaryBlackList.includes(token)
-                ) {
+            // await sendNotification(tokenTaxMessage(path.tokenOut, rugCheck.buyTax, rugCheck.sellTax))
 
-                    // Ensure the bot is not investing more than the maximum amount it should be investing
-                    const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
+            if (rugCheck!.buyTax < MINIMUM_BUY_TAX && rugCheck!.sellTax < MINIMUM_SELL_TAX) {
 
-                    if (count < 1) {
-                        count++;
+                console.log("\n\n[PROCESSING] : SwapETHForExactTokens transaction to be routed to v2 ")
 
-                        const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+                // Prevent the bot from buying a stable coin
+                if (!stableTokens.includes(token.toLowerCase())) {
+                    let token = path.tokenOut;
+                    let dbTokens = await checkToken(token);
 
-                        let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
+                    // Prevent the bot from buying tokens we have already bought
+                    if (
+                        (dbTokens && dbTokens.length == 0) ||
+                        temporaryBlackList.includes(token)
+                    ) {
 
-                        if (buyTx.success) {
-                            // await saveToken(token, buyTx.data);
-                            await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+                        // Ensure the bot is not investing more than the maximum amount it should be investing
+                        const botAmountIn = txnData.value! > txnData.maxInvestment ? txnData.maxInvestment : txnData.value;
 
-                            await sendTgNotification(
-                                targetWallet,
-                                txnData.hash,
-                                buyTx.data,
-                                "BUY",
-                                token
-                            );
+                        if (count < 1) {
+                            count++;
+
+                            const amountsOut = await getSlippagedAmoutOut(botAmountIn!, path)
+
+                            let buyTx = await buy(amountsOut?.amountIn, amountsOut?.amountOut!, path, overLoads);
+
+                            if (buyTx.success) {
+                                // await saveToken(token, buyTx.data);
+                                await saveToken(path.tokenOut, "HOLDER_IN_PLACE_OF_HASH");
+
+                                await sendTgNotification(
+                                    targetWallet,
+                                    txnData.hash,
+                                    buyTx.data,
+                                    "BUY",
+                                    token
+                                );
+                            } else {
+                                // If token was not successfully bought remove it from the temporaryBlacklist 
+                                temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
+                            }
+
+                            // Wait for the transaction to be confirmed
+                            // await waitForTransaction(buyTx.data)
+
+                            count = 0;
                         } else {
-                            // If token was not successfully bought remove it from the temporaryBlacklist 
-                            temporaryBlackList = temporaryBlackList.filter(e => e !== path.tokenOut)
+                            console.log("\n\n Count is not updated ", count)
                         }
-
-                        // Wait for the transaction to be confirmed
-                        // await waitForTransaction(buyTx.data)
-
-                        count = 0;
                     } else {
-                        console.log("\n\n Count is not updated ", count)
+                        let message =
+                            "Target is buying a token we had already bought";
+                        message += "\n\nTarget ";
+                        message += `\n${targetWallet}`;
+                        message += "\n\n Token";
+                        message += `\nhttps://etherscan.io/token/${path.tokenOut
+                            }?a=${botParameters.swapperAddress}`;
+
+                        await sendNotification(message);
+
                     }
+
                 } else {
-                    let message =
-                        "Target is buying a token we had already bought";
-                    message += "\n\nTarget ";
-                    message += `\n${targetWallet}`;
-                    message += "\n\n Token";
-                    message += `\nhttps://etherscan.io/token/${path.tokenOut
-                        }?a=${botParameters.swapperAddress}`;
-
-                    await sendNotification(message);
-
+                    // Send notification if the token had a tax greater than the minimum amount
+                    await sendTaxMessage(path.tokenOut, rugCheck?.buyTax!, rugCheck?.sellTax!)
                 }
 
             } else {

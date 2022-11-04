@@ -261,10 +261,10 @@ const MAX_GAS_PRICE_TG = 100;
 const SLIPPAGE = 20
 
 // Minimum tax a token charges for buy transactions
-export const MINIMUM_BUY_TAX = 0
+export const MINIMUM_BUY_TAX = 6
 
 // Minimum tax a token charges for sell transactions
-export const MINIMUM_SELL_TAX = 3
+export const MINIMUM_SELL_TAX = 6
 
 
 // Scam functions method Ids we use to capture events when the token dev wants to rug a token
